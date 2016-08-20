@@ -1,0 +1,61 @@
+group "necauqua.mods"
+version "1.0"
+
+buildscript {
+    repositories {
+        jcenter()
+        maven {
+            name = "forge"
+            url = "http://files.minecraftforge.net/maven"
+        }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
+    }
+}
+
+apply plugin: 'net.minecraftforge.gradle.forge'
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+minecraft {
+  version = "1.10.2-12.18.1.2065"
+  runDir = "run"
+  mappings = "snapshot_20160518"
+  replace "@VERSION@", project.version
+  replace "@API_VERSION@", "1.0"
+}
+
+
+jar {
+  manifest {
+    attributes("FMLCorePlugin": "necauqua.mods.cm.asm.Plugin", "FMLCorePluginContainsFMLMod": "true")
+  }
+  from 'COPYING', 'COPYING.lesser'
+}
+
+task deobfJar(type: Jar) {
+    manifest {
+        attributes("FMLCorePluginContainsFMLMod": "true", "FMLCorePlugin": "necauqua.mods.cm.asm.Plugin")
+    }
+    from(sourceSets.main.output)
+    from 'COPYING', 'COPYING.lesser'
+    archiveName = "${baseName}-${version}-deobf.${extension}"
+}
+
+artifacts {
+    archives deobfJar
+}
+
+processResources {
+  inputs.property "version", project.version
+  inputs.property "mcversion", minecraft.version
+  from(sourceSets.main.resources.srcDirs) {
+    include 'mcmod.info'
+    expand 'version':project.version, 'mcversion':project.minecraft.version
+  }
+  from(sourceSets.main.resources.srcDirs) {
+    exclude 'mcmod.info'
+  }
+}

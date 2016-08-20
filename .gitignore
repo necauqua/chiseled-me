@@ -1,0 +1,12 @@
+# idea
+*.ipr
+*.iws
+*.iml
+.idea
+
+# gradle
+build
+.gradle
+
+# mc
+run

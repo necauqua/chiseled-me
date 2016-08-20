@@ -1,0 +1,14 @@
+[{
+  "modid": "chiseled_me",
+  "name": "Chiseled Me",
+  "description": "This mods adds a thing that makes you so small that bits from Chisel and Bits (basically Minecraft voxels) mod appear as big as usual blocks to you.\n Also it can make you even smaller than that or it can make you bigger than you are.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["necauqua"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}]

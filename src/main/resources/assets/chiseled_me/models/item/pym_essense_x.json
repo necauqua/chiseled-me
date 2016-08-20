@@ -1,0 +1,4 @@
+{
+  "textures": { "layer0": "chiseled_me:items/pym_essense_x" },
+  "parent": "item/generated"
+}

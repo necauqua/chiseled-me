@@ -1,0 +1,4 @@
+{
+  "textures": { "layer0": "chiseled_me:items/blue_star" },
+  "parent": "item/generated"
+}

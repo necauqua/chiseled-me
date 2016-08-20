@@ -1,0 +1,4 @@
+{
+  "textures": { "layer0": "chiseled_me:items/recalibrator_amplification" },
+  "parent": "item/generated"
+}

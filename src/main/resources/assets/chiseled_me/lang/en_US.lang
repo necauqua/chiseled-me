@@ -1,0 +1,66 @@
+
+itemGroup.chiseled_me=Chiseled Me
+
+chiseled_me.bed.too_small=You are too small to sleep in bed!
+chiseled_me.bed.too_big=You are too big to sleep in bed!
+
+commands.chiseled_me:getsizeof.usage=/getsizeof <entity>
+commands.chiseled_me:getsizeof.message=Relative size of %s is %s!
+commands.chiseled_me:setsizeof.usage=/setsizeof <entity> <number> [interp]
+commands.chiseled_me:setsizeof.message=Set size of %s to %s!
+
+item.chiseled_me:recalibrator.charges=  §8Charges left: §7%s
+item.chiseled_me:recalibrator.reset.name=Matter Volume Recalibrator [ 1.0 ]
+item.chiseled_me:recalibrator.reset.tooltip=§8§o-Right click to reset your size to normal.
+item.chiseled_me:recalibrator.reduction.name=Matter Volume Recalibrator [ 1/%s ]
+item.chiseled_me:recalibrator.reduction.tooltip=§8§o-Right click to become 1/%s'th of normal.
+item.chiseled_me:recalibrator.amplification.name=Matter Volume Recalibrator [ %s ]
+item.chiseled_me:recalibrator.amplification.tooltip=§8§o-Right click to become %s times bigger than normal.
+
+item.chiseled_me:blue_star.name=Blue Nether Star
+item.chiseled_me:pym_container.name=Pym Container
+item.chiseled_me:pym_container_x.name=Hardened Pym Container
+item.chiseled_me:pym_essense.name=Pym Essense
+item.chiseled_me:pym_essense_x.name=Concentrated Pym Essense
+item.chiseled_me:pym_essense_b.name=Antipolarized Concentrated Pym Essense
+
+achievement.chiseled_me:beginning=Beginning
+achievement.chiseled_me:beginning.desc=Craft a pym container
+achievement.chiseled_me:essense=Pym Essense
+achievement.chiseled_me:essense.desc=Wobbly red thing inside a small container
+achievement.chiseled_me:reset=Depletion
+achievement.chiseled_me:reset.desc=Opportunely this thing does reset your size for free
+achievement.chiseled_me:cablework=Easy cablework!
+achievement.chiseled_me:cablework.desc=Become 1/2 of your size
+achievement.chiseled_me:big_stairs=Stairs are too big now
+achievement.chiseled_me:big_stairs.desc=Become 1/4 of your size
+achievement.chiseled_me:mouse_holes=Accessible mouse holes
+achievement.chiseled_me:mouse_holes.desc=Become 1/8 of your size
+achievement.chiseled_me:c&b_galore=Chisel & Bits FTW!
+achievement.chiseled_me:c&b_galore.desc=Become 1/16 of your size
+achievement.chiseled_me:c&b_squared=I need C&B for C&B now!
+achievement.chiseled_me:c&b_squared.desc=Become 1/256 of your size
+achievement.chiseled_me:advancements=Advancements
+achievement.chiseled_me:advancements.desc=Craft bigger pym container
+achievement.chiseled_me:concentrated=Concentrated Pym Essense
+achievement.chiseled_me:concentrated.desc=Wobbly red thing inseide a *big* container
+achievement.chiseled_me:supersmalls=Supersmall
+achievement.chiseled_me:supersmalls.desc=Become 1/512 of your size
+achievement.chiseled_me:the_limit=The Limit
+achievement.chiseled_me:the_limit.desc=Become 1/4096 of your size
+achievement.chiseled_me:blue_nether_star=Blue nether star?
+achievement.chiseled_me:blue_nether_star.desc=Combine a nether star with lapis block
+achievement.chiseled_me:weird_beacon=Unusual beacon
+achievement.chiseled_me:weird_beacon.desc=This beacon is somehow weird. Use it?
+achievement.chiseled_me:surprise=Surprize? :D
+achievement.chiseled_me:surprise.desc=Convert blue nether star into the lapis block
+achievement.chiseled_me:antipolarization=Antipolarization
+achievement.chiseled_me:antipolarization.desc=Antipolarize some concentrated pym essense with blue nether star
+achievement.chiseled_me:double=Double!
+achievement.chiseled_me:double.desc=Become twice as big
+achievement.chiseled_me:quadruple=Quadruple!
+achievement.chiseled_me:quadruple.desc=Become 4 times bigger
+achievement.chiseled_me:octuple=Octuple!
+achievement.chiseled_me:octuple.desc=Become 8 times bigger
+achievement.chiseled_me:sexdecuple=Sexdecuple!!1!
+achievement.chiseled_me:sexdecuple.desc=Become 16 times bigger
