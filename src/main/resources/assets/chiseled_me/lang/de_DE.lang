@@ -1,0 +1,66 @@
+
+itemGroup.chiseled_me=Chiseled Me
+
+chiseled_me.bed.too_small=Du bist zu klein, um in einem Bett zu schlafen!
+chiseled_me.bed.too_big=Du bist zu groß, um in einem bett zu schlafen!
+
+commands.chiseled_me:getsizeof.usage=/getsizeof <Entity>
+commands.chiseled_me:getsizeof.message=%s: Relative Größe ist %s!
+commands.chiseled_me:setsizeof.usage=/setsizeof <Entity> <Zahl> [interp]
+commands.chiseled_me:setsizeof.message=%s: Größe verändert zu %s!
+
+item.chiseled_me:recalibrator.charges=  §8Ladung: §7%s
+item.chiseled_me:recalibrator.reset.name=Masse-Volumen-Rekalibrierer [ 1.0 ]
+item.chiseled_me:recalibrator.reset.tooltip=§8§o-Rechtsklick zum Normalisieren der Größe.
+item.chiseled_me:recalibrator.reduction.name=Masse-Volumen-Rekalibrierer [ 1/%s ]
+item.chiseled_me:recalibrator.reduction.tooltip=§8§o-Rechtsklick zum Schrumpfen auf 1/%s.
+item.chiseled_me:recalibrator.amplification.name=Masse-Volumen-Rekalibrierer [ %s ]
+item.chiseled_me:recalibrator.amplification.tooltip=§8§o-Rechtsklick zur %s-fachen Vergrößerung.
+
+item.chiseled_me:blue_star.name=Blauer Netherstern
+item.chiseled_me:pym_container.name=Pym-Container
+item.chiseled_me:pym_container_x.name=Verstärkter Pym-Container
+item.chiseled_me:pym_essense.name=Pym-Essenz
+item.chiseled_me:pym_essense_x.name=Konzentrierte Pym-Essenz
+item.chiseled_me:pym_essense_b.name=Antipolarisierte konzentrierte Pym-Essenz
+
+achievement.chiseled_me:beginning=Der Anfang
+achievement.chiseled_me:beginning.desc=Fertige einen Pym-Containers
+achievement.chiseled_me:essense=Pym-Essenz
+achievement.chiseled_me:essense.desc=Seltsames rotes Zeug in einem Pym-Container
+achievement.chiseled_me:reset=Entladung
+achievement.chiseled_me:reset.desc=Passenderweise setzt dieses Ding deine Größe auf Normal... Gratis!
+achievement.chiseled_me:cablework=Gut gegen Kabelsalat
+achievement.chiseled_me:cablework.desc=Schrumpfe auf die Hälfte deiner Größe
+achievement.chiseled_me:big_stairs=Treppen sind jetzt viel zu groß
+achievement.chiseled_me:big_stairs.desc=Schrumpfe auf einen Viertel deiner Größe
+achievement.chiseled_me:mouse_holes=Mauselochzugriff
+achievement.chiseled_me:mouse_holes.desc=Schrumpfe auf einen Achtel deiner Größe
+achievement.chiseled_me:c&b_galore=Chisels & Bits ist jetzt noch besser!
+achievement.chiseled_me:c&b_galore.desc=Schrumpfe auf einen Sechzehntel deiner Größe
+achievement.chiseled_me:c&b_squared=So langsam braucht man Chisels & Bits für Chisels & Bits...
+achievement.chiseled_me:c&b_squared.desc=Schrumpfe auf 1/256 deiner Größe
+achievement.chiseled_me:advancements=Verbesserungen
+achievement.chiseled_me:advancements.desc=Fertige einen größeren Pym-Container
+achievement.chiseled_me:concentrated=Konzentration!
+achievement.chiseled_me:concentrated.desc=Seltsames rotes Zeug in einem *großen* Pym-Container
+achievement.chiseled_me:supersmalls=Winziger als winzig
+achievement.chiseled_me:supersmalls.desc=Schrumpfe auf 1/512 deiner Größe
+achievement.chiseled_me:the_limit=Fast schon atomar
+achievement.chiseled_me:the_limit.desc=Schrumpfe auf 1/4096 deiner Größe
+achievement.chiseled_me:blue_nether_star=Blauer Netherstern?
+achievement.chiseled_me:blue_nether_star.desc=Verbinde einen Netherstern mit einem Lapislazuliblock
+achievement.chiseled_me:weird_beacon=Seltsames Leuchtfeuer
+achievement.chiseled_me:weird_beacon.desc=Es sieht... seltsam aus... Verwende es?
+achievement.chiseled_me:surprise=Überraschung? :D
+achievement.chiseled_me:surprise.desc=Wandle einen blauen Netherstern in einen Lapislazuliblock um
+achievement.chiseled_me:antipolarization=Antipolarisierung
+achievement.chiseled_me:antipolarization.desc=Antipolarisiere etwas konzentrierte Pym-Essenz mit einem blauen Netherstern
+achievement.chiseled_me:double=Verdoppelt!
+achievement.chiseled_me:double.desc=Werde auf das Doppelte vergrößert
+achievement.chiseled_me:quadruple=Vervierfacht!!
+achievement.chiseled_me:quadruple.desc=Werde auf das Vierfache vergrößert
+achievement.chiseled_me:octuple=Verachtfacht!!!
+achievement.chiseled_me:octuple.desc=Werde auf das Achtfache vergrößert
+achievement.chiseled_me:sexdecuple=VERSECHZEHNFACHT!!1!
+achievement.chiseled_me:sexdecuple.desc=Werde auf das Sechzehnfache vergrößert
