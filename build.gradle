@@ -20,7 +20,7 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
 minecraft {
-  version = "1.10.2-12.18.1.2065"
+  version = "1.10.2-12.18.1.2070"
   runDir = "run"
   mappings = "snapshot_20160518"
   replace "@VERSION@", project.version

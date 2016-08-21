@@ -33,7 +33,7 @@ public final class Config {
     private static void load(Configuration c) {
         changeBedAABB = c.getBoolean("bedBBox", "misc", true,
             "Override vanilla bed bounding box so if you're small enough you can walk under it");
-        changePortalAABB = c.getBoolean("Override vanilla portal bounding box", "misc", true,
+        changePortalAABB = c.getBoolean("portalBBox", "misc", true,
             "By default you are starting to use portal if you collide with blockspace it takes. This option fixes that so if you're small you could walk on obsidian but not in portal");
         enableSupersmalls = c.getBoolean("enableSupersmalls", "main", true,
             "At these sizes (most noticeable at 1/4096) Minecraft starts to break a little so beware of various (mostly visual, mob AI and colliding) glitches");
