@@ -19,8 +19,8 @@ package necauqua.mods.cm.asm;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.Type;
 
-import static org.objectweb.asm.Opcodes.*;
 import static necauqua.mods.cm.asm.ASM.*;
+import static org.objectweb.asm.Opcodes.*;
 
 public class Transformers {
 

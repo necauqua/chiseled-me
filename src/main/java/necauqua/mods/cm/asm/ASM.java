@@ -19,7 +19,7 @@ package necauqua.mods.cm.asm;
 import com.google.common.base.Joiner;
 import necauqua.mods.cm.ChiseledMe;
 import necauqua.mods.cm.Log;
-import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.objectweb.asm.*;
 import org.objectweb.asm.commons.LocalVariablesSorter;
 import org.objectweb.asm.util.Printer;
@@ -176,10 +176,12 @@ public final class ASM {
             List<Modifier> modifiers = new ArrayList<>();
             Map<String, Type> locals = new HashMap<>();
      outer: for(MethodPatcher patch : patcher.patches) {
-                for(Pair<String, String> md : patch.methods) {
-                    if(name.equals(md.getLeft()) && desc.equals(md.getRight())) {
+                for(Triple<String, String, String> md : patch.methods) {
+                    String mcpName = md.getLeft();
+                    if(name.equals(resolve(mcpName, md.getMiddle())) && desc.equals(md.getRight())) {
                         transformers.add(patch.transformer);
                         modifiers.addAll(patch.patch.modifiers);
+                        allModifiers.getOrDefault(mcpName + desc, new ArrayList<>()).addAll(patch.patch.modifiers);
                         locals.putAll(patch.patch.locals);
                         unusedPatches.remove(patch);
                         continue outer;
@@ -189,7 +191,6 @@ public final class ASM {
             MethodVisitor parent = super.visitMethod(access, name, desc, signature, exceptions);
             if(!modifiers.isEmpty()) {
                 Log.debug(" - Patching method with {" + Joiner.on(", ").join(transformers) + "}: " + name + desc);
-                allModifiers.put(name + desc, modifiers);
                 SpecialMethodVisitor visitor = new SpecialMethodVisitor(locals, access, desc, parent);
                 for(Modifier mod : modifiers) {
                     Log.trace("   * Applying " + mod);
@@ -280,7 +281,7 @@ public final class ASM {
 
         public final String transformer; // used only for logging
 
-        private final List<Pair<String, String>> methods = new ArrayList<>();
+        private final List<Triple<String, String, String>> methods = new ArrayList<>();
         private final ClassPatcher parent;
         private final boolean optional;
 
@@ -290,11 +291,11 @@ public final class ASM {
             this.parent = parent;
             this.transformer = transformer;
             this.optional = optional;
-            methods.add(Pair.of(resolve(mcpName, srgName), desc));
+            methods.add(Triple.of(mcpName, srgName, desc));
         }
 
         public MethodPatcher and(String mcpName, String srgName, String desc) {
-            methods.add(Pair.of(resolve(mcpName, srgName), desc));
+            methods.add(Triple.of(mcpName, srgName, desc));
             return this;
         }
 

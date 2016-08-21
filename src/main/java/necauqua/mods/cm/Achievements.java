@@ -17,7 +17,6 @@
 package necauqua.mods.cm;
 
 import necauqua.mods.cm.item.ItemRecalibrator;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.stats.Achievement;

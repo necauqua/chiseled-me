@@ -43,9 +43,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-import static necauqua.mods.cm.item.ItemRecalibrator.RecalibrationEffect.AMPLIFICATION;
-import static necauqua.mods.cm.item.ItemRecalibrator.RecalibrationEffect.REDUCTION;
-import static necauqua.mods.cm.item.ItemRecalibrator.RecalibrationEffect.RESET;
+import static necauqua.mods.cm.item.ItemRecalibrator.RecalibrationEffect.*;
 
 public class ItemRecalibrator extends ItemMod {
 
