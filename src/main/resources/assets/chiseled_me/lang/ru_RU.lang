@@ -1,0 +1,66 @@
+
+itemGroup.chiseled_me=Chiseled Me
+
+chiseled_me.bed.too_small=Ваш размер слишком мал чтобы спать в кровати!
+chiseled_me.bed.too_big=Ваш размер слишком велик чтобы спать в кровати!
+
+commands.chiseled_me:getsizeof.usage=/getsizeof <сущность>
+commands.chiseled_me:getsizeof.message=Относительный размер %s - %s!
+commands.chiseled_me:setsizeof.usage=/setsizeof <сущность> <число> [плавное]
+commands.chiseled_me:setsizeof.message=Изменён размер %s на %s!
+
+item.chiseled_me:recalibrator.charges=  §8Осталось зарядов: §7%s
+item.chiseled_me:recalibrator.reset.name=Материально-Объёмный Перераспределитель [ 1.0 ]
+item.chiseled_me:recalibrator.reset.tooltip=§8§o-При клике ПКМ восстанавливает ваш размер.
+item.chiseled_me:recalibrator.reduction.name=Материально-Объёмный Перераспределитель [ 1/%s ]
+item.chiseled_me:recalibrator.reduction.tooltip=§8§o-При клике ПКМ ваш размер станет 1/%s от нормального.
+item.chiseled_me:recalibrator.amplification.name=Материально-Объёмный Перераспределитель [ %s ]
+item.chiseled_me:recalibrator.amplification.tooltip=§8§o-При клике ПКМ ваш размер станет в %s раз(а) больше нормального.
+
+item.chiseled_me:blue_star.name=Синяя звезда Ада
+item.chiseled_me:pym_container.name=Контейнер Пима
+item.chiseled_me:pym_container_x.name=Укреплённый контейнер Пима
+item.chiseled_me:pym_essense.name=Эссенция Пима
+item.chiseled_me:pym_essense_x.name=Концентрированная эссенция Пима
+item.chiseled_me:pym_essense_b.name=Антиполяризованная концентрированная эссенция Пима
+
+achievement.chiseled_me:beginning=Начало
+achievement.chiseled_me:beginning.desc=Создайте контейнер Пима
+achievement.chiseled_me:essense=Эссенция Пима
+achievement.chiseled_me:essense.desc=Неустойчивая красная субстанция в маленьком контейнере
+achievement.chiseled_me:reset=Опустошение
+achievement.chiseled_me:reset.desc=Занятно, что эта штука восстанавливает ваш размер бесплатно
+achievement.chiseled_me:cablework=Провода? Легко!
+achievement.chiseled_me:cablework.desc=Станьте 1/2 от вашего размера
+achievement.chiseled_me:big_stairs=Ступени теперь слишком велики
+achievement.chiseled_me:big_stairs.desc=Станьте 1/4 от вашего размера
+achievement.chiseled_me:mouse_holes=Доступные мышиные норы
+achievement.chiseled_me:mouse_holes.desc=Станьте 1/8 от вашего размера
+achievement.chiseled_me:c&b_galore=Chisel & Bits FTW!
+achievement.chiseled_me:c&b_galore.desc=Станьте 1/16 от вашего размера
+achievement.chiseled_me:c&b_squared=Хочу C&B для C&B!
+achievement.chiseled_me:c&b_squared.desc=Станьте 1/256 от вашего размера
+achievement.chiseled_me:advancements=Улучшения
+achievement.chiseled_me:advancements.desc=Создайте больший контейнер Пима
+achievement.chiseled_me:concentrated=Концентрированная эссенция
+achievement.chiseled_me:concentrated.desc=Неустойчивая красная субстанция в *большом* контейнере
+achievement.chiseled_me:supersmalls=Сверхмалый
+achievement.chiseled_me:supersmalls.desc=Станьте 1/512 от вашего размера
+achievement.chiseled_me:the_limit=Предел
+achievement.chiseled_me:the_limit.desc=Станьте 1/4096 от вашего размера
+achievement.chiseled_me:blue_nether_star=Синяя звезда Ада?
+achievement.chiseled_me:blue_nether_star.desc=Соедините звезду Ада и блок лазурита
+achievement.chiseled_me:weird_beacon=Необычный маяк
+achievement.chiseled_me:weird_beacon.desc=Этот маяк чем-то необычен. Используйте его?
+achievement.chiseled_me:surprise=Опаньки! :D
+achievement.chiseled_me:surprise.desc=Превратите синюю звезду Ада в блок лазурита
+achievement.chiseled_me:antipolarization=Антиполяризация
+achievement.chiseled_me:antipolarization.desc=Антиполяризуйте немного концентрированной эссенции Пима при помощи синей звезды Ада
+achievement.chiseled_me:double=Двойной!
+achievement.chiseled_me:double.desc=Станьте вдвое больше
+achievement.chiseled_me:quadruple=Четверной!
+achievement.chiseled_me:quadruple.desc=Станьте вчетверо больше
+achievement.chiseled_me:octuple=Восьмерной!
+achievement.chiseled_me:octuple.desc=Станьте в восемь раз больше
+achievement.chiseled_me:sexdecuple=Шестнадцатерной!!1!
+achievement.chiseled_me:sexdecuple.desc=Станьте в шестнадцать раз больше
