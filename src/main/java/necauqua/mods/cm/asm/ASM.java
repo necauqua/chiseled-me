@@ -17,6 +17,8 @@
 package necauqua.mods.cm.asm;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import necauqua.mods.cm.ChiseledMe;
 import necauqua.mods.cm.Log;
 import org.apache.commons.lang3.tuple.Triple;
@@ -32,6 +34,7 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /*
   If you strip some shit related to mc/forge weird obfuscation
@@ -133,13 +136,18 @@ public final class ASM {
                 throw new IllegalStateException("Transformers {" + Joiner.on(", ").join(ts) + "} were not applied!");
             }
 
-            visitor.allModifiers.forEach((method, mods) ->
-                mods.forEach(mod -> {
-                    if(mod.code == null || !mod.code.succededOnce()) {
-                        throw new IllegalStateException("Modifier " + mod + " from " + method + " was not applied even once!");
-                    }
-                })
-            );
+            List<String> errors =
+                visitor.allModifiers.asMap().entrySet().stream().flatMap(entry ->
+                    entry.getValue().stream()
+                        .filter(mod -> mod.code == null || !mod.code.succededOnce())
+                        .map(mod -> mod + " from " + entry.getKey())
+                ).collect(Collectors.toList());
+            if(!errors.isEmpty()) {
+                StringBuilder error = new StringBuilder("Those modifiers were not applied! \n");
+                errors.forEach(e -> error.append(e).append("\n"));
+                Log.error(error.toString(), null);
+                throw new IllegalStateException("Coremod failed!");
+            }
             try {
                 return writer.toByteArray();
             }catch(Exception e) {
@@ -152,7 +160,7 @@ public final class ASM {
 
     private static class ClassPatchVisitor extends ClassVisitor {
 
-        public final Map<String, List<Modifier>> allModifiers = new HashMap<>();
+        public final Multimap<String, Modifier> allModifiers = HashMultimap.create();
         public final List<MethodPatcher> unusedPatches;
         private final ClassPatcher patcher;
 
@@ -181,7 +189,7 @@ public final class ASM {
                     if(name.equals(resolve(mcpName, md.getMiddle())) && desc.equals(md.getRight())) {
                         transformers.add(patch.transformer);
                         modifiers.addAll(patch.patch.modifiers);
-                        allModifiers.getOrDefault(mcpName + desc, new ArrayList<>()).addAll(patch.patch.modifiers);
+                        allModifiers.putAll(mcpName + desc, patch.patch.modifiers);
                         locals.putAll(patch.patch.locals);
                         unusedPatches.remove(patch);
                         continue outer;
