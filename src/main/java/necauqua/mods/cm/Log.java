@@ -45,6 +45,10 @@ public final class Log {
         logger.warn(msg, cause);
     }
 
+    public static void error(Object msg) {
+        logger.error(msg, null);
+    }
+
     public static void error(Object msg, Throwable cause) {
         logger.error(msg, cause);
     }

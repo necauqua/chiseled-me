@@ -59,7 +59,7 @@ public final class Handlers {
             AxisAlignedBB aabb = new AxisAlignedBB(0.0, 0.1875, 0.0, 1.0, 0.5625, 1.0);
             EnumHelper.setFailsafeFieldValue(f, null, aabb); // this can set final non-primitive fields
         }catch(Exception e) {
-            e.printStackTrace();
+            Log.error("Failed to modify bed AABB!", e);
         }
     }
 

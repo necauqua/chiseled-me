@@ -45,8 +45,10 @@ public final class ASM {
 
     public static final Element methodBegin = new MethodBeginElement();
 
-    public static boolean loaded = false;
     private static boolean obfuscated = true;
+
+    // coremod completeness check
+    private static boolean loadedAtAll = false;
 
     private static final Map<String, ClassPatcher> patchers = new HashMap<>();
     private static String currentTransformer = null;
@@ -58,17 +60,20 @@ public final class ASM {
     }
 
     public static void check() {
-        if(!loaded) {
-            throw new IllegalStateException(
-                "For some reason coremod part of the mod was not even loaded!" +
-                " Something is completely wrong - corrupt jar-file, manifest etc." +
-                " Re-Download the mod, ensuring that Minecraft and Forge versions are the ones required and so on.");
+        if(!loadedAtAll) {
+            Log.error(
+              "\n  *************************************************************************************************\n" +
+                "  * For some reason coremod part of the mod was not even loaded at all!\n" +
+                "  * Something is completely wrong - corrupt jar-file, manifest etc.\n" +
+                "  * Redownload the mod, ensuring that Minecraft and Forge versions are the ones required and so on.\n" +
+                "  **************************************************************************************************");
+            throw new IllegalStateException("Coremod failed!");
         }
     }
 
     public static void init(Object holder, boolean obf) {
         obfuscated = obf;
-        loaded = true;
+        loadedAtAll = true;
         Log.debug("Obfuscated: " + obf + ". Names will be resolved to " + (obf ? "srg" : "mcp") + " names");
         for(Method m : holder.getClass().getMethods()) {
             if(m.isAnnotationPresent(Transformer.class)) {
@@ -124,28 +129,28 @@ public final class ASM {
                 Log.error("Couldn't accept patch visitor!", e);
             }
 
-            Set<String> ts = new HashSet<>();
-            visitor.unusedPatches.forEach(patch -> {
+            String cls = className.substring(className.lastIndexOf('.') + 1);
+            String stuff;
+            stuff = visitor.unusedPatches.stream().filter(patch -> {
                 if(patch.optional) {
-                    Log.debug("One of patches from " + className + " wasn't applied but ignoring because it's marked as optional (eg. @SideOnly)");
+                    Log.debug("One of patches from " + cls + " wasn't applied but ignoring because it's marked as optional (eg. @SideOnly)");
+                    return false;
                 }else {
-                    ts.add(patch.transformer);
+                    return true;
                 }
-            });
-            if(!ts.isEmpty()) {
-                throw new IllegalStateException("Transformers {" + Joiner.on(", ").join(ts) + "} were not applied!");
+            }).map(p -> cls + "." + p.getMethodNames()).collect(Collectors.joining("\n    ", "\n    ", ""));
+            if(!stuff.equals("\n    ")) {
+                Log.error("\n*** Those methods were not found:" + stuff);
+                throw new IllegalStateException("Coremod failed!");
             }
-
-            List<String> errors =
-                visitor.allModifiers.asMap().entrySet().stream().flatMap(entry ->
+            stuff =
+                visitor.modifiers.asMap().entrySet().stream().flatMap(entry ->
                     entry.getValue().stream()
                         .filter(mod -> mod.code == null || !mod.code.succededOnce())
-                        .map(mod -> mod + " from " + entry.getKey())
-                ).collect(Collectors.toList());
-            if(!errors.isEmpty()) {
-                StringBuilder error = new StringBuilder("Those modifiers were not applied! \n");
-                errors.forEach(e -> error.append(e).append("\n"));
-                Log.error(error.toString(), null);
+                        .map(mod -> mod + " from " + cls + "." + entry.getKey())
+                ).collect(Collectors.joining("\n    ", "\n    ", ""));
+            if(!stuff.equals("\n    ")) {
+                Log.error("\n*** Those modifiers were not applied:" + stuff);
                 throw new IllegalStateException("Coremod failed!");
             }
             try {
@@ -160,7 +165,7 @@ public final class ASM {
 
     private static class ClassPatchVisitor extends ClassVisitor {
 
-        public final Multimap<String, Modifier> allModifiers = HashMultimap.create();
+        public final Multimap<String, Modifier> modifiers = HashMultimap.create();
         public final List<MethodPatcher> unusedPatches;
         private final ClassPatcher patcher;
 
@@ -189,7 +194,7 @@ public final class ASM {
                     if(name.equals(resolve(mcpName, md.getMiddle())) && desc.equals(md.getRight())) {
                         transformers.add(patch.transformer);
                         modifiers.addAll(patch.patch.modifiers);
-                        allModifiers.putAll(mcpName + desc, patch.patch.modifiers);
+                        this.modifiers.putAll(mcpName + desc, patch.patch.modifiers); // put here and checked above because of mcpName
                         locals.putAll(patch.patch.locals);
                         unusedPatches.remove(patch);
                         continue outer;
@@ -311,6 +316,18 @@ public final class ASM {
             this.patch = patch;
             return parent;
         }
+
+        private String getMethodName(Triple<String, String, String> method) {
+            return method.getLeft() + method.getRight();
+        }
+
+        public String getMethodNames() {
+            if(methods.size() == 1) {
+                return getMethodName(methods.get(0));
+            }else {
+                return methods.stream().map(this::getMethodName).collect(Collectors.joining(", ", "[ ", " ]"));
+            }
+        }
     }
 
     public static abstract class Patch {
@@ -396,7 +413,7 @@ public final class ASM {
             if(code != null) {
                 return element.apply(parent, code, type, at);
             }else {
-                throw new IllegalStateException("Modifier has no 'code' block!"); // should never happen but whatever
+                throw new IllegalStateException("Modifier " + toString() + " has no 'code' block!"); // should never happen but whatever
             }
         }
 
