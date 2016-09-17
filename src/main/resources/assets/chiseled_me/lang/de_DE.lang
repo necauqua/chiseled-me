@@ -2,7 +2,7 @@
 itemGroup.chiseled_me=Chiseled Me
 
 chiseled_me.bed.too_small=Du bist zu klein, um in einem Bett zu schlafen!
-chiseled_me.bed.too_big=Du bist zu groß, um in einem bett zu schlafen!
+chiseled_me.bed.too_big=Du bist zu groß, um in einem Bett zu schlafen!
 
 commands.chiseled_me:getsizeof.usage=/getsizeof <Entity>
 commands.chiseled_me:getsizeof.message=%s: Relative Größe ist %s!
@@ -25,7 +25,7 @@ item.chiseled_me:pym_essense_x.name=Konzentrierte Pym-Essenz
 item.chiseled_me:pym_essense_b.name=Antipolarisierte konzentrierte Pym-Essenz
 
 achievement.chiseled_me:beginning=Der Anfang
-achievement.chiseled_me:beginning.desc=Fertige einen Pym-Containers
+achievement.chiseled_me:beginning.desc=Fertige einen Pym-Container
 achievement.chiseled_me:essense=Pym-Essenz
 achievement.chiseled_me:essense.desc=Seltsames rotes Zeug in einem Pym-Container
 achievement.chiseled_me:reset=Entladung
