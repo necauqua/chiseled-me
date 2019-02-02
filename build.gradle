@@ -1,13 +1,7 @@
-group "necauqua.mods"
-version "1.0"
-
 buildscript {
     repositories {
         jcenter()
-        maven {
-            name = "forge"
-            url = "http://files.minecraftforge.net/maven"
-        }
+        maven { url = 'http://files.minecraftforge.net/maven' }
     }
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
@@ -16,46 +10,91 @@ buildscript {
 
 apply plugin: 'net.minecraftforge.gradle.forge'
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
+version = '1.1.0'
+group = 'necauqua.mods'
+
+sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
 
 minecraft {
-  version = "1.10.2-12.18.1.2070"
-  runDir = "run"
-  mappings = "snapshot_20160518"
-  replace "@VERSION@", project.version
-  replace "@API_VERSION@", "1.0"
-}
+    version = '1.10.2-12.18.3.2185'
+    mappings = 'stable_29'
 
+    replace '@VERSION@', project.version
+    replace '@API_VERSION@', '1.0'
+}
 
 jar {
-  manifest {
-    attributes("FMLCorePlugin": "necauqua.mods.cm.asm.Plugin", "FMLCorePluginContainsFMLMod": "true")
-  }
-  from 'COPYING', 'COPYING.lesser'
-}
-
-task deobfJar(type: Jar) {
     manifest {
-        attributes("FMLCorePluginContainsFMLMod": "true", "FMLCorePlugin": "necauqua.mods.cm.asm.Plugin")
+        attributes('FMLCorePlugin': 'necauqua.mods.cm.asm.Plugin', 'FMLCorePluginContainsFMLMod': 'true')
     }
-    from(sourceSets.main.output)
-    from 'COPYING', 'COPYING.lesser'
-    archiveName = "${baseName}-${version}-deobf.${extension}"
-}
-
-artifacts {
-    archives deobfJar
+    from 'LICENSE'
 }
 
 processResources {
-  inputs.property "version", project.version
-  inputs.property "mcversion", minecraft.version
-  from(sourceSets.main.resources.srcDirs) {
-    include 'mcmod.info'
-    expand 'version':project.version, 'mcversion':project.minecraft.version
-  }
-  from(sourceSets.main.resources.srcDirs) {
-    exclude 'mcmod.info'
-  }
+    inputs.property 'version', project.version
+    inputs.property 'mcversion', minecraft.version
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+        expand 'version': project.version, 'mcversion': project.minecraft.version
+    }
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
+}
+
+import net.minecraftforge.gradle.user.TaskSourceCopy
+
+task postProcessSources {
+    dependsOn += tasks.withType(TaskSourceCopy.class)
+    doLast {
+        def map = [:].withDefault { [] }
+        genSrgs.mcpToSrg.eachLine {
+            if(it.startsWith('CL: ')) {
+                return
+            }
+            def mcp, srg
+            def desc = null
+            if (it.startsWith('MD: ')) {
+                (mcp, desc, srg) = it.split(' ')[1..3]
+            } else {
+                (mcp, srg) = it.split(' ')[1..2]
+            }
+            def idx = mcp.lastIndexOf('/')
+            def cls = mcp.substring(mcp.lastIndexOf('/', idx - 1) + 1, idx)
+            srg = srg.substring(srg.lastIndexOf('/') + 1)
+            map.get(mcp.substring(idx + 1)).add([srg: srg, cls: cls, desc: desc])
+        }
+        def notFound = [:].withDefault { 0 }
+        def ambiguous = [:].withDefault { 0 }
+        tasks.withType(TaskSourceCopy.class) {
+            fileTree(it.getOutput()).each {
+                it.text = it.text.replaceAll('srg\\(\\s*"(.*?)"(?:\\s*,\\s*"(.*?)")?(?:\\s*,\\s*"(.*?)")?\\s*\\)') {
+                    def (mcp, cls, desc) = it[1..3]
+                    def m = map.get(mcp)
+                    if (cls == null && m.size > 1) {
+                        ambiguous[mcp] += 1
+                        return "\"$mcp\""
+                    }
+                    def x = m.size == 1 ? m.get(0) : m.find { it.cls == cls && (desc == null || desc == it.desc) }
+                    if (x == null) {
+                        notFound[mcp] += 1
+                        return "\"$mcp\""
+                    }
+                    return "\"$x\""
+                }
+            }
+        }
+        if (!notFound.isEmpty() || !ambiguous.isEmpty()) {
+            def fn = { it.getKey() + (it.getValue() > 1 ? " (${it.getValue()} times)" : '') }
+            throw new IllegalStateException("\nProcessing SRG literals failed:\n" +
+                    (!notFound.isEmpty() ? "  * Mappings not found for:\n" +
+                            "    - ${notFound.collect(fn).join("\n    - ")}\n" : "") +
+                    (!ambiguous.isEmpty() ? "  * Multiple mappings exist but class is not clarified for:\n" +
+                            "    - ${ambiguous.collect(fn).join("\n    - ")}\n" : ''))
+        }
+    }
+}
+
+tasks.withType(AbstractCompile) {
+    it.dependsOn(postProcessSources)
 }

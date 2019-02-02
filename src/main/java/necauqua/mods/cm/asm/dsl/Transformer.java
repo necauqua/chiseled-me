@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-@API(owner = "chiseled_me", provides = "chiseled_me_api", apiVersion = "@API_VERSION@")
-package necauqua.mods.cm.api;
+package necauqua.mods.cm.asm.dsl;
 
-import net.minecraftforge.fml.common.API;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Transformer {}

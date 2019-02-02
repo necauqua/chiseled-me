@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-@API(owner = "chiseled_me", provides = "chiseled_me_api", apiVersion = "@API_VERSION@")
-package necauqua.mods.cm.api;
+package necauqua.mods.cm.asm.dsl;
 
-import net.minecraftforge.fml.common.API;
+import org.objectweb.asm.Type;
+
+public interface PatchWithLocalsDsl extends PatchDsl {
+
+    PatchWithLocalsDsl addLocal(String assocName, Type type);
+}

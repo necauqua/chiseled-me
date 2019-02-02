@@ -14,7 +14,23 @@
  * limitations under the License.
  */
 
-@API(owner = "chiseled_me", provides = "chiseled_me_api", apiVersion = "@API_VERSION@")
-package necauqua.mods.cm.api;
+package necauqua.mods.cm.asm.dsl;
 
-import net.minecraftforge.fml.common.API;
+public final class CheckedHook {
+
+    private final AsmMethodHook hook;
+    private boolean called = false;
+
+    public CheckedHook(AsmMethodHook hook) {
+        this.hook = hook;
+    }
+
+    public void accept(SpecialMethodVisitor smv) {
+        hook.accept(smv);
+        called = true;
+    }
+
+    public boolean wasCalled() {
+        return called;
+    }
+}

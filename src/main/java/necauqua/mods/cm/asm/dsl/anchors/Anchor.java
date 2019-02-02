@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-@API(owner = "chiseled_me", provides = "chiseled_me_api", apiVersion = "@API_VERSION@")
-package necauqua.mods.cm.api;
+package necauqua.mods.cm.asm.dsl.anchors;
 
-import net.minecraftforge.fml.common.API;
+import necauqua.mods.cm.asm.dsl.CheckedHook;
+import necauqua.mods.cm.asm.dsl.ModifierType;
+import necauqua.mods.cm.asm.dsl.SpecialMethodVisitor;
+
+public interface Anchor {
+
+    SpecialMethodVisitor apply(SpecialMethodVisitor parent, CheckedHook code, ModifierType type, int at);
+}

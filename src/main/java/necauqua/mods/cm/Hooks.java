@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Anton Bulakh
+ * Copyright (c) 2016-2019 Anton Bulakh <necauqua@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,9 @@ public final class Hooks {
 
     @CalledFromASM
     public static float getLabelHeight(Entity entity, float old) {
-        float off = entity.isSneaking() ? 0.25F : 0.5F;
+        float off = entity.isSneaking() ?
+            0.25F :
+            0.5F;
         return (old - off) / getSize(entity) + off;
     }
 
@@ -66,6 +68,6 @@ public final class Hooks {
 
     @CalledFromASM
     public static boolean cancelBlockCollision(Entity entity, IBlockState state, BlockPos pos) { // this makes nether portal more fun
-        return Config.changePortalAABB && state.getBlock() == Blocks.PORTAL && getSize(entity) < 1.0F && !entity.getEntityBoundingBox().intersectsWith(state.getSelectedBoundingBox(entity.worldObj, pos));
+        return Config.changePortalAABB && state.getBlock() == Blocks.PORTAL && getSize(entity) < 1.0F && !entity.getEntityBoundingBox().intersectsWith(state.getSelectedBoundingBox(entity.world, pos));
     }
 }

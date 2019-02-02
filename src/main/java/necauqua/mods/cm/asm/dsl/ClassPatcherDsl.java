@@ -14,7 +14,21 @@
  * limitations under the License.
  */
 
-@API(owner = "chiseled_me", provides = "chiseled_me_api", apiVersion = "@API_VERSION@")
-package necauqua.mods.cm.api;
+package necauqua.mods.cm.asm.dsl;
 
-import net.minecraftforge.fml.common.API;
+public interface ClassPatcherDsl {
+
+    ClassPatcherDsl addField(int acc, String name, String desc, String sign);
+
+    default ClassPatcherDsl addField(int acc, String name, String desc) {
+        return addField(acc, name, desc, null);
+    }
+
+    MethodPatcherDsl patchMethod(String name, String desc);
+
+    MethodPatcherDsl patchMethodOptionally(String name, String desc);
+
+    default MethodPatcherDsl patchConstructor(String desc) {
+        return patchMethod("<init>", desc);
+    }
+}

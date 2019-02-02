@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Anton Bulakh
+ * Copyright (c) 2016-2019 Anton Bulakh <necauqua@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ public class CraftItem extends ItemMod {
 
     @Override
     public void onCreated(ItemStack stack, World world, EntityPlayer player) {
-        if(boundAchievementId != -1) {
+        if (boundAchievementId != -1) {
             player.addStat(Achievements.get(boundAchievementId));
         }
     }

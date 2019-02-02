@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Anton Bulakh
+ * Copyright (c) 2016-2019 Anton Bulakh <necauqua@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,41 +65,41 @@ public final class Recipes {
             REDSTONE_BLOCK, REDSTONE_BLOCK, REDSTONE_BLOCK, REDSTONE_BLOCK,
             REDSTONE_BLOCK, REDSTONE_BLOCK, REDSTONE_BLOCK, REDSTONE_BLOCK
         );
-        for(int i = 1; i <= 8; i++) {
+        for (int i = 1; i <= 8; i++) {
             Object[] params = new Object[i + 1];
             params[0] = DRAGON_BREATH;
-            for(int j = 1; j <= i; j++) {
+            for (int j = 1; j <= i; j++) {
                 params[j] = ChiseledMe.PYM_ESSENSE;
             }
             GameRegistry.addShapelessRecipe(ItemRecalibrator.create(REDUCTION, (byte) i), params);
         }
-        if(Config.enableSupersmalls || Config.enableBigSizes) {
+        if (Config.enableSupersmalls || Config.enableBigSizes) {
             GameRegistry.addShapedRecipe(
                 new ItemStack(ChiseledMe.PYM_CONTAINER_X),
-                    "xyx",
-                    "yzy",
-                    "xyx",
+                "xyx",
+                "yzy",
+                "xyx",
                 'x', IRON_BLOCK, 'y', DIAMOND_BLOCK, 'z', ChiseledMe.PYM_CONTAINER // this is so original i cant even..
             );
             GameRegistry.addShapelessRecipe(new ItemStack(ChiseledMe.PYM_ESSENSE_X), ChiseledMe.PYM_CONTAINER_X, NETHER_STAR, REDSTONE_BLOCK);
         }
-        if(Config.enableSupersmalls) {
-            for(int i = 1; i <= 4; i++) {
+        if (Config.enableSupersmalls) {
+            for (int i = 1; i <= 4; i++) {
                 Object[] params = new Object[i + 1];
                 params[0] = DRAGON_BREATH;
-                for(int j = 1; j <= i; j++) {
+                for (int j = 1; j <= i; j++) {
                     params[j] = ChiseledMe.PYM_ESSENSE_X;
                 }
                 GameRegistry.addShapelessRecipe(ItemRecalibrator.create(REDUCTION, (byte) (i + 8)), params);
             }
         }
-        if(Config.enableBigSizes) {
+        if (Config.enableBigSizes) {
             GameRegistry.addRecipe(new BlueEssenseRecipe());
             RecipeSorter.register("chiseled_me:blue_essense", BlueEssenseRecipe.class, SHAPELESS, "after:minecraft:shapeless");
-            for(int i = 1; i <= 4; i++) {
+            for (int i = 1; i <= 4; i++) {
                 Object[] params = new Object[i + 1];
                 params[0] = DRAGON_BREATH;
-                for(int j = 1; j <= i; j++) {
+                for (int j = 1; j <= i; j++) {
                     params[j] = ChiseledMe.PYM_ESSENSE_B;
                 }
                 GameRegistry.addShapelessRecipe(ItemRecalibrator.create(AMPLIFICATION, (byte) i), params);
@@ -110,7 +110,7 @@ public final class Recipes {
     private static class OverridenBeaconRecipe extends ShapedRecipes {
 
         public OverridenBeaconRecipe() {
-            super(3, 3, new ItemStack[] {
+            super(3, 3, new ItemStack[]{
                 new ItemStack(GLASS), new ItemStack(GLASS), new ItemStack(GLASS),
                 new ItemStack(GLASS), new ItemStack(ChiseledMe.BLUE_STAR), new ItemStack(GLASS),
                 new ItemStack(OBSIDIAN), new ItemStack(OBSIDIAN), new ItemStack(OBSIDIAN)
@@ -163,9 +163,9 @@ public final class Recipes {
         @Nonnull
         public ItemStack[] getRemainingItems(InventoryCrafting inv) {
             ItemStack[] remaining = super.getRemainingItems(inv);
-            for(int i = 0; i < inv.getSizeInventory(); i++) {
+            for (int i = 0; i < inv.getSizeInventory(); i++) {
                 ItemStack stack = inv.getStackInSlot(i);
-                if(stack != null && stack.getItem() == ChiseledMe.BLUE_STAR) {
+                if (stack != null && stack.getItem() == ChiseledMe.BLUE_STAR) {
                     remaining[i] = new ItemStack(NETHER_STAR);
                 }
             }
@@ -178,12 +178,12 @@ public final class Recipes {
         @Override
         public boolean matches(@Nonnull InventoryCrafting inv, @Nonnull World world) {
             boolean once = false;
-            for(int i = 0; i < inv.getSizeInventory(); i++) {
+            for (int i = 0; i < inv.getSizeInventory(); i++) {
                 ItemStack stack = inv.getStackInSlot(i);
-                if(stack != null) {
-                    if(stack.getItem() == ChiseledMe.BLUE_STAR) {
+                if (stack != null) {
+                    if (stack.getItem() == ChiseledMe.BLUE_STAR) {
                         once = true;
-                    }else {
+                    } else {
                         return false;
                     }
                 }
@@ -195,8 +195,8 @@ public final class Recipes {
         @Override
         public ItemStack getCraftingResult(@Nonnull InventoryCrafting inv) {
             int c = 0;
-            for(int i = 0; i < inv.getSizeInventory(); i++) {
-                if(inv.getStackInSlot(i) != null) {
+            for (int i = 0; i < inv.getSizeInventory(); i++) {
+                if (inv.getStackInSlot(i) != null) {
                     ++c;
                 }
             }
@@ -218,9 +218,9 @@ public final class Recipes {
         @Nonnull
         public ItemStack[] getRemainingItems(@Nonnull InventoryCrafting inv) {
             ItemStack[] ret = new ItemStack[inv.getSizeInventory()];
-            for(int i = 0; i < inv.getSizeInventory(); i++) {
+            for (int i = 0; i < inv.getSizeInventory(); i++) {
                 ItemStack stack = inv.getStackInSlot(i);
-                if(stack != null && stack.getItem() == ChiseledMe.BLUE_STAR) {
+                if (stack != null && stack.getItem() == ChiseledMe.BLUE_STAR) {
                     ret[i] = new ItemStack(NETHER_STAR);
                 }
             }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Anton Bulakh
+ * Copyright (c) 2016-2019 Anton Bulakh <necauqua@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package necauqua.mods.cm;
 
 import necauqua.mods.cm.api.ChiseledMeAPI;
 import necauqua.mods.cm.api.ChiseledMeInterface;
-import necauqua.mods.cm.asm.ASM;
+import necauqua.mods.cm.asm.dsl.ASM;
 import necauqua.mods.cm.cmd.GetSizeCommand;
 import necauqua.mods.cm.cmd.SetSizeCommand;
 import necauqua.mods.cm.item.CraftItem;
@@ -34,6 +34,7 @@ import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import scala.reflect.runtime.ReflectionUtils;
 
 import javax.annotation.Nonnull;
 
@@ -53,7 +54,7 @@ public final class ChiseledMe implements ChiseledMeInterface {
         @Override
         @Nonnull
         public ItemStack getIconItemStack() {
-            if(icon == null) {
+            if (icon == null) {
                 icon = ItemRecalibrator.create(RecalibrationEffect.REDUCTION, (byte) 1);
             }
             return icon;
@@ -80,7 +81,7 @@ public final class ChiseledMe implements ChiseledMeInterface {
 
     @EventHandler
     public void init(FMLInitializationEvent e) {
-        RandomUtils.forEachStaticField(ItemMod.class, ItemMod::init);
+        RandomUtils.forEachStaticField(getClass(), ItemMod.class, ItemMod::init);
         Handlers.init();
         Achievements.init();
         Recipes.init();

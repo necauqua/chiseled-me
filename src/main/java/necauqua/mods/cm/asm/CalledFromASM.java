@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Anton Bulakh
+ * Copyright (c) 2016-2019 Anton Bulakh <necauqua@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
-  * Used to indicate that method is called from ASM.
-  * Only for self-awareness (instead of comments) and for Intellij
-  * to know that annotated method is actually used somewhere.
-  **/
+ * Used to indicate that method is called from ASM.
+ * Only for self-awareness (instead of comments) and for Intellij
+ * to know that annotated method is actually used somewhere.
+ **/
 
 @Retention(RetentionPolicy.SOURCE)
 @Target({ElementType.METHOD, ElementType.TYPE})

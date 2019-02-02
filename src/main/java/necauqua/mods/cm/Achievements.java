@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Anton Bulakh
+ * Copyright (c) 2016-2019 Anton Bulakh <necauqua@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,12 +73,12 @@ public final class Achievements extends AchievementPage {
     private Achievements() {
         super("Chiseled Me"); // soo.. no lang keys? m'key
         List<Achievement> achievements = getAchievements();
-        RandomUtils.forEachStaticField(Achievement.class, achievements::add);
-        if(!Config.enableSupersmalls) {
+        RandomUtils.forEachStaticField(getClass(), Achievement.class, achievements::add);
+        if (!Config.enableSupersmalls) {
             achievements.remove(SUPERSMALLS);
             achievements.remove(THE_LIMIT);
         }
-        if(!Config.enableBigSizes) {
+        if (!Config.enableBigSizes) {
             achievements.remove(ANTIPOLARIZATION);
             achievements.remove(DOUBLE);
             achievements.remove(QUADRUPLE);
