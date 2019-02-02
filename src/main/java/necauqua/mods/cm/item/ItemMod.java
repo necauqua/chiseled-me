@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Anton Bulakh
+ * Copyright (c) 2016-2019 Anton Bulakh <necauqua@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ public class ItemMod extends Item {
 
     public void init() {
         GameRegistry.register(this);
-        if(FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
             clientRegister();
         }
     }
@@ -64,7 +64,7 @@ public class ItemMod extends Item {
         String[] vs = getModelVariants();
         ResourceLocation[] variants = new ResourceLocation[vs.length + 1];
         variants[0] = defaultModel;
-        for(int i = 0; i < vs.length; i++) {
+        for (int i = 0; i < vs.length; i++) {
             variants[i + 1] = new ResourceLocation("chiseled_me", vs[i]);
         }
         ModelBakery.registerItemVariants(this, variants);

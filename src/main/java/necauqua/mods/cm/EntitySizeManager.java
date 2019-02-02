@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Anton Bulakh
+ * Copyright (c) 2016-2019 Anton Bulakh <necauqua@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,10 +73,10 @@ public final class EntitySizeManager {
 
     @SideOnly(Side.CLIENT)
     public static void enqueueSetSize(int entityId, float size) {
-        World clientWorld = Minecraft.getMinecraft().theWorld;
-        if(clientWorld != null) {
+        World clientWorld = Minecraft.getMinecraft().world;
+        if (clientWorld != null) {
             Entity entity = clientWorld.getEntityByID(entityId);
-            if(entity != null) {
+            if (entity != null) {
                 setSize(entity, size, false);
                 return;
             }
@@ -92,9 +92,9 @@ public final class EntitySizeManager {
     @SubscribeEvent
     public void onEntityJoinWorld(EntityJoinWorldEvent e) {
         Entity entity = e.getEntity();
-        if(entity.worldObj.isRemote) {
+        if (entity.world.isRemote) {
             Float size = spawnSetSizeQueue.remove(entity.getEntityId());
-            if(size != null) {
+            if (size != null) {
                 setSize(entity, size, false);
             }
         }
@@ -108,8 +108,8 @@ public final class EntitySizeManager {
     @SubscribeEvent
     public void onPlayerLogin(PlayerLoggedInEvent e) {
         float size = getData(e.player).setSize;
-        if(size != 1.0F) {
-            if(e.player instanceof EntityPlayerMP) {
+        if (size != 1.0F) {
+            if (e.player instanceof EntityPlayerMP) {
                 Network.sendEnqueueSetSizeToClient((EntityPlayerMP) e.player, e.player, size);
             }
         }
@@ -119,19 +119,21 @@ public final class EntitySizeManager {
     public void onStartTracking(PlayerEvent.StartTracking e) {
         Entity entity = e.getTarget();
         EntitySizeData data = getData(entity);
-        if(entity instanceof EntityItem) {
+        if (entity instanceof EntityItem) {
             ItemStack stack = ((EntityItem) entity).getEntityItem();
             NBTTagCompound nbt = stack.getTagCompound();
-            if(nbt != null && nbt.hasKey("chiseled_me:size", 5)) {
+            if (nbt != null && nbt.hasKey("chiseled_me:size", 5)) {
                 data.setSize(nbt.getFloat("chiseled_me:size"), false);
                 nbt.removeTag("chiseled_me:size");
-                stack.setTagCompound(nbt.hasNoTags() ? null : nbt);
+                stack.setTagCompound(nbt.hasNoTags() ?
+                    null :
+                    nbt);
             }
         }
         float size = data.setSize;
-        if(size != 1.0F) {
+        if (size != 1.0F) {
             EntityPlayer player = e.getEntityPlayer();
-            if(player instanceof EntityPlayerMP) {
+            if (player instanceof EntityPlayerMP) {
                 Network.sendEnqueueSetSizeToClient((EntityPlayerMP) player, entity, size);
             }
         }
@@ -160,27 +162,27 @@ public final class EntitySizeManager {
         }
 
         public void tick() {
-            if(interping) {
-                if(interp++ < interpTime) {
+            if (interping) {
+                if (interp++ < interpTime) {
                     prevRenderSize = renderSize;
                     float s = prevSize + (setSize - prevSize) / interpTime * interp;
                     renderSize = s;
                     currentSize = s;
                     setBBoxSize(s);
-                }else {
+                } else {
                     prevRenderSize = renderSize;
                     currentSize = setSize;
                     setBBoxSize(setSize);
                     interp = 0;
                     interping = false;
                 }
-            }else if(setSize != 1.0F && !isPlayer) { // players are handled by separate hook within mc code
+            } else if (setSize != 1.0F && !isPlayer) { // players are handled by separate hook within mc code
                 setBBoxSize(setSize);
             }
         }
 
         private void setBBoxSize(float size) {
-            if(!sizeWasSet) { // can't do this in constructor because it's called at end of Entity constructor where size is still set to default
+            if (!sizeWasSet) { // can't do this in constructor because it's called at end of Entity constructor where size is still set to default
                 originalWidth = entity.width;
                 originalHeight = entity.height;
                 sizeWasSet = true;
@@ -202,10 +204,10 @@ public final class EntitySizeManager {
         }
 
         private void setSize(float size, boolean interp) {
-            if(size >= LOWER_LIMIT && size <= UPPER_LIMIT) {
+            if (size >= LOWER_LIMIT && size <= UPPER_LIMIT) {
                 Entity[] parts = entity.getParts();
-                if(parts != null) {
-                    for(Entity part : parts) {
+                if (parts != null) {
+                    for (Entity part : parts) {
                         getData(part).setSize(size, interp);
                     }
                 }
@@ -213,19 +215,19 @@ public final class EntitySizeManager {
                 entity.removePassengers();
                 prevSize = setSize;
                 setSize = size;
-                if(interp) {
+                if (interp) {
                     currentSize = prevSize;
                     float p = prevSize;
                     float s = size;
-                    if(p < 1.0F) {
+                    if (p < 1.0F) {
                         p = -1.0F / p;
                     }
-                    if(s < 1.0F) {
+                    if (s < 1.0F) {
                         s = -1.0F / s;
                     }
-                    interpTime = MathHelper.calculateLogBaseTwo(Math.abs((int) (s - p)) + 1) * 2;
+                    interpTime = MathHelper.log2(Math.abs((int) (s - p)) + 1) * 2;
                     interping = true;
-                }else {
+                } else {
                     setBBoxSize(size);
                     setAllSizes(size);
                 }
@@ -247,7 +249,7 @@ public final class EntitySizeManager {
 
         @Override
         public void deserializeNBT(NBTBase nbt) {
-            if(nbt instanceof NBTPrimitive) {
+            if (nbt instanceof NBTPrimitive) {
                 setAllSizes(((NBTPrimitive) nbt).getFloat());
             }
         }
@@ -259,7 +261,9 @@ public final class EntitySizeManager {
 
         @Override
         public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing) {
-            return capability == CAPABILITY ? CAPABILITY.cast(this) : null;
+            return capability == CAPABILITY ?
+                CAPABILITY.cast(this) :
+                null;
         }
     }
 

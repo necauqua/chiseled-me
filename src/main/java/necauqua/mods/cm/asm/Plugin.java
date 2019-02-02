@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Anton Bulakh
+ * Copyright (c) 2016-2019 Anton Bulakh <necauqua@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package necauqua.mods.cm.asm;
 
+import necauqua.mods.cm.asm.dsl.ASM;
 import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.MCVersion;
@@ -27,13 +28,13 @@ import java.util.Map;
 
 @Name("Chiseled Me ASM")
 @MCVersion("1.10.2")
-@SortingIndex(1001) // above 1000 so srg deobfuscation would happen EARLIER >.< (so at least descs are the same)
-@TransformerExclusions("necauqua.mods.cm.asm") // ^ i feel that Lex would just annihilate me for that :D
+@SortingIndex(1001) // above 1000 so notch->srg deobfuscation would happen before us
+@TransformerExclusions("necauqua.mods.cm")
 public class Plugin implements IFMLLoadingPlugin, IClassTransformer {
 
     @Override
     public void injectData(Map<String, Object> data) {
-        ASM.init(new Transformers(), (Boolean) data.get("runtimeDeobfuscationEnabled"));
+        ASM.init(new Transformers());
     }
 
     @Override
@@ -43,7 +44,7 @@ public class Plugin implements IFMLLoadingPlugin, IClassTransformer {
 
     @Override
     public String[] getASMTransformerClass() {
-        return new String[] { "necauqua.mods.cm.asm.Plugin" };
+        return new String[]{"necauqua.mods.cm.asm.Plugin"};
     }
 
     @Override

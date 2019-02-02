@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Anton Bulakh
+ * Copyright (c) 2016-2019 Anton Bulakh <necauqua@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ public final class Handlers {
 
     public static void init() {
         MinecraftForge.EVENT_BUS.register(new Handlers());
-        if(Config.changeBedAABB) {
+        if (Config.changeBedAABB) {
             fixBedAABB();
         }
     }
@@ -58,21 +58,21 @@ public final class Handlers {
             Field f = ReflectionHelper.findField(BlockBed.class, "field_185513_c", "BED_AABB");
             AxisAlignedBB aabb = new AxisAlignedBB(0.0, 0.1875, 0.0, 1.0, 0.5625, 1.0);
             EnumHelper.setFailsafeFieldValue(f, null, aabb); // this can set final non-primitive fields
-        }catch(Exception e) {
+        } catch (Exception e) {
             Log.error("Failed to modify bed AABB!", e);
         }
     }
 
     @SubscribeEvent
     public void onPlayerInteract(EntityInteractSpecific e) {
-        if(getSize(e.getEntity()) != getSize(e.getTarget())) {
+        if (getSize(e.getEntity()) != getSize(e.getTarget())) {
             e.setCanceled(true);
         }
     }
 
     @SubscribeEvent
     public void onEntityMount(EntityMountEvent e) { // todo this is temp, remove after riding fix (not soon)
-        if(e.isMounting() && (getSize(e.getEntityMounting()) != 1.0F || getSize(e.getEntityBeingMounted()) != 1.0F)) {
+        if (e.isMounting() && (getSize(e.getEntityMounting()) != 1.0F || getSize(e.getEntityBeingMounted()) != 1.0F)) {
             e.setCanceled(true);
         }
     }
@@ -84,20 +84,20 @@ public final class Handlers {
     public void onPlayerSleepInBed(PlayerSleepInBedEvent e) {
         EntityPlayer player = e.getEntityPlayer();
         float size = getSize(player);
-        if(size < 1.0F) {
+        if (size < 1.0F) {
             e.setResult(TOO_SMALL);
-            player.addChatComponentMessage(new TextComponentTranslation("chiseled_me.bed.too_small"));
-        }else if(size > 1.0F) {
+            player.sendMessage(new TextComponentTranslation("chiseled_me.bed.too_small"));
+        } else if (size > 1.0F) {
             e.setResult(TOO_BIG);
-            player.addChatComponentMessage(new TextComponentTranslation("chiseled_me.bed.too_big"));
+            player.sendMessage(new TextComponentTranslation("chiseled_me.bed.too_big"));
         }
     }
 
     @SubscribeEvent
     public void onLivingDrops(LivingDropsEvent e) {
         float size = getSize(e.getEntity());
-        if(size != 1.0F) {
-            for(EntityItem item : e.getDrops()) {
+        if (size != 1.0F) {
+            for (EntityItem item : e.getDrops()) {
                 EntitySizeManager.setSize(item, size, false);
             }
         }
@@ -106,7 +106,7 @@ public final class Handlers {
     @SubscribeEvent
     public void onPlayerDrop(ItemTossEvent e) {
         float size = getSize(e.getPlayer());
-        if(size != 1.0F) {
+        if (size != 1.0F) {
             EntitySizeManager.setSize(e.getEntityItem(), size, false);
         }
     }
@@ -115,10 +115,10 @@ public final class Handlers {
     public void onPlayerBreak(BlockEvent.HarvestDropsEvent e) {
         EntityPlayer player = e.getHarvester();
         float size;
-        if(player != null && (size = getSize(player)) < 1.0) {
-            for(ItemStack stack : e.getDrops()) {
+        if (player != null && (size = getSize(player)) < 1.0) {
+            for (ItemStack stack : e.getDrops()) {
                 NBTTagCompound nbt = stack.getTagCompound();
-                if(nbt == null) {
+                if (nbt == null) {
                     nbt = new NBTTagCompound();
                 }
                 nbt.setFloat("chiseled_me:size", size);

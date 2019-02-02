@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Anton Bulakh
+ * Copyright (c) 2016-2019 Anton Bulakh <necauqua@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,18 +47,18 @@ public final class Network {
     @SideOnly(Side.CLIENT)
     public void onClientReceive(ClientCustomPacketEvent e) {
         PacketBuffer payload = new PacketBuffer(e.getPacket().payload());
-        switch(payload.readByte()) {
+        switch (payload.readByte()) {
             case 0: {
-                World clientWorld = Minecraft.getMinecraft().theWorld;
-                if(clientWorld != null) {
+                World clientWorld = Minecraft.getMinecraft().world;
+                if (clientWorld != null) {
                     int id = payload.readInt();
                     Entity entity = clientWorld.getEntityByID(id);
-                    if(entity != null) {
+                    if (entity != null) {
                         EntitySizeManager.setSize(entity, payload.readFloat(), payload.readBoolean());
-                    }else {
+                    } else {
                         Log.warn("Client entity with id " + id + " is null! This mean you're desynced somewhere =/");
                     }
-                }else {
+                } else {
                     Log.warn("Somehow client world does not yet exist, this should never happen!");
                 }
                 break;

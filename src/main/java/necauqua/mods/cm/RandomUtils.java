@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Anton Bulakh
+ * Copyright (c) 2016-2019 Anton Bulakh <necauqua@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 
 package necauqua.mods.cm;
 
-import sun.reflect.CallerSensitive;
-import sun.reflect.Reflection;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.function.Consumer;
@@ -27,24 +24,19 @@ public final class RandomUtils {
 
     private RandomUtils() {}
 
-    @CallerSensitive
-    @SuppressWarnings("deprecation")
-    public static <T> void forEachStaticField(Class<T> type, Consumer<T> action) {
-        forEachStaticField(Reflection.getCallerClass(2), type, action);
-    }
-
     @SuppressWarnings("unchecked")
     public static <T> void forEachStaticField(Class<?> holder, Class<T> type, Consumer<T> action) {
         try {
-            for(Field field : holder.getFields()) {
-                if((field.getModifiers() & Modifier.STATIC) != 0) {
-                    Object obj = field.get(null);
-                    if(type.isAssignableFrom(obj.getClass())) {
-                        action.accept((T) obj);
-                    }
+            for (Field field : holder.getFields()) {
+                if ((field.getModifiers() & Modifier.STATIC) == 0) {
+                    continue;
+                }
+                Object obj = field.get(null);
+                if (type.isAssignableFrom(obj.getClass())) {
+                    action.accept((T) obj);
                 }
             }
-        }catch(IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
     }

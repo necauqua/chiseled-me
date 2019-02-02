@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Anton Bulakh
+ * Copyright (c) 2016-2019 Anton Bulakh <necauqua@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ public class ItemRecalibrator extends ItemMod {
 
     public static RecalibrationEffect getEffectFromStack(ItemStack stack) {
         NBTTagCompound nbt = stack.getTagCompound();
-        if(nbt != null && nbt.hasKey("type", 1) && nbt.hasKey("tier", 1) && nbt.hasKey("charges", 3)) {
+        if (nbt != null && nbt.hasKey("type", 1) && nbt.hasKey("tier", 1) && nbt.hasKey("charges", 3)) {
             return new RecalibrationEffect(nbt.getByte("type"), nbt.getByte("tier"), nbt.getInteger("charges"));
         }
         return new RecalibrationEffect(RESET, (byte) 0, 0);
@@ -74,30 +74,32 @@ public class ItemRecalibrator extends ItemMod {
     @Nonnull
     public ActionResult<ItemStack> onItemRightClick(@Nonnull ItemStack stack, World world, EntityPlayer player, EnumHand hand) {
         ItemStack ret = stack;
-        if(player.isSneaking()) {
+        if (player.isSneaking()) {
             double dist = 5.0 * EntitySizeManager.getSize(player);
             Vec3d start = player.getPositionVector().addVector(0.0, player.getEyeHeight(), 0.0);
             Vec3d end = start.add(player.getLook(1.0F).scale(dist));
             AxisAlignedBB range = new AxisAlignedBB(player.posX - dist, player.posY - dist, player.posZ - dist, player.posX + dist, player.posY + dist, player.posZ + dist);
             Entity target = null;
-            for(Entity entity : world.getEntitiesWithinAABBExcludingEntity(player, range)) {
+            for (Entity entity : world.getEntitiesWithinAABBExcludingEntity(player, range)) {
                 AxisAlignedBB aabb = entity.getEntityBoundingBox();
                 RayTraceResult result = aabb.calculateIntercept(start, end);
-                if(result != null) {
+                if (result != null) {
                     double d = start.distanceTo(entity.getPositionVector());
-                    if(d < dist) {
+                    if (d < dist) {
                         dist = d;
                         target = entity;
                     }
                 }
             }
-            if(target != null && !target.isInvisibleToPlayer(player) && !(target instanceof EntityPlayer)) {
+            if (target != null && !target.isInvisibleToPlayer(player) && !(target instanceof EntityPlayer)) {
                 ret = getEffectFromStack(stack).apply(target, stack.copy());
             }
-        }else {
+        } else {
             ret = getEffectFromStack(stack).apply(player, stack.copy());
         }
-        return new ActionResult<>(EnumActionResult.SUCCESS, player.isCreative() ? stack : ret);
+        return new ActionResult<>(EnumActionResult.SUCCESS, player.isCreative() ?
+            stack :
+            ret);
     }
 
     @Override
@@ -112,7 +114,7 @@ public class ItemRecalibrator extends ItemMod {
         RecalibrationEffect effect = getEffectFromStack(stack);
         tooltip.add(effect.getDisplayString("tooltip"));
         String uses = effect.getChargesLeft();
-        if(uses != null) {
+        if (uses != null) {
             tooltip.add(uses);
         }
     }
@@ -121,7 +123,13 @@ public class ItemRecalibrator extends ItemMod {
     @Nonnull
     public EnumRarity getRarity(ItemStack stack) {
         RecalibrationEffect effect = getEffectFromStack(stack);
-        return effect.type == RESET ? EnumRarity.UNCOMMON : effect.tier <= (effect.type == REDUCTION ? 8 : 2) ? EnumRarity.RARE : EnumRarity.EPIC;
+        return effect.type == RESET ?
+            EnumRarity.UNCOMMON :
+            effect.tier <= (effect.type == REDUCTION ?
+                8 :
+                2) ?
+                EnumRarity.RARE :
+                EnumRarity.EPIC;
     }
 
     @Override
@@ -137,23 +145,29 @@ public class ItemRecalibrator extends ItemMod {
     @Override
     public void getSubItems(@Nonnull Item item, @Nullable CreativeTabs tab, List<ItemStack> subItems) {
         super.getSubItems(item, tab, subItems); // reset one
-        for(byte i = 1; i <= 12; i++) {
+        for (byte i = 1; i <= 12; i++) {
             subItems.add(create(REDUCTION, i));
         }
-        for(byte i = 1; i <= 4; i++) {
+        for (byte i = 1; i <= 4; i++) {
             subItems.add(create(AMPLIFICATION, i));
         }
     }
 
     @Override
     protected ResourceLocation getModelResource(ItemStack stack) {
-        byte type = stack.hasTagCompound() ? stack.getTagCompound().getByte("type") : 0;
-        return new ResourceLocation("chiseled_me", "recalibrator" + (type == -1 ? "_reduction" : type == 1 ? "_amplification" : ""));
+        byte type = stack.hasTagCompound() ?
+            stack.getTagCompound().getByte("type") :
+            0;
+        return new ResourceLocation("chiseled_me", "recalibrator" + (type == -1 ?
+            "_reduction" :
+            type == 1 ?
+                "_amplification" :
+                ""));
     }
 
     @Override
     protected String[] getModelVariants() {
-        return new String[] { "recalibrator_reduction", "recalibrator_amplification" };
+        return new String[]{"recalibrator_reduction", "recalibrator_amplification"};
     }
 
     public static class RecalibrationEffect {
@@ -173,8 +187,14 @@ public class ItemRecalibrator extends ItemMod {
             this.type = type;
             this.tier = tier;
             this.charges = charges;
-            int maxTier = (byte) (type == REDUCTION ? 12 : type == AMPLIFICATION ? 4 : 0);
-            size = tier <= maxTier ? (float) Math.pow(2.0, tier * type) : 1.0F;
+            int maxTier = (byte) (type == REDUCTION ?
+                12 :
+                type == AMPLIFICATION ?
+                    4 :
+                    0);
+            size = tier <= maxTier ?
+                (float) Math.pow(2.0, tier * type) :
+                1.0F;
             maxCharges = (float) Math.pow(2.0, maxTier - tier);
         }
 
@@ -188,28 +208,38 @@ public class ItemRecalibrator extends ItemMod {
 
         @SideOnly(Side.CLIENT)
         public String getChargesLeft() {
-            return type == RESET ? null : I18n.format("item.chiseled_me:recalibrator.charges", (int) (maxCharges - charges));
+            return type == RESET ?
+                null :
+                I18n.format("item.chiseled_me:recalibrator.charges", (int) (maxCharges - charges));
         }
 
         @SideOnly(Side.CLIENT)
         public String getDisplayString(String sub) {
-            int s = (int) (type == REDUCTION ? 1.0F / this.size : this.size);
-            String name = type == REDUCTION ? "reduction" : type == AMPLIFICATION ? "amplification" : "reset";
+            int s = (int) (type == REDUCTION ?
+                1.0F / size :
+                size);
+            String name = type == REDUCTION ?
+                "reduction" :
+                type == AMPLIFICATION ?
+                    "amplification" :
+                    "reset";
             return I18n.format("item.chiseled_me:recalibrator." + name + "." + sub, s);
         }
 
         public ItemStack apply(Entity entity, ItemStack stack) {
             boolean isPlayer = entity instanceof EntityPlayer;
-            int i = isPlayer ? 1 : 2;
-            if(size != EntitySizeManager.getSize(entity)) {
-                if(!entity.worldObj.isRemote) {
+            int i = isPlayer ?
+                1 :
+                2;
+            if (size != EntitySizeManager.getSize(entity)) {
+                if (!entity.world.isRemote) {
                     EntitySizeManager.setSize(entity, size, true);
                     Network.sendSetSizeToClients(entity, size, true); // notify all clients 'bout this
                 }
-                if(isPlayer) {
+                if (isPlayer) {
                     EntityPlayer player = (EntityPlayer) entity;
-                    if(type == REDUCTION) {
-                        switch(tier) {
+                    if (type == REDUCTION) {
+                        switch (tier) {
                             case 1:
                                 player.addStat(Achievements.CABLEWORK);
                                 break;
@@ -232,8 +262,8 @@ public class ItemRecalibrator extends ItemMod {
                                 player.addStat(Achievements.THE_LIMIT);
                                 break;
                         }
-                    }else if(type == AMPLIFICATION) {
-                        switch(tier) {
+                    } else if (type == AMPLIFICATION) {
+                        switch (tier) {
                             case 1:
                                 player.addStat(Achievements.DOUBLE);
                                 break;
@@ -249,20 +279,20 @@ public class ItemRecalibrator extends ItemMod {
                         }
                     }
                 }
-            }else {
+            } else {
                 i *= 4;
             }
-            if(type != RESET) {
-                if(charges < maxCharges - i) {
+            if (type != RESET) {
+                if (charges < maxCharges - i) {
                     NBTTagCompound nbt = stack.getTagCompound();
-                    if(nbt == null) {
+                    if (nbt == null) {
                         nbt = new NBTTagCompound();
                     }
                     nbt.setInteger("charges", charges + i);
                     stack.setTagCompound(nbt);
-                }else {
+                } else {
                     stack.setTagCompound(null); // set recalibrator to reset mode
-                    if(isPlayer) {
+                    if (isPlayer) {
                         ((EntityPlayer) entity).addStat(Achievements.RESET);
                     }
                 }
