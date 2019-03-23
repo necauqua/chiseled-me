@@ -23,9 +23,13 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.commons.LocalVariablesSorter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
+import static java.util.stream.Collectors.toMap;
 
 public final class ClassPatchVisitor extends ClassVisitor {
 
@@ -68,15 +72,19 @@ public final class ClassPatchVisitor extends ClassVisitor {
             }
         }
 
-        MethodVisitor visititor = super.visitMethod(access, name, desc, signature, exceptions);
+        MethodVisitor visitor = super.visitMethod(access, name, desc, signature, exceptions);
 
         if (modifiers.isEmpty()) {
-            return visititor;
+            return visitor;
         }
-        ContextMethodVisitor visitor = new ContextMethodVisitor(patcher.getClassName(), locals, access, desc, visititor);
+
+        LocalVariablesSorter lvs = new LocalVariablesSorter(access, desc, visitor);
+        Map<String, Integer> localIndices = locals.stream().collect(toMap(Pair::getLeft, p -> lvs.newLocal(p.getRight())));
+        ContextMethodVisitor patched = new ContextMethodVisitor(patcher.getClassName(), localIndices, lvs, visitor);
+
         for (Modifier mod : modifiers) {
-            visitor = mod.apply(visitor);
+            patched = mod.apply(patched);
         }
-        return visitor;
+        return patched;
     }
 }

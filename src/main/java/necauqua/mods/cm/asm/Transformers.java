@@ -20,10 +20,11 @@ import necauqua.mods.cm.asm.dsl.Hook;
 import necauqua.mods.cm.asm.dsl.Patch;
 import necauqua.mods.cm.asm.dsl.Transformer;
 import org.objectweb.asm.Label;
-import org.objectweb.asm.Type;
 
 import static necauqua.mods.cm.asm.dsl.ASM.*;
 import static org.objectweb.asm.Opcodes.*;
+import static org.objectweb.asm.Type.DOUBLE_TYPE;
+import static org.objectweb.asm.Type.FLOAT_TYPE;
 
 // intellij sees to many random duplicates in the hooks
 @SuppressWarnings("Duplicates")
@@ -76,7 +77,7 @@ public class Transformers {
         inClass("net.minecraft.client.renderer.EntityRenderer")
             .patchMethod(srg("orientCamera"), "(F)V") // camera height & shift
             .with(p -> {
-                p.addLocal("size", Type.FLOAT_TYPE);
+                p.addLocal("size", FLOAT_TYPE);
                 p.insertBefore(varInsn(FSTORE, 3), mv -> { // local float f
                     mv.visitInsn(POP); // meh, just ignore original getEyeHeight call
                     mv.visitVarInsn(ALOAD, 2); // local Entity entity
@@ -103,7 +104,7 @@ public class Transformers {
             })
             .patchMethod(srg("setupCameraTransform"), "(FI)V")
             .with(p -> {
-                p.addLocal("size", Type.FLOAT_TYPE);
+                p.addLocal("size", FLOAT_TYPE);
                 p.insertAfter(methodBegin(), mv -> {
                     mv.visitVarInsn(ALOAD, 0);
                     mv.visitFieldInsn(GETFIELD, srg("mc", "EntityRenderer"), "Lnet/minecraft/client/Minecraft;");
@@ -137,7 +138,7 @@ public class Transformers {
             })
             .patchMethod(srg("applyBobbing"), "(F)V") // bobbing fix (-_-)
             .with(p -> {
-                p.addLocal("size", Type.FLOAT_TYPE);
+                p.addLocal("size", FLOAT_TYPE);
                 p.insertBefore(varInsn(ASTORE, 2), mv -> { // local EntityPlayer entityplayer
                     mv.visitInsn(DUP);
                     mv.visitHook(getSize);
@@ -158,7 +159,7 @@ public class Transformers {
             .and(srg("renderCloudsCheck"), "(Lnet/minecraft/client/renderer/RenderGlobal;FI)V")
             .and(srg("renderHand", "EntityRenderer"), "(FI)V")
             .with(p -> {
-                p.addLocal("size", Type.FLOAT_TYPE);
+                p.addLocal("size", FLOAT_TYPE);
                 p.insertAfter(methodBegin(), mv -> {
                     mv.visitVarInsn(ALOAD, 0);
                     mv.visitFieldInsn(GETFIELD, srg("mc", "EntityRenderer"), "Lnet/minecraft/client/Minecraft;");
@@ -179,7 +180,7 @@ public class Transformers {
         inClass("net.minecraft.client.renderer.entity.RenderManager")
             .patchMethod(srg("doRenderEntity"), "(Lnet/minecraft/entity/Entity;DDDFFZ)V")
             .with(p -> {
-                p.addLocal("size", Type.DOUBLE_TYPE);
+                p.addLocal("size", DOUBLE_TYPE);
                 p.insertBefore(varInsn(ALOAD, 11), 2, mv -> {
                     mv.visitVarInsn(ALOAD, 1);  // param Entity entityIn
                     mv.visitVarInsn(FLOAD, 9); // param float partialTicks
@@ -215,7 +216,7 @@ public class Transformers {
             })
             .patchMethod(srg("renderDebugBoundingBox"), "(Lnet/minecraft/entity/Entity;DDDFF)V")
             .with(p -> {
-                p.addLocal("size", Type.DOUBLE_TYPE);
+                p.addLocal("size", DOUBLE_TYPE);
                 p.insertAfter(methodBegin(), mv -> {
                     mv.visitVarInsn(ALOAD, 1);  // param Entity entityIn
                     mv.visitHook(getSize);
@@ -234,7 +235,7 @@ public class Transformers {
         inClass("net.minecraft.client.renderer.entity.Render")
             .patchMethod(srg("renderShadow", "Render"), "(Lnet/minecraft/entity/Entity;DDDFF)V")
             .with(p -> {
-                p.addLocal("size", Type.FLOAT_TYPE);
+                p.addLocal("size", FLOAT_TYPE);
                 p.insertAfter(methodBegin(), mv -> {
                     mv.visitVarInsn(ALOAD, 1); // param Entity entityIn
                     mv.visitVarInsn(FLOAD, 9); // param float partialTicks
@@ -302,7 +303,7 @@ public class Transformers {
         inClass("net.minecraft.entity.Entity")
             .patchMethod(srg("move", "Entity"), "(DDD)V")
             .with(p -> {
-                p.addLocal("size", Type.DOUBLE_TYPE);
+                p.addLocal("size", DOUBLE_TYPE);
                 p.insertAfter(methodBegin(), mv -> { // the speed
                     mv.visitVarInsn(ALOAD, 0);  // Entity this
                     mv.visitHook(getSize);
@@ -383,7 +384,7 @@ public class Transformers {
         inClass("net.minecraft.network.NetHandlerPlayServer")
             .patchMethod(srg("processPlayer", "NetHandlerPlayServer"), "(Lnet/minecraft/network/play/client/CPacketPlayer;)V")
             .with(p -> {
-                p.addLocal("size", Type.DOUBLE_TYPE);
+                p.addLocal("size", DOUBLE_TYPE);
                 p.insertBefore(varInsn(ALOAD, 2), mv -> { // setup
                     mv.visitVarInsn(ALOAD, 0); // NetHandlerPlayServer this
                     mv.visitFieldInsn(GETFIELD, "playerEntity", "Lnet/minecraft/entity/player/EntityPlayerMP;");
@@ -417,7 +418,7 @@ public class Transformers {
         inClass("net.minecraft.entity.player.EntityPlayer")
             .patchMethod(srg("updateSize", "EntityPlayer"), "()V")
             .with(p -> {
-                p.addLocal("size", Type.FLOAT_TYPE);
+                p.addLocal("size", FLOAT_TYPE);
                 p.insertBefore(varInsn(FLOAD, 1), mv -> {
                     mv.visitVarInsn(ALOAD, 0); // EntityPlayer this
                     mv.visitHook(getSize);
@@ -434,7 +435,7 @@ public class Transformers {
             })
             .patchMethod(srg("onLivingUpdate", "EntityPlayer"), "()V") // fixes collideEntityWithPlayer aabb expansion
             .with(p -> {
-                p.addLocal("size", Type.DOUBLE_TYPE);
+                p.addLocal("size", DOUBLE_TYPE);
                 p.insertBefore(jumpInsn(IFEQ), 5, mv -> {
                     mv.visitVarInsn(ALOAD, 0); // EntityPlayer this
                     mv.visitHook(getSize);
@@ -535,7 +536,7 @@ public class Transformers {
         inClass("net.minecraft.entity.item.EntityItem")
             .patchMethod(srg("searchForOtherItemsNearby"), "()V")
             .with(p -> {
-                p.addLocal("size", Type.DOUBLE_TYPE);
+                p.addLocal("size", DOUBLE_TYPE);
                 p.insertAfter(methodBegin(), mv -> { // items stacking with each other
                     mv.visitVarInsn(ALOAD, 0); // EntityItem this
                     mv.visitHook(getSize);
