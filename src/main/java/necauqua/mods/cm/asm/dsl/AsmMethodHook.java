@@ -20,4 +20,4 @@ import java.util.function.Consumer;
 
 @FunctionalInterface
 public
-interface AsmMethodHook extends Consumer<SpecialMethodVisitor> {}
+interface AsmMethodHook extends Consumer<ContextMethodVisitor> {}

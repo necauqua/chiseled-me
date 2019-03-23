@@ -16,11 +16,31 @@
 
 package necauqua.mods.cm.asm.dsl.anchors;
 
-import necauqua.mods.cm.asm.dsl.CheckedHook;
+import necauqua.mods.cm.asm.dsl.ContextMethodVisitor;
+import necauqua.mods.cm.asm.dsl.Modifier;
 import necauqua.mods.cm.asm.dsl.ModifierType;
-import necauqua.mods.cm.asm.dsl.SpecialMethodVisitor;
 
-public interface Anchor {
+import java.util.function.BooleanSupplier;
+import java.util.function.IntSupplier;
 
-    SpecialMethodVisitor apply(SpecialMethodVisitor parent, CheckedHook code, ModifierType type, int at);
+import static necauqua.mods.cm.asm.dsl.ModifierType.*;
+
+public abstract class Anchor {
+
+    public abstract ContextMethodVisitor apply(ContextMethodVisitor context, Modifier modifier);
+
+    protected final void visit(Modifier modifier, ContextMethodVisitor context, Runnable original, BooleanSupplier matches, IntSupplier pass) {
+        ModifierType type = modifier.getType();
+        if (type == INSERT_AFTER) {
+            original.run();
+        }
+        if (!(matches.getAsBoolean() && modifier.match(context, pass.getAsInt()))) {
+            if (type == REPLACE) {
+                original.run();
+            }
+        }
+        if (type == INSERT_BEFORE) {
+            original.run();
+        }
+    }
 }

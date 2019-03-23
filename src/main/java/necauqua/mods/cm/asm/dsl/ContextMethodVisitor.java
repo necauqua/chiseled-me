@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 // dont ever ask me how this class works with locals. Such hax
-public class SpecialMethodVisitor extends MethodVisitor {
+public class ContextMethodVisitor extends MethodVisitor {
 
     private final String className;
     private final Map<String, Integer> locals;
@@ -32,7 +32,7 @@ public class SpecialMethodVisitor extends MethodVisitor {
 
     private int pass = 1; // used in `code` lambdas here and there
 
-    public SpecialMethodVisitor(String className, Map<String, Type> locals, int access, String desc, MethodVisitor mv) {
+    public ContextMethodVisitor(String className, Map<String, Type> locals, int access, String desc, MethodVisitor mv) {
         super(Opcodes.ASM5, mv);
         this.className = className.replace('.', '/');
         this.locals = new HashMap<>();
@@ -45,7 +45,7 @@ public class SpecialMethodVisitor extends MethodVisitor {
         rootMV = mv;
     }
 
-    public SpecialMethodVisitor(SpecialMethodVisitor mv) {
+    public ContextMethodVisitor(ContextMethodVisitor mv) {
         super(Opcodes.ASM5, mv);
         className = mv.className;
         locals = mv.locals;

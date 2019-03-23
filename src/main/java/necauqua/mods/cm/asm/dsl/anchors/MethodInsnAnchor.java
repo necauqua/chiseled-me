@@ -16,14 +16,11 @@
 
 package necauqua.mods.cm.asm.dsl.anchors;
 
-import necauqua.mods.cm.asm.dsl.CheckedHook;
-import necauqua.mods.cm.asm.dsl.ModifierType;
-import necauqua.mods.cm.asm.dsl.SpecialMethodVisitor;
+import necauqua.mods.cm.asm.dsl.ContextMethodVisitor;
+import necauqua.mods.cm.asm.dsl.Modifier;
 import org.objectweb.asm.util.Printer;
 
-import static necauqua.mods.cm.asm.dsl.ModifierType.*;
-
-public final class MethodInsnAnchor implements Anchor {
+public final class MethodInsnAnchor extends Anchor {
 
     private final int opcode;
     private final String owner;
@@ -38,24 +35,17 @@ public final class MethodInsnAnchor implements Anchor {
     }
 
     @Override
-    public SpecialMethodVisitor apply(SpecialMethodVisitor parent, CheckedHook hook, ModifierType type, int at) {
-        return new SpecialMethodVisitor(parent) {
+    public ContextMethodVisitor apply(ContextMethodVisitor context, Modifier modifier) {
+        return new ContextMethodVisitor(context) {
             private int n = 0;
 
             @Override
             public void visitMethodInsn(int op, String _owner, String _name, String _desc, boolean isInterface) {
-                if (type == INSERT_AFTER) {
-                    mv.visitMethodInsn(op, _owner, _name, _desc, isInterface);
-                }
-                if (op == opcode && _owner.equals(owner) && _name.equals(name) && _desc.equals(desc) && (at == ++n || at == 0)) {
-                    parent.setPass(n);
-                    hook.accept(parent);
-                } else if (type == REPLACE) {
-                    mv.visitMethodInsn(op, _owner, _name, _desc, isInterface);
-                }
-                if (type == INSERT_BEFORE) {
-                    mv.visitMethodInsn(op, _owner, _name, _desc, isInterface);
-                }
+                visit(modifier, context,
+                    () -> super.visitMethodInsn(op, _owner, _name, _desc, isInterface),
+                    () -> op == opcode && _owner.equals(owner) && _name.equals(name) && _desc.equals(desc),
+                    () -> ++n
+                );
             }
         };
     }

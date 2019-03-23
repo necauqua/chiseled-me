@@ -16,13 +16,10 @@
 
 package necauqua.mods.cm.asm.dsl.anchors;
 
-import necauqua.mods.cm.asm.dsl.CheckedHook;
-import necauqua.mods.cm.asm.dsl.ModifierType;
-import necauqua.mods.cm.asm.dsl.SpecialMethodVisitor;
+import necauqua.mods.cm.asm.dsl.ContextMethodVisitor;
+import necauqua.mods.cm.asm.dsl.Modifier;
 
-import static necauqua.mods.cm.asm.dsl.ModifierType.*;
-
-public final class LdcInsnAnchor implements Anchor {
+public final class LdcInsnAnchor extends Anchor {
 
     private final Object cst;
 
@@ -31,24 +28,17 @@ public final class LdcInsnAnchor implements Anchor {
     }
 
     @Override
-    public SpecialMethodVisitor apply(SpecialMethodVisitor parent, CheckedHook hook, ModifierType type, int at) {
-        return new SpecialMethodVisitor(parent) {
+    public ContextMethodVisitor apply(ContextMethodVisitor context, Modifier modifier) {
+        return new ContextMethodVisitor(context) {
             private int n = 0;
 
             @Override
             public void visitLdcInsn(Object _cst) {
-                if (type == INSERT_AFTER) {
-                    mv.visitLdcInsn(_cst);
-                }
-                if (_cst.equals(cst) && (at == ++n || at == 0)) {
-                    parent.setPass(n);
-                    hook.accept(parent);
-                } else if (type == REPLACE) {
-                    mv.visitLdcInsn(_cst);
-                }
-                if (type == INSERT_BEFORE) {
-                    mv.visitLdcInsn(_cst);
-                }
+                visit(modifier, context,
+                    () -> super.visitLdcInsn(_cst),
+                    () -> _cst.equals(cst),
+                    () -> ++n
+                );
             }
         };
     }
