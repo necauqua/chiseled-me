@@ -16,13 +16,11 @@
 
 package necauqua.mods.cm.item;
 
-import necauqua.mods.cm.Achievements;
-import necauqua.mods.cm.ChiseledMe;
-import necauqua.mods.cm.EntitySizeManager;
-import necauqua.mods.cm.Network;
+import necauqua.mods.cm.*;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.EnumRarity;
 import net.minecraft.item.Item;
@@ -43,6 +41,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
+import static necauqua.mods.cm.ChiseledMe.MODID;
 import static necauqua.mods.cm.item.ItemRecalibrator.RecalibrationEffect.*;
 
 public class ItemRecalibrator extends ItemMod {
@@ -74,14 +73,18 @@ public class ItemRecalibrator extends ItemMod {
     @Nonnull
     public ActionResult<ItemStack> onItemRightClick(@Nonnull ItemStack stack, World world, EntityPlayer player, EnumHand hand) {
         ItemStack ret = stack;
-        if (player.isSneaking()) {
-            double dist = 5.0 * EntitySizeManager.getSize(player);
+        double dist = Config.recalibratorEntityReachDist;
+        if (dist > 0.0 && player.isSneaking()) {
             Vec3d start = player.getPositionVector().addVector(0.0, player.getEyeHeight(), 0.0);
             Vec3d end = start.add(player.getLook(1.0F).scale(dist));
             AxisAlignedBB range = new AxisAlignedBB(player.posX - dist, player.posY - dist, player.posZ - dist, player.posX + dist, player.posY + dist, player.posZ + dist);
             Entity target = null;
             for (Entity entity : world.getEntitiesWithinAABBExcludingEntity(player, range)) {
                 AxisAlignedBB aabb = entity.getEntityBoundingBox();
+                if (Config.recalibratorItemEntityBBoxOffset && entity instanceof EntityItem) {
+                    double h = aabb.maxY - aabb.minY;
+                    aabb = new AxisAlignedBB(aabb.minX, aabb.minY + h, aabb.minZ, aabb.maxX, aabb.maxY + h, aabb.maxZ);
+                }
                 RayTraceResult result = aabb.calculateIntercept(start, end);
                 if (result != null) {
                     double d = start.distanceTo(entity.getPositionVector());
@@ -155,14 +158,10 @@ public class ItemRecalibrator extends ItemMod {
 
     @Override
     protected ResourceLocation getModelResource(ItemStack stack) {
-        byte type = stack.hasTagCompound() ?
-            stack.getTagCompound().getByte("type") :
-            0;
-        return new ResourceLocation("chiseled_me", "recalibrator" + (type == -1 ?
-            "_reduction" :
-            type == 1 ?
-                "_amplification" :
-                ""));
+        NBTTagCompound nbt = stack.getTagCompound();
+        byte type = nbt != null ? nbt.getByte("type") : 0;
+        return new ResourceLocation(MODID, "recalibrator" +
+            (type == -1 ? "_reduction" : type == 1 ? "_amplification" : ""));
     }
 
     @Override
