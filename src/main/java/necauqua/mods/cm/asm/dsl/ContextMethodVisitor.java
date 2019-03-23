@@ -16,45 +16,34 @@
 
 package necauqua.mods.cm.asm.dsl;
 
-import org.apache.commons.lang3.tuple.Pair;
-import org.objectweb.asm.*;
-import org.objectweb.asm.commons.LocalVariablesSorter;
+import org.objectweb.asm.Label;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.objectweb.asm.Opcodes.GOTO;
 
-// dont ever ask me how this class works with locals. Such hax
 public class ContextMethodVisitor extends MethodVisitor {
 
     private final String className;
     private final Map<String, Integer> locals;
-    private final LocalVariablesSorter lvs;
-    private final MethodVisitor rootMV;
+    private final MethodVisitor root;
 
     private int pass = 1; // used in `code` lambdas here and there
 
-    public ContextMethodVisitor(String className, List<Pair<String, Type>> locals, int access, String desc, MethodVisitor mv) {
-        super(Opcodes.ASM5, mv);
+    public ContextMethodVisitor(String className, Map<String, Integer> locals, MethodVisitor parent, MethodVisitor root) {
+        super(Opcodes.ASM5, parent);
         this.className = className.replace('.', '/');
-        this.locals = new HashMap<>();
-        if (!locals.isEmpty()) {
-            lvs = new LocalVariablesSorter(access, desc, mv);
-            locals.forEach(p -> this.locals.put(p.getLeft(), lvs.newLocal(p.getRight())));
-        } else {
-            lvs = null;
-        }
-        rootMV = mv;
+        this.locals = locals;
+        this.root = root;
     }
 
     public ContextMethodVisitor(ContextMethodVisitor mv) {
         super(Opcodes.ASM5, mv);
         className = mv.className;
         locals = mv.locals;
-        rootMV = mv.rootMV;
-        lvs = null;
+        root = mv.root;
     }
 
     public void setPass(int pass) {
@@ -83,12 +72,14 @@ public class ContextMethodVisitor extends MethodVisitor {
         return var;
     }
 
+    // for SOME REASON just calling super with the created locals does not work and
+    // I have to keep a reference to the original MethodWriter
     public void visitVarInsn(int opcode, String assocName) {
-        rootMV.visitVarInsn(opcode, getLocal(assocName));
+        root.visitVarInsn(opcode, getLocal(assocName));
     }
 
     public void visitIincInsn(String assocName, int increment) {
-        rootMV.visitIincInsn(getLocal(assocName), increment);
+        root.visitIincInsn(getLocal(assocName), increment);
     }
 
     public void ifJump(int opcode, Runnable body) {
@@ -107,61 +98,5 @@ public class ContextMethodVisitor extends MethodVisitor {
         visitLabel(then);
         or.run();
         visitLabel(skip);
-    }
-
-    // Overrides for root LVS:
-
-    @Override
-    public void visitVarInsn(int opcode, int var) {
-        if (lvs != null) {
-            lvs.visitVarInsn(opcode, var);
-        } else {
-            super.visitVarInsn(opcode, var);
-        }
-    }
-
-    @Override
-    public void visitIincInsn(int var, int increment) {
-        if (lvs != null) {
-            lvs.visitIincInsn(var, increment);
-        } else {
-            super.visitIincInsn(var, increment);
-        }
-    }
-
-    @Override
-    public void visitMaxs(int maxStack, int maxLocals) {
-        if (lvs != null) {
-            lvs.visitMaxs(maxStack, maxLocals);
-        } else {
-            super.visitMaxs(maxStack, maxLocals);
-        }
-    }
-
-    @Override
-    public void visitLocalVariable(String name, String desc, String signature, Label start, Label end, int index) {
-        if (lvs != null) {
-            lvs.visitLocalVariable(name, desc, signature, start, end, index);
-        } else {
-            super.visitLocalVariable(name, desc, signature, start, end, index);
-        }
-    }
-
-    @Override
-    public AnnotationVisitor visitLocalVariableAnnotation(int typeRef, TypePath typePath, Label[] start, Label[] end, int[] index, String desc, boolean visible) {
-        if (lvs != null) {
-            return lvs.visitLocalVariableAnnotation(typeRef, typePath, start, end, index, desc, visible);
-        } else {
-            return super.visitLocalVariableAnnotation(typeRef, typePath, start, end, index, desc, visible);
-        }
-    }
-
-    @Override
-    public void visitFrame(int type, int nLocal, Object[] local, int nStack, Object[] stack) {
-        if (lvs != null) {
-            lvs.visitFrame(type, nLocal, local, nStack, stack);
-        } else {
-            super.visitFrame(type, nLocal, local, nStack, stack);
-        }
     }
 }
