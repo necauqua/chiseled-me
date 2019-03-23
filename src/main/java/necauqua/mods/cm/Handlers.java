@@ -35,6 +35,7 @@ import net.minecraftforge.common.util.EnumHelper;
 import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
+import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteractSpecific;
 import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
@@ -67,6 +68,22 @@ public final class Handlers {
             EnumHelper.setFailsafeFieldValue(f, null, aabb); // this can set final non-primitive fields
         } catch (Exception e) {
             Log.error("Failed to modify bed AABB!", e);
+        }
+    }
+
+    @SubscribeEvent
+    public void onLivingFall(LivingFallEvent event) {
+        EntityLivingBase entity = event.getEntityLiving();
+        float size = getSize(entity);
+        if (size == 1.0F) {
+            return;
+        }
+        if (size < 1.0F && Config.scaleSmall) {
+            event.setDamageMultiplier(event.getDamageMultiplier() * size);
+            return;
+        }
+        if (size > 1.0F && Config.scaleBig) {
+            event.setDamageMultiplier(event.getDamageMultiplier() * size);
         }
     }
 

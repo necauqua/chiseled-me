@@ -33,6 +33,8 @@ public final class Config {
     public static float recalibratorEntityReachDist;
     public static boolean recalibratorItemEntityBBoxOffset;
 
+    public static boolean scaleSmall, scaleBig;
+
     private static void load(Configuration c) {
         changeBedAABB = c.getBoolean("bedBBox", "misc", true,
             "Override vanilla bed bounding box so if you're small enough you can walk under it");
@@ -55,6 +57,18 @@ public final class Config {
             "Item entities have their bboxes exactly below their models. You can check this with F3+B. " +
                 "When this is true, recalibrator would take that into account and for item entities you would click " +
                 "on rendering item and not below it");
+
+        int fallEffect = c.getInt("fallEffect", "main", 1, 0, 3,
+            "Specifies how falling damage applies. It is in range 0-4, so it's two bits - " +
+                "first bit controls if fall damage is increased appropriately when you small, " +
+                "and second - if it's descreased when you're big. " +
+                "So 00=0 - realistic (when you small you can fall long, when you big your mass hurts you), " +
+                "01=1 - comfortable (default but unrealistic, you fall long when small and fall normal when big), " +
+                "10=2 - not really usable (small - normal, big - mass hurts), " +
+                "11=3 - just scale (so it always feels as you're of normal size).");
+
+        scaleSmall = (fallEffect >> 1) == 1;
+        scaleBig = (fallEffect & 1) == 1;
     }
 
     public static void init(File configFolder) {
