@@ -34,10 +34,16 @@ import static java.util.stream.Collectors.toMap;
 public final class ClassPatchVisitor extends ClassVisitor {
 
     private final ClassPatcher patcher;
+    private final List<Modifier> modifiers = new ArrayList<>();
+    private final List<Modifier> missed = new ArrayList<>();
 
     public ClassPatchVisitor(ClassVisitor parent, ClassPatcher patcher) {
         super(Opcodes.ASM5, parent);
         this.patcher = patcher;
+    }
+
+    public List<Modifier> getMisses() {
+        return missed;
     }
 
     @Override
@@ -53,6 +59,9 @@ public final class ClassPatchVisitor extends ClassVisitor {
     @Override
     public void visitEnd() {
         super.visitEnd();
+        modifiers.stream()
+            .filter(m -> !m.didMatch())
+            .forEach(missed::add);
     }
 
     @Override
@@ -77,6 +86,7 @@ public final class ClassPatchVisitor extends ClassVisitor {
         if (modifiers.isEmpty()) {
             return visitor;
         }
+        this.modifiers.addAll(modifiers);
 
         LocalVariablesSorter lvs = new LocalVariablesSorter(access, desc, visitor);
         Map<String, Integer> localIndices = locals.stream().collect(toMap(Pair::getLeft, p -> lvs.newLocal(p.getRight())));

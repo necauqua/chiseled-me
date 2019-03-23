@@ -36,12 +36,20 @@ public final class Modifier {
         this.hook = hook;
     }
 
-    public int getIndex() {
-        return index;
+    public MethodPatcher getParent() {
+        return parent;
     }
 
     public ModifierType getType() {
         return type;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public Hook getHook() {
+        return hook;
     }
 
     public boolean didMatch() {
