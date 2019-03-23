@@ -16,9 +16,8 @@
 
 package necauqua.mods.cm.asm.dsl;
 
-import org.objectweb.asm.Type;
+import java.util.function.Consumer;
 
-public interface PatchWithLocalsDsl extends PatchDsl {
-
-    PatchWithLocalsDsl addLocal(String assocName, Type type);
-}
+@FunctionalInterface
+public
+interface Hook extends Consumer<ContextMethodVisitor> {}

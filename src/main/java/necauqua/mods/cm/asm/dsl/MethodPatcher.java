@@ -29,7 +29,7 @@ public final class MethodPatcher implements MethodPatcherDsl {
     private final boolean optional;
 
     private final List<Pair<String, String>> methodsToPatch = new ArrayList<>();
-    private PatchDsl thePatch = new Patch(); // empty stub
+    private Patch patch = p -> {}; // empty stub
 
     public MethodPatcher(ClassPatcher parent, String transformerName, String name, String desc, boolean optional) {
         this.parent = parent;
@@ -46,8 +46,8 @@ public final class MethodPatcher implements MethodPatcherDsl {
         return methodsToPatch;
     }
 
-    public PatchDsl getThePatch() {
-        return thePatch;
+    public Patch getPatch() {
+        return patch;
     }
 
     public boolean isOptional() {
@@ -61,8 +61,8 @@ public final class MethodPatcher implements MethodPatcherDsl {
     }
 
     @Override
-    public ClassPatcherDsl with(PatchDsl patch) {
-        thePatch = patch;
+    public ClassPatcherDsl with(Patch patch) {
+        this.patch = patch;
         return parent;
     }
 

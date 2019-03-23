@@ -20,21 +20,23 @@ import necauqua.mods.cm.asm.dsl.anchors.Anchor;
 
 public final class Modifier {
 
+    private final MethodPatcher parent;
     private final ModifierType type;
     private final Anchor anchor;
     private final int nth;
-    private final AsmMethodHook hook;
+    private final Hook hook;
 
     private boolean matched = false;
 
-    public Modifier(ModifierType type, Anchor anchor, int nth, AsmMethodHook hook) {
+    public Modifier(MethodPatcher parent, Anchor anchor, Hook hook, ModifierType type, int nth) {
+        this.parent = parent;
         this.type = type;
         this.anchor = anchor;
         this.nth = nth;
         this.hook = hook;
     }
 
-    public AsmMethodHook getHook() {
+    public Hook getHook() {
         return hook;
     }
 
@@ -47,7 +49,6 @@ public final class Modifier {
     }
 
     public ContextMethodVisitor apply(ContextMethodVisitor parent) {
-        parent.setPass(1);
         return anchor.apply(parent, this);
     }
 

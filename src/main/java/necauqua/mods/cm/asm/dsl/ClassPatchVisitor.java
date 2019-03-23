@@ -25,9 +25,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public final class ClassPatchVisitor extends ClassVisitor {
 
@@ -56,28 +54,29 @@ public final class ClassPatchVisitor extends ClassVisitor {
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         List<Modifier> modifiers = new ArrayList<>();
-        Map<String, Type> locals = new HashMap<>();
+        List<Pair<String, Type>> locals = new ArrayList<>();
 
         for (MethodPatcher methodPatcher : patcher.getMethodPatchers()) {
             for (Pair<String, String> md : methodPatcher.getMethodsToPatch()) {
                 if (!md.getLeft().equals(name) || !md.getRight().equals(desc)) {
                     continue;
                 }
-                Patch patch = (Patch) methodPatcher.getThePatch(); // meh
-                modifiers.addAll(patch.getModifiers());
-                locals.putAll(patch.getLocals());
+                PatchContext context = new PatchContext(methodPatcher);
+                methodPatcher.getPatch().accept(context);
+                modifiers.addAll(context.getModifiers());
+                locals.addAll(context.getLocals());
             }
         }
 
         MethodVisitor visititor = super.visitMethod(access, name, desc, signature, exceptions);
 
-        if (!modifiers.isEmpty()) {
-            ContextMethodVisitor visitor = new ContextMethodVisitor(patcher.getClassName(), locals, access, desc, visititor);
-            for (Modifier mod : modifiers) {
-                visitor = mod.apply(visitor);
-            }
-            return visitor;
+        if (modifiers.isEmpty()) {
+            return visititor;
         }
-        return visititor;
+        ContextMethodVisitor visitor = new ContextMethodVisitor(patcher.getClassName(), locals, access, desc, visititor);
+        for (Modifier mod : modifiers) {
+            visitor = mod.apply(visitor);
+        }
+        return visitor;
     }
 }

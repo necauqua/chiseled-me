@@ -38,12 +38,12 @@ public final class ASM {
 
     public static void check() {
         if (!loadedAtAll) {
-            Log.error(
-                "\n  ****************************************************************************************************\n" +
-                    "  * For some reason coremod part of the mod was not even loaded at all!\n" +
-                    "  * Something is completely wrong - corrupt jar-file, manifest etc.\n" +
-                    "  * Redownload the mod, ensuring that Minecraft and Forge versions are the ones required and so on.\n" +
-                    "  ****************************************************************************************************");
+            Log.error("\n" +
+                "  ****************************************************************************************************\n" +
+                "  * For some reason coremod part of the mod was not even loaded at all!\n" +
+                "  * Something is completely wrong - corrupt jar-file, manifest etc.\n" +
+                "  * Redownload the mod, ensuring that Minecraft and Forge versions are the ones required and so on.\n" +
+                "  ****************************************************************************************************");
             throw new IllegalStateException("Coremod failed!");
         }
     }
@@ -130,10 +130,6 @@ public final class ASM {
             throw new IllegalStateException("Can't use 'inClass' outside transformer method!");
         }
         return patchers.computeIfAbsent(className, ClassPatcher::new);
-    }
-
-    public static PatchWithLocalsDsl patch() {
-        return new Patch();
     }
 
     public static Anchor methodBegin() {
