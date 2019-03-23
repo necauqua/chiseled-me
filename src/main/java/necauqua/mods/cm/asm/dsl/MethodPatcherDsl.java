@@ -20,5 +20,5 @@ public interface MethodPatcherDsl {
 
     MethodPatcherDsl and(String name, String desc);
 
-    ClassPatcherDsl with(PatchDsl patch);
+    ClassPatcherDsl with(Patch patch);
 }

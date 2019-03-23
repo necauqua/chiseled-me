@@ -16,11 +16,15 @@
 
 package necauqua.mods.cm.asm.dsl;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.objectweb.asm.*;
 import org.objectweb.asm.commons.LocalVariablesSorter;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import static org.objectweb.asm.Opcodes.GOTO;
 
 // dont ever ask me how this class works with locals. Such hax
 public class ContextMethodVisitor extends MethodVisitor {
@@ -32,13 +36,13 @@ public class ContextMethodVisitor extends MethodVisitor {
 
     private int pass = 1; // used in `code` lambdas here and there
 
-    public ContextMethodVisitor(String className, Map<String, Type> locals, int access, String desc, MethodVisitor mv) {
+    public ContextMethodVisitor(String className, List<Pair<String, Type>> locals, int access, String desc, MethodVisitor mv) {
         super(Opcodes.ASM5, mv);
         this.className = className.replace('.', '/');
         this.locals = new HashMap<>();
         if (!locals.isEmpty()) {
             lvs = new LocalVariablesSorter(access, desc, mv);
-            locals.forEach((k, v) -> this.locals.put(k, lvs.newLocal(v)));
+            locals.forEach(p -> this.locals.put(p.getLeft(), lvs.newLocal(p.getRight())));
         } else {
             lvs = null;
         }
@@ -63,7 +67,7 @@ public class ContextMethodVisitor extends MethodVisitor {
 
     // Additional methods:
 
-    public void visitHook(AsmMethodHook hook) {
+    public void visitHook(Hook hook) {
         hook.accept(this);
     }
 
@@ -71,22 +75,38 @@ public class ContextMethodVisitor extends MethodVisitor {
         super.visitFieldInsn(opcode, className, name, desc);
     }
 
-    public void visitVarInsn(int opcode, String assocName) {
+    private int getLocal(String assocName) {
         Integer var = locals.get(assocName);
-        if (var != null) {
-            rootMV.visitVarInsn(opcode, var);
-        } else {
+        if (var == null) {
             throw new IllegalArgumentException("Local with assoc name '" + assocName + "' was never created!");
         }
+        return var;
+    }
+
+    public void visitVarInsn(int opcode, String assocName) {
+        rootMV.visitVarInsn(opcode, getLocal(assocName));
     }
 
     public void visitIincInsn(String assocName, int increment) {
-        Integer var = locals.get(assocName);
-        if (var != null) {
-            rootMV.visitIincInsn(var, increment);
-        } else {
-            throw new IllegalArgumentException("Local with assoc name '" + assocName + "' was never created!");
-        }
+        rootMV.visitIincInsn(getLocal(assocName), increment);
+    }
+
+    public void ifJump(int opcode, Runnable body) {
+        Label skip = new Label();
+        visitJumpInsn(opcode, skip);
+        body.run();
+        visitLabel(skip);
+    }
+
+    public void ifJump(int opcode, Runnable body, Runnable or) {
+        Label then = new Label();
+        Label skip = new Label();
+        visitJumpInsn(opcode, then);
+        body.run();
+        visitJumpInsn(GOTO, skip);
+        visitLabel(then);
+        or.run();
+        visitLabel(skip);
     }
 
     // Overrides for root LVS:

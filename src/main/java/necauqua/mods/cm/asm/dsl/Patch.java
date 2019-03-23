@@ -16,38 +16,7 @@
 
 package necauqua.mods.cm.asm.dsl;
 
-import necauqua.mods.cm.asm.dsl.anchors.Anchor;
-import org.objectweb.asm.Type;
+import java.util.function.Consumer;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-public final class Patch implements PatchWithLocalsDsl {
-
-    protected final Map<String, Type> locals = new HashMap<>();
-    protected final List<Modifier> modifiers = new ArrayList<>();
-
-    Patch() {}
-
-    public Map<String, Type> getLocals() {
-        return locals;
-    }
-
-    public List<Modifier> getModifiers() {
-        return modifiers;
-    }
-
-    @Override
-    public PatchWithLocalsDsl addLocal(String assocName, Type type) {
-        locals.put(assocName, type);
-        return this;
-    }
-
-    @Override
-    public PatchDsl modify(ModifierType type, Anchor anchor, int nth, AsmMethodHook hook) {
-        modifiers.add(new Modifier(type, anchor, nth, hook));
-        return this;
-    }
-}
+@FunctionalInterface
+public interface Patch extends Consumer<PatchContextDsl> {}
