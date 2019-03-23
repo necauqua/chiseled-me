@@ -16,27 +16,31 @@
 
 package necauqua.mods.cm.asm.dsl.anchors;
 
-import necauqua.mods.cm.asm.dsl.CheckedHook;
+import necauqua.mods.cm.asm.dsl.ContextMethodVisitor;
+import necauqua.mods.cm.asm.dsl.Modifier;
 import necauqua.mods.cm.asm.dsl.ModifierType;
-import necauqua.mods.cm.asm.dsl.SpecialMethodVisitor;
 
-public final class MethodBeginAnchor implements Anchor {
+import static necauqua.mods.cm.asm.dsl.ModifierType.INSERT_AFTER;
+import static necauqua.mods.cm.asm.dsl.ModifierType.INSERT_BEFORE;
+
+public final class MethodBeginAnchor extends Anchor {
 
     public static final MethodBeginAnchor INSTANCE = new MethodBeginAnchor();
 
     private MethodBeginAnchor() {}
 
     @Override
-    public SpecialMethodVisitor apply(SpecialMethodVisitor parent, CheckedHook hook, ModifierType type, int at) {
-        return new SpecialMethodVisitor(parent) {
+    public ContextMethodVisitor apply(ContextMethodVisitor context, Modifier modifier) {
+        ModifierType type = modifier.getType();
+        return new ContextMethodVisitor(context) {
             @Override
             public void visitCode() {
-                if (type == ModifierType.INSERT_AFTER) {
-                    mv.visitCode();
+                if (type == INSERT_AFTER) {
+                    super.visitCode();
                 }
-                hook.accept(parent);
-                if (type == ModifierType.INSERT_BEFORE) {
-                    mv.visitCode();
+                modifier.match(context, 1);
+                if (type == INSERT_BEFORE) {
+                    super.visitCode();
                 }
             }
         };

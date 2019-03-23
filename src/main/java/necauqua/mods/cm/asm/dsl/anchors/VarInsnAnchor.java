@@ -16,14 +16,11 @@
 
 package necauqua.mods.cm.asm.dsl.anchors;
 
-import necauqua.mods.cm.asm.dsl.CheckedHook;
-import necauqua.mods.cm.asm.dsl.ModifierType;
-import necauqua.mods.cm.asm.dsl.SpecialMethodVisitor;
+import necauqua.mods.cm.asm.dsl.ContextMethodVisitor;
+import necauqua.mods.cm.asm.dsl.Modifier;
 import org.objectweb.asm.util.Printer;
 
-import static necauqua.mods.cm.asm.dsl.ModifierType.*;
-
-public final class VarInsnAnchor implements Anchor {
+public final class VarInsnAnchor extends Anchor {
 
     private final int opcode;
     private final int var;
@@ -34,24 +31,17 @@ public final class VarInsnAnchor implements Anchor {
     }
 
     @Override
-    public SpecialMethodVisitor apply(SpecialMethodVisitor parent, CheckedHook hook, ModifierType type, int at) {
-        return new SpecialMethodVisitor(parent) {
+    public ContextMethodVisitor apply(ContextMethodVisitor context, Modifier modifier) {
+        return new ContextMethodVisitor(context) {
             private int n = 0;
 
             @Override
             public void visitVarInsn(int _opcode, int _var) {
-                if (type == INSERT_AFTER) {
-                    mv.visitVarInsn(_opcode, _var);
-                }
-                if (_opcode == opcode && _var == var && (at == ++n || at == 0)) {
-                    parent.setPass(n);
-                    hook.accept(parent);
-                } else if (type == REPLACE) {
-                    mv.visitVarInsn(_opcode, _var);
-                }
-                if (type == INSERT_BEFORE) {
-                    mv.visitVarInsn(_opcode, _var);
-                }
+                visit(modifier, context,
+                    () -> super.visitVarInsn(_opcode, _var),
+                    () -> _opcode == opcode && _var == var,
+                    () -> ++n
+                );
             }
         };
     }

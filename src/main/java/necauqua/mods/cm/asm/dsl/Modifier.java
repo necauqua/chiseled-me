@@ -21,30 +21,45 @@ import necauqua.mods.cm.asm.dsl.anchors.Anchor;
 public final class Modifier {
 
     private final ModifierType type;
-    private final Patch parent;
     private final Anchor anchor;
-
     private final int nth;
-    private CheckedHook hook;
+    private final AsmMethodHook hook;
 
-    public Modifier(Patch parent, ModifierType type, Anchor anchor, int nth, AsmMethodHook hook) {
+    private boolean matched = false;
+
+    public Modifier(ModifierType type, Anchor anchor, int nth, AsmMethodHook hook) {
         this.type = type;
-        this.parent = parent;
         this.anchor = anchor;
         this.nth = nth;
-        this.hook = new CheckedHook(hook);
+        this.hook = hook;
     }
 
-    public CheckedHook getHook() {
+    public AsmMethodHook getHook() {
         return hook;
     }
 
-    public SpecialMethodVisitor apply(SpecialMethodVisitor parent) {
+    public ModifierType getType() {
+        return type;
+    }
+
+    public boolean didMatch() {
+        return matched;
+    }
+
+    public ContextMethodVisitor apply(ContextMethodVisitor parent) {
         parent.setPass(1);
-        if (hook == null) {
-            throw new IllegalStateException("Modifier " + toString() + " has no 'code' block!");
+        return anchor.apply(parent, this);
+    }
+
+    public boolean match(ContextMethodVisitor context, int pass) {
+        if (nth != 0 && nth != pass) {
+            return false;
         }
-        return anchor.apply(parent, hook, type, nth);
+        matched = true;
+        context.setPass(pass);
+        hook.accept(context);
+        context.setPass(1);
+        return true;
     }
 
     @Override

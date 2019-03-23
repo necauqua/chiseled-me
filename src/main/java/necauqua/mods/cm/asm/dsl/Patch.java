@@ -47,7 +47,7 @@ public final class Patch implements PatchWithLocalsDsl {
 
     @Override
     public PatchDsl modify(ModifierType type, Anchor anchor, int nth, AsmMethodHook hook) {
-        modifiers.add(new Modifier(this, type, anchor, nth, hook));
+        modifiers.add(new Modifier(type, anchor, nth, hook));
         return this;
     }
 }

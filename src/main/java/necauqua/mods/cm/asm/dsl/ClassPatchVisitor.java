@@ -72,7 +72,7 @@ public final class ClassPatchVisitor extends ClassVisitor {
         MethodVisitor visititor = super.visitMethod(access, name, desc, signature, exceptions);
 
         if (!modifiers.isEmpty()) {
-            SpecialMethodVisitor visitor = new SpecialMethodVisitor(patcher.getClassName(), locals, access, desc, visititor);
+            ContextMethodVisitor visitor = new ContextMethodVisitor(patcher.getClassName(), locals, access, desc, visititor);
             for (Modifier mod : modifiers) {
                 visitor = mod.apply(visitor);
             }
