@@ -24,7 +24,11 @@ import org.objectweb.asm.ClassWriter;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
 
 public final class ASM {
 
@@ -99,14 +103,48 @@ public final class ASM {
                 }
             }
         };
-        try {
-            ClassPatchVisitor visitor = new ClassPatchVisitor(writer, patcher);
-            reader.accept(visitor, ClassReader.SKIP_FRAMES);
-            return writer.toByteArray();
-        } catch (Exception e) {
-            Log.error("Failed to patch class " + className, e);
-            return original;
+        ClassPatchVisitor visitor = new ClassPatchVisitor(writer, patcher);
+        reader.accept(visitor, ClassReader.SKIP_FRAMES);
+        byte[] modified = writer.toByteArray();
+        // we dont collect all misses and then fail with all of them printed because
+        // a class could be loaded at any time, so we can't know when to finally check
+        List<Modifier> misses = visitor.getMisses();
+        if (!misses.isEmpty()) {
+            checkMisses(className, misses);
         }
+        return modified;
+    }
+
+    private static void checkMisses(String className, List<Modifier> misses) {
+        List<Modifier> strict = misses.stream()
+            .filter(m -> {
+                // that filter is purely functional ofc, logging is a 'light' side effect
+                if (m.getParent().isOptional()) {
+                    Log.debug("Missed optional modifier " + m);
+                    return false;
+                }
+                return true;
+            })
+            .collect(toList());
+        if (strict.isEmpty()) {
+            return;
+        }
+        int idx = className.lastIndexOf('.');
+        String shortName = idx != -1 ? className.substring(idx + 1) : className;
+        StringBuilder message = new StringBuilder("\nSome patches were not applied to class " + shortName + ":\n");
+        strict.stream()
+            .collect(groupingBy(m -> m.getParent().getTransformerName()))
+            .forEach((transformer, transformerMisses) -> {
+                message.append("  transformer '").append(transformer).append("':\n");
+                transformerMisses.stream()
+                    .collect(groupingBy(modifier -> modifier.getParent().getMethodNames()))
+                    .forEach((method, methodMisses) -> {
+                        message.append("    method ").append(method).append(":\n");
+                        methodMisses.forEach(m -> message.append("      - ").append(m).append('\n'));
+                    });
+            });
+        Log.error(message);
+        throw new IllegalStateException("Coremod failed!");
     }
 
     // *** boilerplate for declarativeness *** //
