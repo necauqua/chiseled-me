@@ -88,6 +88,7 @@ public final class Achievements extends AchievementPage {
     }
 
     private static Achievement create(String name, int column, int row, ItemStack stack, Achievement parent) {
-        return new Achievement("chiseled_me:" + name, "chiseled_me:" + name, column, row, stack, parent).registerStat();
+        return new Achievement("chiseled_me:" + name, "chiseled_me:" + name, column, row, stack, parent)
+            .registerStat();
     }
 }

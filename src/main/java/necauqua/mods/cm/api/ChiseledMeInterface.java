@@ -34,6 +34,18 @@ public interface ChiseledMeInterface {
     float getSizeOf(Entity entity);
 
     /**
+     * Same as {@link #getSizeOf} except that it also interpolates between
+     * previous tick size and current tick size when size changes.
+     * <p>
+     * <code>getRenderSizeOf(entity, 1.0F)</code> is equivalent to <code>getSizeOf(entity)</code>
+     *
+     * @param entity      any minecraft entity which size might have been changed before
+     * @param partialTick interpolation parameter in range between 0 and 1
+     * @return interpolated relative size of given entity
+     */
+    float getRenderSizeOf(Entity entity, float partialTick);
+
+    /**
      * Sets the size of an entity to a given float.<br>
      * While its completely ok to set size at any number in given boundaries
      * it is recommended to stick with negative and positive powers of two

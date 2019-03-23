@@ -17,8 +17,8 @@
 package necauqua.mods.cm.asm.dsl;
 
 public enum ModifierType {
-    REPLACE,
     INSERT_BEFORE,
+    REPLACE,
     INSERT_AFTER;
 
     @Override

@@ -28,7 +28,7 @@ import static org.objectweb.asm.Type.FLOAT_TYPE;
 
 // intellij sees to many random duplicates in the hooks
 @SuppressWarnings("Duplicates")
-public class Transformers {
+public final class Transformers {
 
     private static final Hook getSize =
         mv -> mv.visitMethodInsn(INVOKESTATIC,
@@ -264,20 +264,36 @@ public class Transformers {
                 });
             })
             .patchMethod(srg("renderLivingLabel"), "(Lnet/minecraft/entity/Entity;Ljava/lang/String;DDDI)V")
-            .with(p ->
+            .with(p -> {
+                p.addLocal("off", FLOAT_TYPE);
                 p.replace(varInsn(FLOAD, 16), mv -> {
-                    mv.visitVarInsn(ALOAD, 1);  // param Entity entityIn
-                    mv.visitVarInsn(FLOAD, 16);
-                    mv.visitMethodInsn(INVOKESTATIC, "necauqua/mods/cm/Hooks", "getLabelHeight", "(Lnet/minecraft/entity/Entity;F)F", false);
-                }));
-        Patch renderDistPatch = p ->
-            p.insertBefore(varInsn(DSTORE, 3), 3, mv -> {
-                mv.visitVarInsn(ALOAD, 0); // Entity this
-                mv.visitHook(getSize);
-                mv.visitHook(cutBiggerThanOne);
-                mv.visitInsn(F2D);
-                mv.visitInsn(DDIV);
+                    mv.visitVarInsn(FLOAD, 16); // local float f2
+
+                    mv.visitVarInsn(ALOAD, 1); // param Entity entityIn
+                    mv.visitMethodInsn(INVOKEVIRTUAL, "net/minecraft/entity/Entity", srg("isSneaking"), "()Z", false);
+
+                    mv.ifJump(IFEQ,
+                        () -> mv.visitLdcInsn(0.25F),
+                        () -> mv.visitLdcInsn(0.5F));
+                    mv.visitInsn(DUP);
+                    mv.visitVarInsn(FSTORE, "off");
+
+                    mv.visitInsn(FSUB);
+
+                    mv.visitVarInsn(ALOAD, 1); // param Entity entityIn
+                    mv.visitHook(getSize);
+                    mv.visitInsn(FDIV);
+                    mv.visitVarInsn(FLOAD, "off");
+                    mv.visitInsn(FADD);
+                });
             });
+        Patch renderDistPatch = p -> p.insertBefore(varInsn(DSTORE, 3), 3, mv -> {
+            mv.visitVarInsn(ALOAD, 0); // Entity this
+            mv.visitHook(getSize);
+            mv.visitHook(cutBiggerThanOne);
+            mv.visitInsn(F2D);
+            mv.visitInsn(DDIV);
+        });
         inClass("net.minecraft.entity.Entity")
             .patchMethodOptionally(srg("isInRangeToRenderDist", "EntityOtherPlayerMP"), "(D)Z")
             .with(renderDistPatch);
@@ -286,8 +302,8 @@ public class Transformers {
             .with(renderDistPatch);
         inClass("net.minecraft.client.gui.inventory.GuiInventory")
             .patchMethod(srg("drawEntityOnScreen"), "(IIIFFLnet/minecraft/entity/EntityLivingBase;)V")
-            .with(p ->
-                p.insertAfter(varInsn(FSTORE, 10), mv -> { // local float f4
+            .with(p -> p
+                .insertAfter(varInsn(FSTORE, 10), mv -> { // local float f4
                     mv.visitInsn(FCONST_1);
                     mv.visitVarInsn(ALOAD, 5);  // param EntityLivingBase ent
                     mv.visitHook(getSize);
@@ -332,14 +348,13 @@ public class Transformers {
                 });
             })
             .patchMethod(srg("createRunningParticles"), "()V")
-            .with(p ->
-                p.insertAfter(methodBegin(), mv -> {
+            .with(p -> p
+                .insertAfter(methodBegin(), mv -> {
                     mv.visitVarInsn(ALOAD, 0); // Entity this
-                    mv.visitMethodInsn(INVOKESTATIC, "necauqua/mods/cm/Hooks", "cancelRunningParticlesHook", "(Lnet/minecraft/entity/Entity;)Z", false);
-                    Label skipReturn = new Label();
-                    mv.visitJumpInsn(IFEQ, skipReturn);
-                    mv.visitInsn(RETURN);
-                    mv.visitLabel(skipReturn);
+                    mv.visitHook(getSize);
+                    mv.visitLdcInsn(0.25F);
+                    mv.visitInsn(FCMPG);
+                    mv.ifJump(IFGE, () -> mv.visitInsn(RETURN));
                 }));
         Patch libmSwingAnimation = p ->
             p.insertAfter(ldcInsn(4.0F), mv -> { // fix for limb swing animation
@@ -359,8 +374,8 @@ public class Transformers {
     public void serverMotionFixes() {
         inClass("net.minecraft.client.entity.EntityPlayerSP")
             .patchMethod(srg("onUpdateWalkingPlayer"), "()V")
-            .with(p ->
-                p.insertAfter(ldcInsn(0.0009), mv -> {
+            .with(p -> p
+                .insertAfter(ldcInsn(0.0009), mv -> {
                     mv.visitVarInsn(ALOAD, 0);  // EntityPlayerSP this
                     mv.visitHook(getSize);
                     mv.visitInsn(F2D);
@@ -370,8 +385,8 @@ public class Transformers {
                 }));
         inClass("net.minecraft.entity.EntityTrackerEntry")
             .patchMethod(srg("updatePlayerList", "EntityTrackerEntry"), "(Ljava/util/List;)V")
-            .with(p ->
-                p.replace(ldcInsn(128L), mv -> {
+            .with(p -> p
+                .replace(ldcInsn(128L), mv -> {
                     mv.visitLdcInsn(128.0F);
                     mv.visitVarInsn(ALOAD, 0); // EntityTrackerEntry this
                     mv.visitFieldInsn(GETFIELD, srg("trackedEntity"), "Lnet/minecraft/entity/Entity;");
@@ -451,14 +466,14 @@ public class Transformers {
         Label skipBlockCollision = new Label(); // lol, meh
         inClass("net.minecraft.entity.Entity")
             .patchMethod(srg("onUpdate", "Entity"), "()V") // hooking in updates of ALL entities. I feel so bad about this
-            .with(p ->
-                p.insertAfter(methodBegin(), mv -> {
+            .with(p -> p
+                .insertAfter(methodBegin(), mv -> {
                     mv.visitVarInsn(ALOAD, 0); // Entity this
                     mv.visitMethodInsn(INVOKESTATIC, "necauqua/mods/cm/Hooks", "updateSize", "(Lnet/minecraft/entity/Entity;)V", false);
                 }))
             .patchMethod(srg("isEntityInsideOpaqueBlock", "Entity"), "()Z")
-            .with(p ->
-                p.insertAfter(ldcInsn(0.1F), mv -> {
+            .with(p -> p
+                .insertAfter(ldcInsn(0.1F), mv -> {
                     mv.visitVarInsn(ALOAD, 0); // EntityLivingBase this
                     mv.visitHook(getSize);
                     mv.visitInsn(FMUL);
@@ -481,8 +496,8 @@ public class Transformers {
     public void reachDistance() {
         inClass("net.minecraft.client.multiplayer.PlayerControllerMP") // on client
             .patchMethod(srg("getBlockReachDistance"), "()F")
-            .with(p ->
-                p.insertBefore(insn(FRETURN), mv -> {
+            .with(p -> p
+                .insertBefore(insn(FRETURN), mv -> {
                     mv.visitVarInsn(ALOAD, 0); // PlayerControllerMP this
                     mv.visitFieldInsn(GETFIELD, srg("mc", "PlayerControllerMP"), "Lnet/minecraft/client/Minecraft;");
                     mv.visitHook(thePlayer);
@@ -500,7 +515,8 @@ public class Transformers {
                     mv.visitHook(cutSmallerThanOne);
                     mv.visitInsn(F2D);
                     mv.visitInsn(DMUL);
-                }));
+                })
+            );
         inClass("net.minecraft.network.NetHandlerPlayServer") // entity server reach
             .patchMethod(srg("processUseEntity", "NetHandlerPlayServer"), "(Lnet/minecraft/network/play/client/CPacketUseEntity;)V")
             .with(p ->
@@ -512,23 +528,24 @@ public class Transformers {
                     mv.visitInsn(DUP2);
                     mv.visitInsn(DMUL);
                     mv.visitInsn(DMUL);
-                }));
+                })
+            );
         inClass("net.minecraft.world.World") // when reach distance <= 1 this one return screws up raytracing (for other mods) a bit so here's a fix
             .patchMethod(srg("rayTraceBlocks", "World"), "(Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Vec3d;ZZZ)Lnet/minecraft/util/math/RayTraceResult;")
-            .with(p ->
-                p.replace(insn(ARETURN), 3, mv -> mv.visitInsn(POP)));
+            .with(p -> p.replace(insn(ARETURN), 3, mv -> mv.visitInsn(POP)));
     }
 
     @Transformer
     public void playerEyeHeight() {
         inClass("net.minecraft.entity.player.EntityPlayer")
             .patchMethod(srg("getEyeHeight", "EntityPlayer"), "()F")
-            .with(p ->
-                p.insertBefore(insn(FRETURN), mv -> {
+            .with(p -> p
+                .insertBefore(insn(FRETURN), mv -> {
                     mv.visitVarInsn(ALOAD, 0); // EntityPlayer this
                     mv.visitHook(getSize);
                     mv.visitInsn(FMUL);
-                }));
+                })
+            );
     }
 
     @Transformer
@@ -550,16 +567,16 @@ public class Transformers {
             });
         inClass("net.minecraft.client.particle.ParticleItemPickup")
             .patchConstructor("(Lnet/minecraft/world/World;Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/Entity;F)V")
-            .with(p ->
-                p.insertAfter(varInsn(FLOAD, 4), mv -> { // first person pickup render
+            .with(p -> p
+                .insertAfter(varInsn(FLOAD, 4), mv -> { // first person pickup render
                     mv.visitVarInsn(ALOAD, 3); // param Entity target
                     mv.visitHook(getSize);
                     mv.visitInsn(FMUL);
                 }));
         inClass("net.minecraft.entity.player.EntityPlayer")
             .patchMethod(srg("dropItem", "EntityPlayer"), "(Lnet/minecraft/item/ItemStack;ZZ)Lnet/minecraft/entity/item/EntityItem;")
-            .with(p ->
-                p.insertAfter(ldcInsn(0.30000001192092896), mv -> { // player's item drop hardcoded height
+            .with(p -> p
+                .insertAfter(ldcInsn(0.30000001192092896), mv -> { // player's item drop hardcoded height
                     mv.visitVarInsn(ALOAD, 0); // EntityPlayer this
                     mv.visitHook(getSize);
                     mv.visitInsn(F2D);
@@ -573,21 +590,21 @@ public class Transformers {
         inClass("net.minecraft.tileentity.TileEntityBeacon")
             .addField(ACC_PRIVATE, "$cm_baseColor", "Lnet/minecraft/item/EnumDyeColor;")
             .patchConstructor("()V")
-            .with(p ->
-                p.insertAfter(varInsn(ALOAD, 0), 2, mv -> {
+            .with(p -> p
+                .insertAfter(varInsn(ALOAD, 0), 2, mv -> {
                     mv.visitInsn(DUP);
                     mv.visitFieldInsn(GETSTATIC, "net/minecraft/item/EnumDyeColor", WHITE, "Lnet/minecraft/item/EnumDyeColor;");
                     mv.visitFieldInsn(PUTFIELD, "$cm_baseColor", "Lnet/minecraft/item/EnumDyeColor;");
                 }))
             .patchMethod(srg("updateSegmentColors"), "()V")
-            .with(p ->
-                p.replace(fieldInsn(GETSTATIC, "net/minecraft/item/EnumDyeColor", WHITE, "Lnet/minecraft/item/EnumDyeColor;"), mv -> {
+            .with(p -> p
+                .replace(fieldInsn(GETSTATIC, "net/minecraft/item/EnumDyeColor", WHITE, "Lnet/minecraft/item/EnumDyeColor;"), mv -> {
                     mv.visitVarInsn(ALOAD, 0); // TileEntityBeacon this
                     mv.visitFieldInsn(GETFIELD, "$cm_baseColor", "Lnet/minecraft/item/EnumDyeColor;");
                 }))
             .patchMethod(srg("readFromNBT", "TileEntityBeacon"), "(Lnet/minecraft/nbt/NBTTagCompound;)V")
-            .with(p ->
-                p.insertAfter(methodBegin(), mv -> {
+            .with(p -> p
+                .insertAfter(methodBegin(), mv -> {
                     mv.visitVarInsn(ALOAD, 0); // TileEntityBeacon this
                     mv.visitVarInsn(ALOAD, 1); // param NBTTagCompound compound
                     mv.visitLdcInsn("chiseled_me:color");
@@ -596,8 +613,8 @@ public class Transformers {
                     mv.visitFieldInsn(PUTFIELD, "$cm_baseColor", "Lnet/minecraft/item/EnumDyeColor;");
                 }))
             .patchMethod(srg("writeToNBT", "TileEntityBeacon"), "(Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound;")
-            .with(p ->
-                p.insertAfter(methodBegin(), mv -> {
+            .with(p -> p
+                .insertAfter(methodBegin(), mv -> {
                     mv.visitVarInsn(ALOAD, 1); // param NBTTagCompound compound
                     mv.visitLdcInsn("chiseled_me:color");
                     mv.visitVarInsn(ALOAD, 0); // TileEntityBeacon this

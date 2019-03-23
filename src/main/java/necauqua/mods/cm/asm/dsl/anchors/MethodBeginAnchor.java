@@ -20,8 +20,7 @@ import necauqua.mods.cm.asm.dsl.ContextMethodVisitor;
 import necauqua.mods.cm.asm.dsl.Modifier;
 import necauqua.mods.cm.asm.dsl.ModifierType;
 
-import static necauqua.mods.cm.asm.dsl.ModifierType.INSERT_AFTER;
-import static necauqua.mods.cm.asm.dsl.ModifierType.INSERT_BEFORE;
+import static necauqua.mods.cm.asm.dsl.ModifierType.*;
 
 public final class MethodBeginAnchor extends Anchor {
 
@@ -32,6 +31,12 @@ public final class MethodBeginAnchor extends Anchor {
     @Override
     public ContextMethodVisitor apply(ContextMethodVisitor context, Modifier modifier) {
         ModifierType type = modifier.getType();
+        if (type == REPLACE) {
+            throw new IllegalArgumentException("Replacing method begin has no sense");
+        }
+        if (modifier.getIndex() != 1) {
+            throw new IllegalArgumentException("Match indices make no sense for method begin");
+        }
         return new ContextMethodVisitor(context) {
             @Override
             public void visitCode() {

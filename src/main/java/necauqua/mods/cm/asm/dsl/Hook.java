@@ -17,7 +17,24 @@
 package necauqua.mods.cm.asm.dsl;
 
 import java.util.function.Consumer;
+import java.util.function.IntPredicate;
 
 @FunctionalInterface
-public
-interface Hook extends Consumer<ContextMethodVisitor> {}
+public interface Hook extends Consumer<ContextMethodVisitor> {
+
+    default Hook at(int pos) {
+        return mv -> {
+            if (mv.getPass() == pos) {
+                accept(mv);
+            }
+        };
+    }
+
+    default Hook filter(IntPredicate pred) {
+        return mv -> {
+            if (pred.test(mv.getPass())) {
+                accept(mv);
+            }
+        };
+    }
+}

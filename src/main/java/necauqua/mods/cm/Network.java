@@ -32,6 +32,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.function.Consumer;
 
+import static necauqua.mods.cm.ChiseledMe.MODID;
+
 public final class Network {
 
     private Network() {}
@@ -39,7 +41,7 @@ public final class Network {
     private static FMLEventChannel chan;
 
     public static void init() {
-        chan = NetworkRegistry.INSTANCE.newEventDrivenChannel("chiseled_me");
+        chan = NetworkRegistry.INSTANCE.newEventDrivenChannel(MODID);
         chan.register(new Network());
     }
 
@@ -74,7 +76,7 @@ public final class Network {
         PacketBuffer payload = new PacketBuffer(Unpooled.buffer());
         payload.writeByte(id);
         data.accept(payload);
-        return new FMLProxyPacket(payload, "chiseled_me");
+        return new FMLProxyPacket(payload, MODID);
     }
 
     public static void sendSetSizeToClients(Entity entity, float size, boolean interp) {

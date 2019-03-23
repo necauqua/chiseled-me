@@ -115,11 +115,17 @@ public final class ASM {
         return mcpName;
     }
 
+    /**
+     * Calls to this method are transformed with a smart Gradle task
+     */
     @SuppressWarnings("unused")
     public static String srg(String mcpName, String className) {
         return mcpName;
     }
 
+    /**
+     * Calls to this method are transformed with a smart Gradle task
+     */
     @SuppressWarnings("unused")
     public static String srg(String mcpName, String className, String methodDesc) {
         return mcpName;

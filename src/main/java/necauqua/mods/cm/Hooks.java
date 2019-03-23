@@ -33,13 +33,13 @@ public final class Hooks {
 
     @CalledFromASM
     public static float getSize(Entity entity) {
-        return EntitySizeManager.getData(entity).getSize();
+        return EntitySizeManager.getSize(entity);
     }
 
     @CalledFromASM
     @SideOnly(Side.CLIENT)
     public static float getRenderSize(Entity entity, float partialTick) {
-        return EntitySizeManager.getData(entity).getRenderSize(partialTick);
+        return EntitySizeManager.getRenderSize(entity, partialTick);
     }
 
     @CalledFromASM
@@ -50,19 +50,11 @@ public final class Hooks {
 
     @CalledFromASM
     public static void updateSize(Entity entity) {
-        EntitySizeManager.getData(entity).tick();
+        EntitySizeManager.updateSize(entity);
     }
 
     @CalledFromASM
-    public static float getLabelHeight(Entity entity, float old) {
-        float off = entity.isSneaking() ?
-            0.25F :
-            0.5F;
-        return (old - off) / getSize(entity) + off;
-    }
-
-    @CalledFromASM
-    public static boolean cancelRunningParticlesHook(Entity entity) {
+    public static boolean cancelParticlesHook(Entity entity) {
         return getSize(entity) <= 0.25F; // 1/4
     }
 

@@ -29,19 +29,23 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.common.util.EnumHelper;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
-import scala.reflect.runtime.ReflectionUtils;
 
 import javax.annotation.Nonnull;
 
-@Mod(modid = "chiseled_me", version = "@VERSION@")
+import static necauqua.mods.cm.ChiseledMe.MODID;
+
+@Mod(modid = MODID, version = "@VERSION@")
 public final class ChiseledMe implements ChiseledMeInterface {
 
-    public static final CreativeTabs TAB = new CreativeTabs("chiseled_me") {
+    public static final String MODID = "chiseled_me";
+
+    public static final CreativeTabs TAB = new CreativeTabs(MODID) {
 
         private ItemStack icon;
 
@@ -73,7 +77,7 @@ public final class ChiseledMe implements ChiseledMeInterface {
     @EventHandler
     public void preInit(FMLPreInitializationEvent e) {
         ASM.check();
-        ChiseledMeAPI.interaction = this;
+        populateApi(this);
         Config.init(e.getModConfigurationDirectory());
         Network.init();
         EntitySizeManager.init();
@@ -99,7 +103,20 @@ public final class ChiseledMe implements ChiseledMeInterface {
     }
 
     @Override
+    public float getRenderSizeOf(Entity entity, float partialTick) {
+        return EntitySizeManager.getRenderSize(entity, partialTick);
+    }
+
+    @Override
     public void setSizeOf(Entity entity, float size, boolean interp) {
         EntitySizeManager.setSize(entity, size, interp);
+    }
+
+    private static void populateApi(ChiseledMeInterface api) {
+        try {
+            EnumHelper.setFailsafeFieldValue(ChiseledMeAPI.class.getField("interaction"), null, api);
+        } catch (Exception e) {
+            throw new AssertionError("This should not happen", e);
+        }
     }
 }
