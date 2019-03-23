@@ -28,6 +28,8 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import static necauqua.mods.cm.ChiseledMe.MODID;
+
 public class ItemMod extends Item {
 
     protected final String name;
@@ -36,10 +38,10 @@ public class ItemMod extends Item {
 
     public ItemMod(String name) {
         this.name = name;
-        setRegistryName("chiseled_me", name);
-        setUnlocalizedName("chiseled_me:" + name);
+        setRegistryName(MODID, name);
+        setUnlocalizedName(MODID + ":" + name);
         setCreativeTab(ChiseledMe.TAB);
-        defaultModel = new ResourceLocation("chiseled_me", name);
+        defaultModel = new ResourceLocation(MODID, name);
     }
 
     public void init() {
@@ -65,7 +67,7 @@ public class ItemMod extends Item {
         ResourceLocation[] variants = new ResourceLocation[vs.length + 1];
         variants[0] = defaultModel;
         for (int i = 0; i < vs.length; i++) {
-            variants[i + 1] = new ResourceLocation("chiseled_me", vs[i]);
+            variants[i + 1] = new ResourceLocation(MODID, vs[i]);
         }
         ModelBakery.registerItemVariants(this, variants);
     }

@@ -40,19 +40,24 @@ import net.minecraft.entity.Entity;
  * Put this code somewhere where you use it.
  **/
 
-public class ChiseledMeAPI {
+public final class ChiseledMeAPI {
 
     /**
-     * As in any other API, nobody set this to something!
      * If Chiseled Me is in you mod list, after pre-initialization stage
-     * this will be populated with proper implementation to use.
+     * this will be populated (with reflection hacks) with proper
+     * implementation to use.
      * <p>
-     * Also this field is a mod instance.
+     * Also it is a mod instance.
      **/
-    public static ChiseledMeInterface interaction = new ChiseledMeInterface() { // this is a stub (for those doing it the wrong way)
+    public static final ChiseledMeInterface interaction = new ChiseledMeInterface() { // this is a stub (for those doing it the wrong way)
 
         @Override
         public float getSizeOf(Entity entity) {
+            return 1.0F;
+        }
+
+        @Override
+        public float getRenderSizeOf(Entity entity, float partialTick) {
             return 1.0F;
         }
 

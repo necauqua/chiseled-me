@@ -30,7 +30,7 @@ import java.util.Map;
 @MCVersion("1.10.2")
 @SortingIndex(1001) // above 1000 so notch->srg deobfuscation would happen before us
 @TransformerExclusions("necauqua.mods.cm")
-public class Plugin implements IFMLLoadingPlugin, IClassTransformer {
+public final class Plugin implements IFMLLoadingPlugin, IClassTransformer {
 
     @Override
     public void injectData(Map<String, Object> data) {
@@ -48,11 +48,17 @@ public class Plugin implements IFMLLoadingPlugin, IClassTransformer {
     }
 
     @Override
-    public String getModContainerClass() { return null; }
+    public String getModContainerClass() {
+        return null;
+    }
 
     @Override
-    public String getSetupClass() { return null; }
+    public String getSetupClass() {
+        return null;
+    }
 
     @Override
-    public String getAccessTransformerClass() { return null; }
+    public String getAccessTransformerClass() {
+        return null;
+    }
 }

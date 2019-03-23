@@ -23,21 +23,21 @@ public final class Modifier {
     private final MethodPatcher parent;
     private final ModifierType type;
     private final Anchor anchor;
-    private final int nth;
+    private final int index;
     private final Hook hook;
 
     private boolean matched = false;
 
-    public Modifier(MethodPatcher parent, Anchor anchor, Hook hook, ModifierType type, int nth) {
+    public Modifier(MethodPatcher parent, Anchor anchor, Hook hook, ModifierType type, int index) {
         this.parent = parent;
         this.type = type;
         this.anchor = anchor;
-        this.nth = nth;
+        this.index = index;
         this.hook = hook;
     }
 
-    public Hook getHook() {
-        return hook;
+    public int getIndex() {
+        return index;
     }
 
     public ModifierType getType() {
@@ -53,7 +53,7 @@ public final class Modifier {
     }
 
     public boolean match(ContextMethodVisitor context, int pass) {
-        if (nth != 0 && nth != pass) {
+        if (index != 0 && index != pass) {
             return false;
         }
         matched = true;
@@ -65,10 +65,10 @@ public final class Modifier {
 
     @Override
     public String toString() {
-        return "<" + type + (nth == 0 ?
+        return "<" + type + (index == 0 ?
             " all" :
-            "") + " " + anchor + (nth > 1 ?
-            " at " + nth :
+            "") + " " + anchor + (index > 1 ?
+            " at " + index :
             "") + ">";
     }
 }

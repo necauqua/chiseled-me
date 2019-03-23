@@ -30,7 +30,6 @@ import net.minecraft.nbt.NBTTagFloat;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
@@ -50,7 +49,15 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import javax.annotation.Nullable;
 import java.util.Map;
 
+import static java.lang.Math.*;
+import static necauqua.mods.cm.ChiseledMe.MODID;
+import static necauqua.mods.cm.EntitySizeManager.EntitySizeData.CAPABILITY;
+
 public final class EntitySizeManager {
+
+    public static final String NBT_KEY_SIZE = MODID + ":size";
+
+    private static final double TWO_OVER_LOG_TWO = 2.0 / log(2);
 
     private EntitySizeManager() {}
 
@@ -59,16 +66,20 @@ public final class EntitySizeManager {
 
     private static final Map<Integer, Float> spawnSetSizeQueue = Maps.newHashMap();
 
-    public static EntitySizeData getData(Entity entity) {
-        return entity.getCapability(EntitySizeData.CAPABILITY, null);
+    public static float getSize(Entity entity) {
+        return entity.getCapability(CAPABILITY, null).interpSize;
     }
 
-    public static float getSize(Entity entity) {
-        return getData(entity).currentSize;
+    public static float getRenderSize(Entity entity, float partialTick) {
+        return entity.getCapability(CAPABILITY, null).getRenderSize(partialTick);
     }
 
     public static void setSize(Entity entity, float size, boolean interp) {
-        getData(entity).setSize(size, interp);
+        entity.getCapability(CAPABILITY, null).setSize(size, interp);
+    }
+
+    public static void updateSize(Entity entity) {
+        entity.getCapability(CAPABILITY, null).updateSize();
     }
 
     @SideOnly(Side.CLIENT)
@@ -84,9 +95,10 @@ public final class EntitySizeManager {
         spawnSetSizeQueue.put(entityId, size);
     }
 
+    @SuppressWarnings("deprecation") // why?
     @SubscribeEvent
     public void attachCapabilities(AttachCapabilitiesEvent.Entity e) {
-        e.addCapability(new ResourceLocation("chiseled_me", "size"), new EntitySizeData(e.getEntity()));
+        e.addCapability(new ResourceLocation(MODID, "size"), new EntitySizeData(e.getEntity()));
     }
 
     @SubscribeEvent
@@ -107,7 +119,7 @@ public final class EntitySizeManager {
 
     @SubscribeEvent
     public void onPlayerLogin(PlayerLoggedInEvent e) {
-        float size = getData(e.player).setSize;
+        float size = ((Entity) e.player).getCapability(CAPABILITY, null).nextSize;
         if (size != 1.0F) {
             if (e.player instanceof EntityPlayerMP) {
                 Network.sendEnqueueSetSizeToClient((EntityPlayerMP) e.player, e.player, size);
@@ -118,19 +130,20 @@ public final class EntitySizeManager {
     @SubscribeEvent
     public void onStartTracking(PlayerEvent.StartTracking e) {
         Entity entity = e.getTarget();
-        EntitySizeData data = getData(entity);
+        EntitySizeData data = entity.getCapability(CAPABILITY, null);
         if (entity instanceof EntityItem) {
             ItemStack stack = ((EntityItem) entity).getEntityItem();
             NBTTagCompound nbt = stack.getTagCompound();
-            if (nbt != null && nbt.hasKey("chiseled_me:size", 5)) {
-                data.setSize(nbt.getFloat("chiseled_me:size"), false);
-                nbt.removeTag("chiseled_me:size");
-                stack.setTagCompound(nbt.hasNoTags() ?
-                    null :
-                    nbt);
+            if (nbt != null && nbt.hasKey(NBT_KEY_SIZE, 5)) {
+                data.setSize(nbt.getFloat(NBT_KEY_SIZE), false);
+                nbt.removeTag(NBT_KEY_SIZE);
+                if (nbt.hasNoTags()) {
+                    //noinspection ConstantConditions - tag compound is nullable, lol
+                    stack.setTagCompound(null);
+                }
             }
         }
-        float size = data.setSize;
+        float size = data.nextSize;
         if (size != 1.0F) {
             EntityPlayer player = e.getEntityPlayer();
             if (player instanceof EntityPlayerMP) {
@@ -147,37 +160,33 @@ public final class EntitySizeManager {
         private final Entity entity;
         private final boolean isPlayer;
 
-        private float prevSize = 1.0F, currentSize = 1.0F, setSize = 1.0F;
-        private float prevRenderSize = 1.0F, renderSize = 1.0F;
+        private float prevSize = 1.0F, nextSize = 1.0F;
+        private float prevInterpSize = 1.0F, interpSize = 1.0F;
 
         private float originalWidth = 1.0F, originalHeight = 1.0F;
         private boolean sizeWasSet = false;
 
-        private int interpTime = 0, interp = 0;
-        private boolean interping = false;
+        private int interpInterval = 0, interpTicks = 0;
 
         private EntitySizeData(Entity entity) {
             this.entity = entity;
             isPlayer = entity instanceof EntityPlayer;
         }
 
-        public void tick() {
-            if (interping) {
-                if (interp++ < interpTime) {
-                    prevRenderSize = renderSize;
-                    float s = prevSize + (setSize - prevSize) / interpTime * interp;
-                    renderSize = s;
-                    currentSize = s;
-                    setBBoxSize(s);
-                } else {
-                    prevRenderSize = renderSize;
-                    currentSize = setSize;
-                    setBBoxSize(setSize);
-                    interp = 0;
-                    interping = false;
+        public void updateSize() {
+            if (interpInterval != 0) {
+                if (interpTicks++ < interpInterval) {
+                    prevInterpSize = interpSize;
+                    setBBoxSize(interpSize = prevSize + (nextSize - prevSize) / interpInterval * interpTicks);
+                    return;
                 }
-            } else if (setSize != 1.0F && !isPlayer) { // players are handled by separate hook within mc code
-                setBBoxSize(setSize);
+                interpTicks = 0;
+                prevInterpSize = interpSize;
+                interpSize = nextSize;
+                setBBoxSize(nextSize);
+                interpInterval = 0;
+            } else if (nextSize != 1.0F && !isPlayer) { // players are handled by separate hook within mc code
+                setBBoxSize(nextSize);
             }
         }
 
@@ -197,54 +206,45 @@ public final class EntitySizeManager {
 
         private void setAllSizes(float size) {
             prevSize = size;
-            currentSize = size;
-            setSize = size;
-            prevRenderSize = size;
-            renderSize = size;
+            interpSize = size;
+            nextSize = size;
+            prevInterpSize = size;
         }
 
         private void setSize(float size, boolean interp) {
-            if (size >= LOWER_LIMIT && size <= UPPER_LIMIT) {
-                Entity[] parts = entity.getParts();
-                if (parts != null) {
-                    for (Entity part : parts) {
-                        getData(part).setSize(size, interp);
-                    }
-                }
-                entity.dismountRidingEntity();
-                entity.removePassengers();
-                prevSize = setSize;
-                setSize = size;
-                if (interp) {
-                    currentSize = prevSize;
-                    float p = prevSize;
-                    float s = size;
-                    if (p < 1.0F) {
-                        p = -1.0F / p;
-                    }
-                    if (s < 1.0F) {
-                        s = -1.0F / s;
-                    }
-                    interpTime = MathHelper.log2(Math.abs((int) (s - p)) + 1) * 2;
-                    interping = true;
-                } else {
-                    setBBoxSize(size);
-                    setAllSizes(size);
+            if (size < LOWER_LIMIT || size > UPPER_LIMIT) {
+                return;
+            }
+            Entity[] parts = entity.getParts();
+            //noinspection ConstantConditions - parts ARE nullable, lol
+            if (parts != null) {
+                for (Entity part : parts) {
+                    part.getCapability(CAPABILITY, null).setSize(size, interp);
                 }
             }
+            entity.dismountRidingEntity();
+            entity.removePassengers();
+            prevSize = interpSize;
+            nextSize = size;
+            if (interp) {
+                interpInterval = (int) (abs(log(interpSize = prevSize) - log(size)) * TWO_OVER_LOG_TWO);
+                return;
+            }
+            setBBoxSize(size);
+            setAllSizes(size);
         }
 
         public float getSize() {
-            return currentSize;
+            return interpSize;
         }
 
         public float getRenderSize(float partialTick) {
-            return prevRenderSize + (renderSize - prevRenderSize) * partialTick;
+            return prevInterpSize + (interpSize - prevInterpSize) * partialTick;
         }
 
         @Override
         public NBTBase serializeNBT() {
-            return new NBTTagFloat(setSize);
+            return new NBTTagFloat(nextSize);
         }
 
         @Override
