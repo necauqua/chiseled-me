@@ -21,7 +21,6 @@ import necauqua.mods.cm.asm.dsl.ClassPatcher.FieldDesc;
 import org.apache.commons.lang3.tuple.Pair;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.LocalVariablesSorter;
 
@@ -30,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.stream.Collectors.toMap;
+import static org.objectweb.asm.Opcodes.ASM5;
 
 public final class ClassPatchVisitor extends ClassVisitor {
 
@@ -38,7 +38,7 @@ public final class ClassPatchVisitor extends ClassVisitor {
     private final List<Modifier> missed = new ArrayList<>();
 
     public ClassPatchVisitor(ClassVisitor parent, ClassPatcher patcher) {
-        super(Opcodes.ASM5, parent);
+        super(ASM5, parent);
         this.patcher = patcher;
     }
 
@@ -69,11 +69,14 @@ public final class ClassPatchVisitor extends ClassVisitor {
         List<Modifier> modifiers = new ArrayList<>();
         List<Pair<String, Type>> locals = new ArrayList<>();
 
+        boolean isDebug = false;
+
         for (MethodPatcher methodPatcher : patcher.getMethodPatchers()) {
             for (Pair<String, String> md : methodPatcher.getMethodsToPatch()) {
                 if (!md.getLeft().equals(name) || !md.getRight().equals(desc)) {
                     continue;
                 }
+                isDebug |= methodPatcher.isDebug();
                 PatchContext context = new PatchContext(methodPatcher);
                 methodPatcher.getPatch().accept(context);
                 modifiers.addAll(context.getModifiers());
@@ -88,12 +91,20 @@ public final class ClassPatchVisitor extends ClassVisitor {
         }
         this.modifiers.addAll(modifiers);
 
+        String className = patcher.getClassName();
+        if (isDebug) {
+            visitor = MethodDumper.create(visitor, "patched", className, name + desc);
+        }
+
         LocalVariablesSorter lvs = new LocalVariablesSorter(access, desc, visitor);
         Map<String, Integer> localIndices = locals.stream().collect(toMap(Pair::getLeft, p -> lvs.newLocal(p.getRight())));
-        ContextMethodVisitor patched = new ContextMethodVisitor(patcher.getClassName(), localIndices, lvs, visitor);
+        ContextMethodVisitor patched = new ContextMethodVisitor(className, localIndices, lvs, visitor);
 
         for (Modifier mod : modifiers) {
             patched = mod.apply(patched);
+        }
+        if (isDebug) {
+            return MethodDumper.create(patched, "original", className, name + desc);
         }
         return patched;
     }
