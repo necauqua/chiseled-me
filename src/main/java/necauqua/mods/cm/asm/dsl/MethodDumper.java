@@ -39,8 +39,9 @@ public final class MethodDumper extends MethodVisitor {
         super.visitEnd();
         try {
             Files.createDirectories(DUMP_DIR);
-            Path path = DUMP_DIR.resolve(className.replace('.', '_') + "#" + name + "-" + classifier + ".dump");
-            PrintWriter writer = new PrintWriter(new FileOutputStream(path.toString()));
+            String filename = className.replace('.', '_') +
+                "#" + name.replace('/', '_') + "-" + classifier + ".dump";
+            PrintWriter writer = new PrintWriter(new FileOutputStream(DUMP_DIR.resolve(filename).toFile()));
             writer.print('\n' + classifier.toUpperCase() + " DUMP OF METHOD " + name + '\n');
             tmv.p.print(writer);
             writer.close();
