@@ -4,13 +4,18 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.util.Textifier;
 import org.objectweb.asm.util.TraceMethodVisitor;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static org.objectweb.asm.Opcodes.ASM5;
 
 public final class MethodDumper extends MethodVisitor {
+
+    private static final Path DUMP_DIR = Paths.get("./dumps");
 
     private final String classifier;
     private final String className;
@@ -33,12 +38,13 @@ public final class MethodDumper extends MethodVisitor {
     public void visitEnd() {
         super.visitEnd();
         try {
-            String filename = "./dumps/" + className.replace('.', '_') + "#" + name + "-" + classifier + ".dump";
-            PrintWriter writer = new PrintWriter(new FileOutputStream(filename));
+            Files.createDirectories(DUMP_DIR);
+            Path path = DUMP_DIR.resolve(className.replace('.', '_') + "#" + name + "-" + classifier + ".dump");
+            PrintWriter writer = new PrintWriter(new FileOutputStream(path.toString()));
             writer.print('\n' + classifier.toUpperCase() + " DUMP OF METHOD " + name + '\n');
             tmv.p.print(writer);
             writer.close();
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             throw new AssertionError(e);
         }
     }

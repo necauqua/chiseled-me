@@ -517,6 +517,27 @@ public final class Transformers {
 
     @Transformer
     public void reachDistance() {
+        inClass("net.minecraft.client.renderer.EntityRenderer")
+            .patchMethod(srg("getMouseOver"), "(F)V")
+            .with(p -> {
+                p.addLocal("size", DOUBLE_TYPE);
+                p.insertBefore(varInsn(DSTORE, 3), mv -> {
+                    mv.visitVarInsn(ALOAD, 2); // local Entity entity
+                    mv.visitVarInsn(FLOAD, 1); // local float partialTicks
+                    mv.visitHook(getRenderSize);
+                    mv.visitInsn(F2D);
+                    mv.visitVarInsn(DSTORE, "size");
+                    mv.visitVarInsn(DLOAD, "size");
+                    mv.visitInsn(DMUL);
+                });
+                Hook mulBySize = mv -> {
+                    mv.visitVarInsn(DLOAD, "size");
+                    mv.visitInsn(DMUL);
+                };
+                p.insertAfter(ldcInsn(6.0), mulBySize);
+                p.insertAfterAll(ldcInsn(3.0), mulBySize);
+            });
+
         inClass("net.minecraft.client.multiplayer.PlayerControllerMP") // on client
             .patchMethod(srg("getBlockReachDistance"), "()F")
             .with(p -> p

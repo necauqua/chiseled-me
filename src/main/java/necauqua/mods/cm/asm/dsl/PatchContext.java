@@ -29,6 +29,8 @@ public final class PatchContext implements PatchContextDsl {
     private final List<Pair<String, Type>> locals = new ArrayList<>();
     private final MethodPatcher parent;
 
+    private boolean dump = false;
+
     PatchContext(MethodPatcher parent) {
         this.parent = parent;
     }
@@ -41,6 +43,10 @@ public final class PatchContext implements PatchContextDsl {
         return locals;
     }
 
+    public boolean isDump() {
+        return dump;
+    }
+
     @Override
     public void addLocal(String name, Type type) {
         locals.add(Pair.of(name, type));
@@ -49,5 +55,10 @@ public final class PatchContext implements PatchContextDsl {
     @Override
     public void modify(ModifierType type, Anchor anchor, int nth, Hook hook) {
         modifiers.add(new Modifier(parent, anchor, hook, type, nth));
+    }
+
+    @Override
+    public void debugDump() {
+        dump = true;
     }
 }
