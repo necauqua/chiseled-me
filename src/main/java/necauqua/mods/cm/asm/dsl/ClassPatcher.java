@@ -54,19 +54,19 @@ public final class ClassPatcher implements ClassPatcherDsl {
     }
 
     @Override
-    public MethodPatcher patchConstructor(String desc) {
+    public MethodPatcherDsl patchConstructor(String desc) {
         return patchMethod("<init>", desc);
     }
 
     @Override
-    public MethodPatcher patchMethod(String name, String desc) {
+    public MethodPatcherDsl patchMethod(String name, String desc) {
         MethodPatcher patch = new MethodPatcher(this, ASM.currentTransformer, name, desc, false);
         methodPatchers.add(patch);
         return patch;
     }
 
     @Override
-    public MethodPatcher patchMethodOptionally(String name, String desc) {
+    public MethodPatcherDsl patchMethodOptionally(String name, String desc) {
         MethodPatcher patch = new MethodPatcher(this, ASM.currentTransformer, name, desc, true);
         methodPatchers.add(patch);
         return patch;

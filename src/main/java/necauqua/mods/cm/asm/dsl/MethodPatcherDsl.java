@@ -20,5 +20,7 @@ public interface MethodPatcherDsl {
 
     MethodPatcherDsl and(String name, String desc);
 
+    MethodPatcherDsl debug();
+
     ClassPatcherDsl with(Patch patch);
 }

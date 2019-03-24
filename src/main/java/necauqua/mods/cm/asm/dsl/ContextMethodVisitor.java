@@ -61,7 +61,7 @@ public class ContextMethodVisitor extends MethodVisitor {
     }
 
     public void visitFieldInsn(int opcode, String name, String desc) {
-        super.visitFieldInsn(opcode, className, name, desc);
+        visitFieldInsn(opcode, className, name, desc);
     }
 
     private int getLocal(String assocName) {

@@ -262,6 +262,29 @@ public final class Transformers {
                     mv.visitInsn(DSUB);
                     mv.visitLabel(skipHook);
                 });
+                p.insertAfter(varInsn(FLOAD, 8), mv -> { // local float shadowAlpha
+                    //  replace shadowAlpha in renderShadowSingle call with
+                    //  shadowAlpha - (y - (blockpos.getY() + d3)) / 2.0 * (1.0F / size - 1.0F)
+                    mv.visitVarInsn(DLOAD, 4);
+                    mv.visitVarInsn(ALOAD, 34);
+                    mv.visitMethodInsn(INVOKEVIRTUAL, "net/minecraft/util/math/BlockPos", srg("getY"), "()I", false);
+                    mv.visitInsn(I2D);
+                    mv.visitVarInsn(DLOAD, 27);
+                    mv.visitInsn(DADD);
+                    mv.visitInsn(DSUB);
+                    mv.visitLdcInsn(2.0);
+                    mv.visitInsn(DDIV);
+                    mv.visitInsn(D2F);
+
+                    mv.visitInsn(FCONST_1);
+                    mv.visitVarInsn(FLOAD, "size");
+                    mv.visitInsn(FDIV);
+                    mv.visitInsn(FCONST_1);
+                    mv.visitInsn(FSUB);
+                    mv.visitInsn(FMUL);
+
+                    mv.visitInsn(FSUB);
+                });
             })
             .patchMethod(srg("renderLivingLabel"), "(Lnet/minecraft/entity/Entity;Ljava/lang/String;DDDI)V")
             .with(p -> {
@@ -354,7 +377,7 @@ public final class Transformers {
                     mv.visitHook(getSize);
                     mv.visitLdcInsn(0.25F);
                     mv.visitInsn(FCMPG);
-                    mv.ifJump(IFGE, () -> mv.visitInsn(RETURN));
+                    mv.ifJump(IFGT, () -> mv.visitInsn(RETURN));
                 }));
         Patch libmSwingAnimation = p ->
             p.insertAfter(ldcInsn(4.0F), mv -> { // fix for limb swing animation

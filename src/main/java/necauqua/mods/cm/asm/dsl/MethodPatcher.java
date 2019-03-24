@@ -31,6 +31,8 @@ public final class MethodPatcher implements MethodPatcherDsl {
     private final List<Pair<String, String>> methodsToPatch = new ArrayList<>();
     private Patch patch = p -> {}; // empty stub
 
+    private boolean debug = false;
+
     public MethodPatcher(ClassPatcher parent, String transformerName, String name, String desc, boolean optional) {
         this.parent = parent;
         this.transformerName = transformerName;
@@ -54,9 +56,19 @@ public final class MethodPatcher implements MethodPatcherDsl {
         return optional;
     }
 
+    public boolean isDebug() {
+        return debug;
+    }
+
     @Override
     public MethodPatcherDsl and(String name, String desc) {
         methodsToPatch.add(Pair.of(name, desc));
+        return this;
+    }
+
+    @Override
+    public MethodPatcherDsl debug() {
+        debug = true;
         return this;
     }
 
