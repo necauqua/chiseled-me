@@ -69,16 +69,17 @@ public final class ClassPatchVisitor extends ClassVisitor {
         List<Modifier> modifiers = new ArrayList<>();
         List<Pair<String, Type>> locals = new ArrayList<>();
 
-        boolean isDebug = false;
+        boolean isDump = false;
 
         for (MethodPatcher methodPatcher : patcher.getMethodPatchers()) {
             for (Pair<String, String> md : methodPatcher.getMethodsToPatch()) {
                 if (!md.getLeft().equals(name) || !md.getRight().equals(desc)) {
                     continue;
                 }
-                isDebug |= methodPatcher.isDebug();
                 PatchContext context = new PatchContext(methodPatcher);
                 methodPatcher.getPatch().accept(context);
+
+                isDump |= context.isDump();
                 modifiers.addAll(context.getModifiers());
                 locals.addAll(context.getLocals());
             }
@@ -92,7 +93,7 @@ public final class ClassPatchVisitor extends ClassVisitor {
         this.modifiers.addAll(modifiers);
 
         String className = patcher.getClassName();
-        if (isDebug) {
+        if (isDump) {
             visitor = MethodDumper.create(visitor, "patched", className, name + desc);
         }
 
@@ -103,7 +104,7 @@ public final class ClassPatchVisitor extends ClassVisitor {
         for (Modifier mod : modifiers) {
             patched = mod.apply(patched);
         }
-        if (isDebug) {
+        if (isDump) {
             return MethodDumper.create(patched, "original", className, name + desc);
         }
         return patched;

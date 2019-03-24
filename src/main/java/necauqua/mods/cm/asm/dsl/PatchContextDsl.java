@@ -27,6 +27,8 @@ public interface PatchContextDsl {
 
     void modify(ModifierType type, Anchor anchor, int nth, Hook hook);
 
+    void debugDump();
+
     default void modify(ModifierType type, Anchor anchor, Hook hook) {
         modify(type, anchor, 1, hook);
     }
