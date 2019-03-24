@@ -19,4 +19,12 @@ package necauqua.mods.cm.asm.dsl;
 import java.util.function.Consumer;
 
 @FunctionalInterface
-public interface Patch extends Consumer<PatchContextDsl> {}
+public interface Patch extends Consumer<PatchContextDsl> {
+
+    default Patch and(Patch other) {
+        return mv -> {
+            accept(mv);
+            other.accept(mv);
+        };
+    }
+}

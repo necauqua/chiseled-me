@@ -21,8 +21,8 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+
+import static necauqua.mods.cm.EntitySizeManager.getSize;
 
 /** This class holds methods that are called from ASM'ed minecraft code **/
 
@@ -32,34 +32,8 @@ public final class Hooks {
     private Hooks() {}
 
     @CalledFromASM
-    public static float getSize(Entity entity) {
-        return EntitySizeManager.getSize(entity);
-    }
-
-    @CalledFromASM
-    @SideOnly(Side.CLIENT)
-    public static float getRenderSize(Entity entity, float partialTick) {
-        return EntitySizeManager.getRenderSize(entity, partialTick);
-    }
-
-    @CalledFromASM
-    @SideOnly(Side.CLIENT)
-    public static float getScreenInterpEyeHeight(Entity entity, float partialTick) {
-        return entity.getEyeHeight() / getSize(entity) * getRenderSize(entity, partialTick); // assuming getEyeHeight is patched already
-    }
-
-    @CalledFromASM
-    public static void updateSize(Entity entity) {
-        EntitySizeManager.updateSize(entity);
-    }
-
-    @CalledFromASM
-    public static boolean cancelParticlesHook(Entity entity) {
-        return getSize(entity) <= 0.25F; // 1/4
-    }
-
-    @CalledFromASM
     public static boolean cancelBlockCollision(Entity entity, IBlockState state, BlockPos pos) { // this makes nether portal more fun
-        return Config.changePortalAABB && state.getBlock() == Blocks.PORTAL && getSize(entity) < 1.0F && !entity.getEntityBoundingBox().intersectsWith(state.getSelectedBoundingBox(entity.world, pos));
+        return Config.changePortalAABB && state.getBlock() == Blocks.PORTAL && getSize(entity) < 1.0F
+            && !entity.getEntityBoundingBox().intersectsWith(state.getSelectedBoundingBox(entity.world, pos));
     }
 }

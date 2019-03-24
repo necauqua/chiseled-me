@@ -22,6 +22,13 @@ import java.util.function.IntPredicate;
 @FunctionalInterface
 public interface Hook extends Consumer<ContextMethodVisitor> {
 
+    default Hook and(Hook other) {
+        return mv -> {
+            accept(mv);
+            other.accept(mv);
+        };
+    }
+
     default Hook at(int pos) {
         return mv -> {
             if (mv.getPass() == pos) {

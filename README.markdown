@@ -6,9 +6,10 @@ These items are pretty self-explanatory, but to get the recalibrator that makes 
 you need to deplete any other recalibrator(so the cheeper one you make - the more you click).
 
 Known issues:
- * Liquids are funky
- * Ladders are funky
- * No riding(but will be in the future)
+ * Liquids are buggy
+ * Ladders are buggy
+ * Throwables are buggy
+ * No riding (but will be in the future)
 
 About coremods:
 * They can corrupt worlds just like any other mod can (except that maybe they have just a bit more tools for that).
@@ -21,7 +22,7 @@ If you have any issues, feel free to report them at issues page, ALWAYS includin
 
 ## Installation
 
-If you want to modify/compile, you can just run the following commands(assuming you have git installed):
+If you want to modify/compile, you can just run the following commands (assuming you are on Linux and have git installed):
 
 ```
 git clone https://github.com/necauqua/chiseled-me.git

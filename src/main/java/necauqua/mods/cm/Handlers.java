@@ -17,21 +17,20 @@
 package necauqua.mods.cm;
 
 import net.minecraft.block.BlockBed;
-import net.minecraft.block.BlockDispenser;
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayer.SleepResult;
-import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.EnumHelper;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
@@ -42,12 +41,13 @@ import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.registry.IThrowableEntity;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 import java.lang.reflect.Field;
-import java.util.List;
 
 import static necauqua.mods.cm.EntitySizeManager.getSize;
+import static necauqua.mods.cm.EntitySizeManager.setSize;
 
 /** This class holds misc event handlers. **/
 public final class Handlers {
@@ -68,6 +68,27 @@ public final class Handlers {
             EnumHelper.setFailsafeFieldValue(f, null, aabb); // this can set final non-primitive fields
         } catch (Exception e) {
             Log.error("Failed to modify bed AABB!", e);
+        }
+    }
+
+    @SubscribeEvent
+    public void onEntityJoinWorldEvent(EntityJoinWorldEvent e) {
+        Entity entity = e.getEntity();
+        Entity thrower;
+        if (entity instanceof EntityThrowable) {
+            thrower = ((EntityThrowable) entity).getThrower();
+        } else if (entity instanceof EntityArrow) {
+            thrower = ((EntityArrow) entity).shootingEntity;
+        } else if (entity instanceof IThrowableEntity) {
+            thrower = ((IThrowableEntity) entity).getThrower();
+        } else {
+            return;
+        }
+        if (thrower != null) {
+            float size = getSize(thrower);
+            if (size != 1.0F) {
+                setSize(entity, size, false);
+            }
         }
     }
 

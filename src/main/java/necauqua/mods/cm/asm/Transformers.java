@@ -21,6 +21,8 @@ import necauqua.mods.cm.asm.dsl.Patch;
 import necauqua.mods.cm.asm.dsl.Transformer;
 import org.objectweb.asm.Label;
 
+import java.util.function.IntPredicate;
+
 import static necauqua.mods.cm.asm.dsl.ASM.*;
 import static org.objectweb.asm.Opcodes.*;
 import static org.objectweb.asm.Type.DOUBLE_TYPE;
@@ -32,13 +34,13 @@ public final class Transformers {
 
     private static final Hook getSize =
         mv -> mv.visitMethodInsn(INVOKESTATIC,
-            "necauqua/mods/cm/Hooks",
+            "necauqua/mods/cm/EntitySizeManager",
             "getSize",
             "(Lnet/minecraft/entity/Entity;)F",
             false);
 
     private static final Hook getRenderSize =
-        mv -> mv.visitMethodInsn(INVOKESTATIC, "necauqua/mods/cm/Hooks",
+        mv -> mv.visitMethodInsn(INVOKESTATIC, "necauqua/mods/cm/EntitySizeManager",
             "getRenderSize",
             "(Lnet/minecraft/entity/Entity;F)F",
             false);
@@ -79,14 +81,19 @@ public final class Transformers {
             .with(p -> {
                 p.addLocal("size", FLOAT_TYPE);
                 p.insertBefore(varInsn(FSTORE, 3), mv -> { // local float f
-                    mv.visitInsn(POP); // meh, just ignore original getEyeHeight call
+                    // f = entity.getEyeHeight() / getSize(entity) * getRenderSize(entity)
+                    // ^ because getEyeHeight is patched and returns height multiplied
+                    // by non-render size
+
+                    mv.visitVarInsn(ALOAD, 2); // local Entity entity
+                    mv.visitHook(getSize);
+                    mv.visitInsn(FDIV);
                     mv.visitVarInsn(ALOAD, 2); // local Entity entity
                     mv.visitVarInsn(FLOAD, 1); // local float partialTicks
                     mv.visitHook(getRenderSize);
+                    mv.visitInsn(DUP);
                     mv.visitVarInsn(FSTORE, "size");
-                    mv.visitVarInsn(ALOAD, 2); // local Entity entity
-                    mv.visitVarInsn(FLOAD, 1); // local float partialTicks
-                    mv.visitMethodInsn(INVOKESTATIC, "necauqua/mods/cm/Hooks", "getScreenInterpEyeHeight", "(Lnet/minecraft/entity/Entity;F)F", false);
+                    mv.visitInsn(FMUL);
                 });
                 p.insertBefore(varInsn(DSTORE, 12), mv -> { // local double d3
                     mv.visitVarInsn(FLOAD, "size");
@@ -121,16 +128,6 @@ public final class Transformers {
                     mv.visitInsn(D2F);
                     mv.visitInsn(FMUL);
                 });
-
-                // TODO below hook makes fov more natural, but also messes up chunk render clipping somehow
-//                p.insertBefore(varInsn(ALOAD, 0), 4, mv -> { // scaling the projection matrix to make fov feel natural
-//                    mv.visitInsn(FCONST_1);
-//                    mv.visitVarInsn(FLOAD, "size");
-//                    mv.visitInsn(FDIV);
-//                    mv.visitInsn(DUP);
-//                    mv.visitInsn(FCONST_1);
-//                    mv.visitHook(scale);
-//                })
                 p.insertAfterAll(ldcInsn(0.05F), mv -> { // camera offset fix
                     mv.visitVarInsn(FLOAD, "size");
                     mv.visitInsn(FMUL);
@@ -492,7 +489,7 @@ public final class Transformers {
             .with(p -> p
                 .insertAfter(methodBegin(), mv -> {
                     mv.visitVarInsn(ALOAD, 0); // Entity this
-                    mv.visitMethodInsn(INVOKESTATIC, "necauqua/mods/cm/Hooks", "updateSize", "(Lnet/minecraft/entity/Entity;)V", false);
+                    mv.visitMethodInsn(INVOKESTATIC, "necauqua/mods/cm/EntitySizeManager", "updateSize", "(Lnet/minecraft/entity/Entity;)V", false);
                 }))
             .patchMethod(srg("isEntityInsideOpaqueBlock", "Entity"), "()Z")
             .with(p -> p
@@ -574,22 +571,51 @@ public final class Transformers {
                     mv.visitInsn(DMUL);
                 })
             );
-        inClass("net.minecraft.world.World") // when reach distance <= 1 this one return screws up raytracing (for other mods) a bit so here's a fix
+        inClass("net.minecraft.world.World") // when reach distance <= 1 this one null return screws up raytracing a bit so here's a fix
             .patchMethod(srg("rayTraceBlocks", "World"), "(Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Vec3d;ZZZ)Lnet/minecraft/util/math/RayTraceResult;")
-            .with(p -> p.replace(insn(ARETURN), 3, mv -> mv.visitInsn(POP)));
+            .with(p -> p.replace(insn(ACONST_NULL), mv -> {
+                mv.visitTypeInsn(NEW, "net/minecraft/util/math/RayTraceResult");
+                mv.visitInsn(DUP);
+                mv.visitFieldInsn(GETSTATIC, "net/minecraft/util/math/RayTraceResult$Type", srg("MISS"),
+                    "Lnet/minecraft/util/math/RayTraceResult$Type;");
+                mv.visitVarInsn(ALOAD, 1); // param vec31
+                mv.visitInsn(ACONST_NULL);
+                mv.visitTypeInsn(CHECKCAST, "net/minecraft/util/EnumFacing");
+                mv.visitTypeInsn(NEW, "net/minecraft/util/math/BlockPos");
+                mv.visitInsn(DUP);
+                mv.visitVarInsn(ALOAD, 1); // param vec31
+                mv.visitMethodInsn(INVOKESPECIAL, "net/minecraft/util/math/BlockPos", "<init>",
+                    "(Lnet/minecraft/util/math/Vec3d;)V", false);
+                mv.visitMethodInsn(INVOKESPECIAL, "net/minecraft/util/math/RayTraceResult", "<init>",
+                    "(Lnet/minecraft/util/math/RayTraceResult$Type;Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/EnumFacing;Lnet/minecraft/util/math/BlockPos;)V", false);
+            }));
     }
 
     @Transformer
-    public void playerEyeHeight() {
+    public void eyeHeight() {
+        Patch mulBySize = p -> p
+            .insertBefore(insn(FRETURN), mv -> {
+                mv.visitVarInsn(ALOAD, 0); // Entity* this
+                mv.visitHook(getSize);
+                mv.visitInsn(FMUL);
+            });
         inClass("net.minecraft.entity.player.EntityPlayer")
             .patchMethod(srg("getEyeHeight", "EntityPlayer"), "()F")
-            .with(p -> p
-                .insertBefore(insn(FRETURN), mv -> {
-                    mv.visitVarInsn(ALOAD, 0); // EntityPlayer this
-                    mv.visitHook(getSize);
-                    mv.visitInsn(FMUL);
-                })
-            );
+            .with(mulBySize);
+
+        // those patches are for shooting mobs with hardcoded height, there is no way to make it universal currently
+        inClass("net.minecraft.entity.monster.EntitySkeleton")
+            .patchMethod(srg("getEyeHeight", "EntitySkeleton"), "()F")
+            .with(mulBySize);
+        inClass("net.minecraft.entity.monster.EntitySnowman")
+            .patchMethod(srg("getEyeHeight", "EntitySnowman"), "()F")
+            .with(mulBySize);
+        inClass("net.minecraft.entity.monster.EntityGhast")
+            .patchMethod(srg("getEyeHeight", "EntityGhast"), "()F")
+            .with(mulBySize);
+        inClass("net.minecraft.entity.monster.EntityWitch")
+            .patchMethod(srg("getEyeHeight", "EntityWitch"), "()F")
+            .with(mulBySize);
     }
 
     @Transformer
@@ -626,6 +652,24 @@ public final class Transformers {
                     mv.visitInsn(F2D);
                     mv.visitInsn(DMUL);
                 }));
+        inClass("net.minecraft.entity.Entity")
+            .patchMethod("entityDropItem", "(Lnet/minecraft/item/ItemStack;F)Lnet/minecraft/entity/item/EntityItem;")
+            .with(p -> {
+                p.addLocal("size", FLOAT_TYPE);
+                p.insertAfter(varInsn(FLOAD, 2), mv -> {
+                    mv.visitVarInsn(ALOAD, 0); // Entity this
+                    mv.visitHook(getSize);
+                    mv.visitInsn(DUP);
+                    mv.visitVarInsn(FSTORE, "size");
+                    mv.visitInsn(FMUL);
+                });
+                p.insertBefore(varInsn(ASTORE, 3), mv -> { // EntityItem entityitem
+                    mv.visitInsn(DUP);
+                    mv.visitVarInsn(FLOAD, "size");
+                    mv.visitInsn(ICONST_1);
+                    mv.visitMethodInsn(INVOKESTATIC, "necauqua/mods/cm/EntitySizeManager", "setSize", "(Lnet/minecraft/entity/Entity;FZ)V", false);
+                });
+            });
     }
 
     @Transformer
@@ -667,5 +711,95 @@ public final class Transformers {
                     mv.visitInsn(I2B);
                     mv.visitMethodInsn(INVOKEVIRTUAL, "net/minecraft/nbt/NBTTagCompound", srg("setByte", "NBTTagCompound"), "(Ljava/lang/String;B)V", false);
                 }));
+    }
+
+    private Patch motionPatchFor(String className, IntPredicate filterXZ, IntPredicate filterY) {
+        return p -> {
+            p.insertAfter(methodBegin(), mv -> {
+                mv.visitVarInsn(ALOAD, 0);
+                mv.visitInsn(DUP);
+                mv.visitHook(getSize);
+                mv.visitInsn(F2D);
+                mv.visitFieldInsn(PUTFIELD, "$cm_size", "D");
+            });
+            Hook mulBySize = mv -> {
+                mv.visitVarInsn(ALOAD, 0);
+                mv.visitFieldInsn(GETFIELD, "$cm_size", "D");
+                mv.visitInsn(DMUL);
+            };
+            Hook filtered = mulBySize.filter(filterXZ);
+            Hook filteredY = mulBySize.filter(filterY);
+            p.insertAfterAll(fieldInsn(GETFIELD, className, srg("motionX"), "D"), filtered);
+            p.insertAfterAll(fieldInsn(GETFIELD, className, srg("motionY"), "D"), filteredY);
+            p.insertAfterAll(fieldInsn(GETFIELD, className, srg("motionZ"), "D"), filtered);
+            p.insertAfterAll(ldcInsn(0.25D), mulBySize);
+        };
+    }
+
+    @Transformer
+    public void throwableEntityMotion() {
+        Hook mulBySize = mv -> {
+            mv.visitVarInsn(ALOAD, 0);
+            mv.visitFieldInsn(GETFIELD, "$cm_size", "D");
+            mv.visitInsn(DMUL);
+        };
+        Patch heightPatch = p ->
+            p.insertAfter(ldcInsn(0.10000000149011612D), mv -> {
+                mv.visitVarInsn(ALOAD, 2);
+                mv.visitHook(getSize);
+                mv.visitInsn(F2D);
+                mv.visitInsn(DMUL);
+            });
+        Patch collisionPatch = p -> {
+            p.replace(insn(DCONST_1), mv -> {
+                mv.visitVarInsn(ALOAD, 0);
+                mv.visitFieldInsn(GETFIELD, "$cm_size", "D");
+            });
+            p.insertAfterAll(ldcInsn(0.30000001192092896D), mulBySize);
+        };
+        inClass("net.minecraft.entity.projectile.EntityThrowable")
+            .addField(ACC_PRIVATE, "$cm_size", "D")
+            .patchConstructor("(Lnet/minecraft/world/World;Lnet/minecraft/entity/EntityLivingBase;)V")
+            .with(heightPatch)
+            .patchMethod(srg("onUpdate", "EntityThrowable"), "()V")
+            .with(motionPatchFor("net/minecraft/entity/projectile/EntityThrowable",
+                pass -> (pass >= 2 && pass <= 5) || pass == 9 || pass == 10,
+                pass -> (pass >= 2 && pass <= 5) || pass == 7 || pass == 8)
+                .and(collisionPatch));
+
+        inClass("net.minecraft.entity.projectile.EntityArrow")
+            .addField(ACC_PRIVATE, "$cm_size", "D")
+            .patchConstructor("(Lnet/minecraft/world/World;Lnet/minecraft/entity/EntityLivingBase;)V")
+            .with(heightPatch)
+            .patchMethod(srg("onUpdate", "EntityArrow"), "()V")
+            .with(motionPatchFor("net/minecraft/entity/projectile/EntityArrow",
+                pass -> (pass >= 5 && pass <= 9) || pass == 13 || pass == 14,
+                pass -> (pass >= 3 && pass <= 7) || pass == 9 || pass == 10)
+                .and(p ->
+                    p.insertAfter(methodInsn(INVOKEVIRTUAL, "net/minecraft/entity/projectile/EntityArrow", srg("getIsCritical"), "()Z"), mv -> {
+                        mv.ifJump(IFEQ,
+                            () -> {
+                                mv.visitVarInsn(ALOAD, 0);
+                                mv.visitFieldInsn(GETFIELD, "$cm_size", "D");
+                                mv.visitLdcInsn(0.25);
+                                mv.visitInsn(DCMPG);
+                                mv.ifJump(IFGE,
+                                    () -> mv.visitInsn(ICONST_0),
+                                    () -> mv.visitInsn(ICONST_1));
+                            },
+                            () -> mv.visitInsn(ICONST_0));
+                    })))
+            .patchMethod(srg("findEntityOnPath"), "(Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Vec3d;)Lnet/minecraft/entity/Entity;")
+            .with(collisionPatch)
+            .patchMethod(srg("onHit"), "(Lnet/minecraft/util/math/RayTraceResult;)V")
+            .with(p -> {
+//                p.insertAfter(methodBegin(), mv -> {
+//                    mv.visitVarInsn(ALOAD, 1); // param RayTraceResult raytraceResultIn
+//                    mv.visitFieldInsn(GETFIELD, "net/minecraft/util/math/RayTraceResult", srg("typeOfHit"), "Lnet/minecraft/util/math/RayTraceResult$Type;");
+//                    mv.visitFieldInsn(GETSTATIC, "net/minecraft/util/math/RayTraceResult$Type", srg("MISS"), "Lnet/minecraft/util/math/RayTraceResult$Type;");
+//                    mv.ifJump(IF_ACMPNE, () -> mv.visitInsn(RETURN));
+//                });
+                p.insertAfterAll(ldcInsn(0.05000000074505806D), mulBySize);
+            });
     }
 }
