@@ -40,7 +40,7 @@ import javax.annotation.Nonnull;
 
 import static necauqua.mods.cm.ChiseledMe.MODID;
 
-@Mod(modid = MODID, version = "@VERSION@")
+@Mod(modid = MODID, version = "@VERSION@", updateJSON = "@UPDATE_URL@")
 public final class ChiseledMe implements ChiseledMeInterface {
 
     public static final String MODID = "chiseled_me";

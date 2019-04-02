@@ -25,15 +25,15 @@ import net.minecraft.entity.Entity;
  *
  * <pre><code>
  * public float getSize(Entity entity) {
- * if(Loader.isModLoaded("chiseled_me")) {
- * return getSize_opt(entity);
- * }
- * return 1.0F;
+ *     if (Loader.isModLoaded("chiseled_me")) {
+ *         return getSizeImpl(entity);
+ *     }
+ *     return 1.0F;
  * }
  *
  * {@literal @}Optional.Method(modid = "chiseled_me")
- * private float getSize_opt(Entity entity) {
- * return ChiseledMeAPI.interaction.getSizeOf(entity);
+ * private float getSizeImpl(Entity entity) {
+ *     return ChiseledMeAPI.interaction.getSizeOf(entity);
  * }
  * </code></pre>
  * <p>
