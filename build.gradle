@@ -21,6 +21,7 @@ minecraft {
 
     replace '@VERSION@', project.version
     replace '@API_VERSION@', '1.1'
+    replace '@UPDATE_URL@', 'https://raw.githubusercontent.com/necauqua/chiseled-me/master/updates.json'
 }
 
 jar {

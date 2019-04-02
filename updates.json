@@ -1,0 +1,11 @@
+{
+  "homepage": "https://minecraft.curseforge.com/projects/chiseled-me",
+  "1.10.2": {
+    "1.1.0": "Unreleased - testing the updater",
+    "1.0": "Added:\n - The mod was released"
+  },
+  "promos": {
+    "1.10.2-latest": "1.1.0",
+    "1.10.2-recommended": "1.1.0"
+  }
+}
