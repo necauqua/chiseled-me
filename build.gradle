@@ -1,6 +1,5 @@
 buildscript {
     repositories {
-        jcenter()
         maven { url = 'http://files.minecraftforge.net/maven' }
     }
     dependencies {
@@ -8,7 +7,10 @@ buildscript {
     }
 }
 
-apply plugin: 'net.minecraftforge.gradle.forge'
+plugins {
+    id 'net.minecraftforge.gradle.forge' version '2.0.2'
+    id 'org.jetbrains.gradle.plugin.idea-ext' version '0.5'
+}
 
 version = '1.1.0'
 group = 'necauqua.mods'
@@ -18,6 +20,8 @@ sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
 minecraft {
     version = '1.10.2-12.18.3.2185'
     mappings = 'stable_29'
+    runDir = 'build/run'
+    clientRunArgs += ['--username', 'user']
 
     replace '@VERSION@', project.version
     replace '@API_VERSION@', '1.1'
@@ -29,6 +33,14 @@ jar {
         attributes('FMLCorePlugin': 'necauqua.mods.cm.asm.Plugin', 'FMLCorePluginContainsFMLMod': 'true')
     }
     from 'LICENSE'
+}
+
+idea {
+    module {
+        inheritOutputDirs = false
+        outputDir = compileJava.destinationDir
+        testOutputDir = compileTestJava.destinationDir
+    }
 }
 
 processResources {
@@ -47,6 +59,10 @@ import net.minecraftforge.gradle.user.TaskSourceCopy
 
 task postProcessSources {
     dependsOn += tasks.withType(TaskSourceCopy.class)
+    // only apply the srg preprocessing if the final jar is going to be obfuscated
+    onlyIf {
+        gradle.taskGraph.hasTask(':reobfJar')
+    }
     doLast {
         def map = [:].withDefault { [] }
         genSrgs.mcpToSrg.eachLine {
@@ -68,7 +84,7 @@ task postProcessSources {
         def notFound = [:].withDefault { 0 }
         def ambiguous = [:].withDefault { 0 }
         tasks.withType(TaskSourceCopy.class) {
-            fileTree(it.getOutput()).each {
+            fileTree(it.output).each {
                 it.text = it.text.replaceAll('srg\\(\\s*"(.*?)"(?:\\s*,\\s*"(.*?)")?(?:\\s*,\\s*"(.*?)")?\\s*\\)') {
                     def (mcp, cls, desc) = it[1..3]
                     def m = map.get(mcp)
@@ -81,7 +97,7 @@ task postProcessSources {
                         notFound[mcp] += 1
                         return "\"$mcp\""
                     }
-                    return "\"$x\""
+                    return "\"$x.srg\""
                 }
             }
         }

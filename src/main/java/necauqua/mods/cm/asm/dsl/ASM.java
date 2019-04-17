@@ -43,12 +43,12 @@ public final class ASM {
     public static void check() {
         if (!loadedAtAll) {
             Log.error("\n" +
-                "  ****************************************************************************************************\n" +
-                "  * For some reason coremod part of the mod was not even loaded at all!\n" +
-                "  * Something is completely wrong - corrupt jar-file, manifest etc.\n" +
-                "  * Redownload the mod, ensuring that Minecraft and Forge versions are the ones required and so on.\n" +
-                "  ****************************************************************************************************");
-            throw new IllegalStateException("Coremod failed!");
+                    "  ****************************************************************************************************\n" +
+                    "  * For some reason coremod part of the mod was not even loaded at all!\n" +
+                    "  * Something is completely wrong - corrupt jar-file, manifest etc.\n" +
+                    "  * Redownload the mod, ensuring that Minecraft and Forge versions are the ones required and so on.\n" +
+                    "  ****************************************************************************************************");
+            throw new IllegalStateException("Coremod was not loaded!");
         }
     }
 
@@ -108,43 +108,61 @@ public final class ASM {
         byte[] modified = writer.toByteArray();
         // we dont collect all misses and then fail with all of them printed because
         // a class could be loaded at any time, so we can't know when to finally check
-        List<Modifier> misses = visitor.getMisses();
-        if (!misses.isEmpty()) {
-            checkMisses(className, misses);
-        }
+        checkMisses(className, visitor);
         return modified;
     }
 
-    private static void checkMisses(String className, List<Modifier> misses) {
-        List<Modifier> strict = misses.stream()
-            .filter(m -> {
-                // that filter is purely functional ofc, logging is a 'light' side effect
-                if (m.getParent().isOptional()) {
-                    Log.debug("Missed optional modifier " + m);
-                    return false;
-                }
-                return true;
-            })
-            .collect(toList());
-        if (strict.isEmpty()) {
-            return;
-        }
-        int idx = className.lastIndexOf('.');
-        String shortName = idx != -1 ? className.substring(idx + 1) : className;
-        StringBuilder message = new StringBuilder("\nSome patches were not applied to class " + shortName + ":\n");
-        strict.stream()
-            .collect(groupingBy(m -> m.getParent().getTransformerName()))
-            .forEach((transformer, transformerMisses) -> {
-                message.append("  transformer '").append(transformer).append("':\n");
-                transformerMisses.stream()
-                    .collect(groupingBy(modifier -> modifier.getParent().getMethodNames()))
-                    .forEach((method, methodMisses) -> {
-                        message.append("    method ").append(method).append(":\n");
-                        methodMisses.forEach(m -> message.append("      - ").append(m).append('\n'));
+    private static void checkMisses(String className, ClassPatchVisitor visitor) {
+        String shortName = className.substring(className.lastIndexOf('.') + 1);
+        StringBuilder message = new StringBuilder();
+
+        // absolutely functional filters btw, logging is a 'light' side effect, hehe
+        List<MethodPatcher> missedMethods = visitor.getMissedMethods().stream()
+                .filter(mp -> {
+                    if (mp.isOptional()) {
+                        Log.debug("Missed optional method(s) " + mp.getMethodNames());
+                        return false;
+                    }
+                    return true;
+                })
+                .collect(toList());
+
+        if (!missedMethods.isEmpty()) {
+            message.append("Some methods were not found in class ").append(shortName).append(":\n");
+            missedMethods.stream()
+                    .collect(groupingBy(MethodPatcher::getTransformerName))
+                    .forEach((transformer, mps) -> {
+                        message.append("  transformer '").append(transformer).append("':\n");
+                        mps.forEach(mp -> message.append("    method(s) ").append(mp.getMethodNames()).append('\n'));
                     });
-            });
-        Log.error(message);
-        throw new IllegalStateException("Coremod failed!");
+        }
+
+        List<Modifier> missedModifiers = visitor.getMissedModifiers().stream()
+                .filter(m -> {
+                    if (m.getParent().isOptional()) {
+                        Log.debug("Missed optional modifier " + m);
+                        return false;
+                    }
+                    return true;
+                })
+                .collect(toList());
+        if (!missedModifiers.isEmpty()) {
+            message.append("Some patches were not applied to class ").append(shortName).append(":\n");
+            missedModifiers.stream()
+                    .collect(groupingBy(m -> m.getParent().getTransformerName()))
+                    .forEach((transformer, transformerMisses) -> {
+                        message.append("  transformer '").append(transformer).append("':\n");
+                        transformerMisses.stream()
+                                .collect(groupingBy(modifier -> modifier.getParent().getMethodNames()))
+                                .forEach((method, methodMisses) -> {
+                                    message.append("    method ").append(method).append(":\n");
+                                    methodMisses.forEach(m -> message.append("      - ").append(m).append('\n'));
+                                });
+                    });
+        }
+        if (message.length() > 0) {
+            throw new IllegalStateException("Coremod failed!\n" + message);
+        }
     }
 
     // *** boilerplate for declarativeness *** //

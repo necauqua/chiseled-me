@@ -24,6 +24,8 @@ because it is amazing, logical and I want more people to know about it.
  - Fall damage multiplier can now depend on size and be configured
  - The speed of the size change process, now it is consistently 2*|log2(prev) - log2(new)| ticks (each scale up/down by a factor 2 adds up to time linearly)
  - Changed incorrect portal bbox config entry name
+### Changed
+ - This project now adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) starting with version 1.1.0
 
 ## [1.0] - 12016-06-20
 ### Added

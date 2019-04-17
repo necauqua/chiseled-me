@@ -28,6 +28,8 @@ public final class MethodPatcher implements MethodPatcherDsl {
     private final String transformerName;
     private final boolean optional;
 
+    private boolean matched = false;
+
     private final List<Pair<String, String>> methodsToPatch = new ArrayList<>();
     private Patch patch = p -> {}; // empty stub
 
@@ -38,6 +40,10 @@ public final class MethodPatcher implements MethodPatcherDsl {
         methodsToPatch.add(Pair.of(name, desc));
     }
 
+    public ClassPatcher getParent() {
+        return parent;
+    }
+
     public String getTransformerName() {
         return transformerName;
     }
@@ -46,12 +52,17 @@ public final class MethodPatcher implements MethodPatcherDsl {
         return methodsToPatch;
     }
 
-    public Patch getPatch() {
-        return patch;
-    }
-
     public boolean isOptional() {
         return optional;
+    }
+
+    public boolean didMatch() {
+        return matched;
+    }
+
+    public void apply(PatchContextDsl context) {
+        matched = true;
+        patch.accept(context);
     }
 
     @Override

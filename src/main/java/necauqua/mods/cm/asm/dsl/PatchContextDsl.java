@@ -29,6 +29,8 @@ public interface PatchContextDsl {
 
     void debugDump();
 
+    String getClassName();
+
     default void modify(ModifierType type, Anchor anchor, Hook hook) {
         modify(type, anchor, 1, hook);
     }
