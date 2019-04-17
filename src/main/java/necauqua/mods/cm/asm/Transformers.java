@@ -264,7 +264,7 @@ public final class Transformers {
                     //  shadowAlpha - (y - (blockpos.getY() + d3)) / 2.0 * (1.0F / size - 1.0F)
                     mv.visitVarInsn(DLOAD, 4);
                     mv.visitVarInsn(ALOAD, 34);
-                    mv.visitMethodInsn(INVOKEVIRTUAL, "net/minecraft/util/math/BlockPos", srg("getY"), "()I", false);
+                    mv.visitMethodInsn(INVOKEVIRTUAL, "net/minecraft/util/math/BlockPos", srg("getY", "Vec3i"), "()I", false);
                     mv.visitInsn(I2D);
                     mv.visitVarInsn(DLOAD, 27);
                     mv.visitInsn(DADD);
@@ -290,7 +290,7 @@ public final class Transformers {
                     mv.visitVarInsn(FLOAD, 16); // local float f2
 
                     mv.visitVarInsn(ALOAD, 1); // param Entity entityIn
-                    mv.visitMethodInsn(INVOKEVIRTUAL, "net/minecraft/entity/Entity", srg("isSneaking"), "()Z", false);
+                    mv.visitMethodInsn(INVOKEVIRTUAL, "net/minecraft/entity/Entity", srg("isSneaking", "Entity"), "()Z", false);
 
                     mv.ifJump(IFEQ,
                         () -> mv.visitLdcInsn(0.25F),
@@ -713,7 +713,7 @@ public final class Transformers {
                 }));
     }
 
-    private Patch motionPatchFor(String className, IntPredicate filterXZ, IntPredicate filterY) {
+    private Patch motionPatchFor(IntPredicate filterXZ, IntPredicate filterY) {
         return p -> {
             p.insertAfter(methodBegin(), mv -> {
                 mv.visitVarInsn(ALOAD, 0);
@@ -729,9 +729,10 @@ public final class Transformers {
             };
             Hook filtered = mulBySize.filter(filterXZ);
             Hook filteredY = mulBySize.filter(filterY);
-            p.insertAfterAll(fieldInsn(GETFIELD, className, srg("motionX"), "D"), filtered);
-            p.insertAfterAll(fieldInsn(GETFIELD, className, srg("motionY"), "D"), filteredY);
-            p.insertAfterAll(fieldInsn(GETFIELD, className, srg("motionZ"), "D"), filtered);
+            String className = p.getClassName();
+            p.insertAfterAll(fieldInsn(GETFIELD, className, srg("motionX", "Entity"), "D"), filtered);
+            p.insertAfterAll(fieldInsn(GETFIELD, className, srg("motionY", "Entity"), "D"), filteredY);
+            p.insertAfterAll(fieldInsn(GETFIELD, className, srg("motionZ", "Entity"), "D"), filtered);
             p.insertAfterAll(ldcInsn(0.25D), mulBySize);
         };
     }
@@ -757,27 +758,39 @@ public final class Transformers {
             });
             p.insertAfterAll(ldcInsn(0.30000001192092896D), mulBySize);
         };
+        Patch sizeFieldPatch = p -> {
+            p.insertAfter(methodBegin(), mv -> {
+                mv.visitVarInsn(ALOAD, 0);
+                mv.visitInsn(DUP);
+                mv.visitHook(getSize);
+                mv.visitInsn(F2D);
+                mv.visitFieldInsn(PUTFIELD, "$cm_size", "D");
+            });
+            p.insertAfterAll(ldcInsn(0.25D), mulBySize);
+        };
         inClass("net.minecraft.entity.projectile.EntityThrowable")
             .addField(ACC_PRIVATE, "$cm_size", "D")
             .patchConstructor("(Lnet/minecraft/world/World;Lnet/minecraft/entity/EntityLivingBase;)V")
             .with(heightPatch)
             .patchMethod(srg("onUpdate", "EntityThrowable"), "()V")
-            .with(motionPatchFor("net/minecraft/entity/projectile/EntityThrowable",
-                pass -> (pass >= 2 && pass <= 5) || pass == 9 || pass == 10,
-                pass -> (pass >= 2 && pass <= 5) || pass == 7 || pass == 8)
-                .and(collisionPatch));
+            .with(sizeFieldPatch
+                .and(collisionPatch)
+                .and(motionPatchFor(
+                    pass -> (pass >= 2 && pass <= 5) || pass == 9 || pass == 10,
+                    pass -> (pass >= 2 && pass <= 5) || pass == 7 || pass == 8)));
 
         inClass("net.minecraft.entity.projectile.EntityArrow")
             .addField(ACC_PRIVATE, "$cm_size", "D")
             .patchConstructor("(Lnet/minecraft/world/World;Lnet/minecraft/entity/EntityLivingBase;)V")
             .with(heightPatch)
             .patchMethod(srg("onUpdate", "EntityArrow"), "()V")
-            .with(motionPatchFor("net/minecraft/entity/projectile/EntityArrow",
-                pass -> (pass >= 5 && pass <= 9) || pass == 13 || pass == 14,
-                pass -> (pass >= 3 && pass <= 7) || pass == 9 || pass == 10)
+            .with(sizeFieldPatch
+                .and(motionPatchFor(
+                    pass -> (pass >= 5 && pass <= 9) || pass == 13 || pass == 14,
+                    pass -> (pass >= 3 && pass <= 7) || pass == 9 || pass == 10))
                 .and(p ->
-                    p.insertAfter(methodInsn(INVOKEVIRTUAL, "net/minecraft/entity/projectile/EntityArrow", srg("getIsCritical"), "()Z"), mv -> {
-                        mv.ifJump(IFEQ,
+                    p.insertAfter(methodInsn(INVOKEVIRTUAL, "net/minecraft/entity/projectile/EntityArrow", srg("getIsCritical"), "()Z"),
+                        mv -> mv.ifJump(IFEQ,
                             () -> {
                                 mv.visitVarInsn(ALOAD, 0);
                                 mv.visitFieldInsn(GETFIELD, "$cm_size", "D");
@@ -787,8 +800,7 @@ public final class Transformers {
                                     () -> mv.visitInsn(ICONST_0),
                                     () -> mv.visitInsn(ICONST_1));
                             },
-                            () -> mv.visitInsn(ICONST_0));
-                    })))
+                            () -> mv.visitInsn(ICONST_0)))))
             .patchMethod(srg("findEntityOnPath"), "(Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Vec3d;)Lnet/minecraft/entity/Entity;")
             .with(collisionPatch)
             .patchMethod(srg("onHit"), "(Lnet/minecraft/util/math/RayTraceResult;)V")

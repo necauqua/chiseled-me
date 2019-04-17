@@ -35,15 +35,21 @@ public final class ClassPatchVisitor extends ClassVisitor {
 
     private final ClassPatcher patcher;
     private final List<Modifier> modifiers = new ArrayList<>();
-    private final List<Modifier> missed = new ArrayList<>();
+
+    private final List<MethodPatcher> missedMethods = new ArrayList<>();
+    private final List<Modifier> missedModifiers = new ArrayList<>();
 
     public ClassPatchVisitor(ClassVisitor parent, ClassPatcher patcher) {
         super(ASM5, parent);
         this.patcher = patcher;
     }
 
-    public List<Modifier> getMisses() {
-        return missed;
+    public List<MethodPatcher> getMissedMethods() {
+        return missedMethods;
+    }
+
+    public List<Modifier> getMissedModifiers() {
+        return missedModifiers;
     }
 
     @Override
@@ -52,16 +58,19 @@ public final class ClassPatchVisitor extends ClassVisitor {
         for (FieldDesc f : patcher.getFields()) {
             Log.debug("  - Adding field: " + f.getName() + "(" + f.getDesc() + ")");
             cv.visitField(f.getAcc(), f.getName(), f.getDesc(), f.getSign(), null)
-                .visitEnd();
+                    .visitEnd();
         }
     }
 
     @Override
     public void visitEnd() {
         super.visitEnd();
+        patcher.getMethodPatchers().stream()
+                .filter(mp -> !mp.didMatch())
+                .forEach(missedMethods::add);
         modifiers.stream()
-            .filter(m -> !m.didMatch())
-            .forEach(missed::add);
+                .filter(m -> !m.didMatch())
+                .forEach(missedModifiers::add);
     }
 
     @Override
@@ -77,7 +86,8 @@ public final class ClassPatchVisitor extends ClassVisitor {
                     continue;
                 }
                 PatchContext context = new PatchContext(methodPatcher);
-                methodPatcher.getPatch().accept(context);
+
+                methodPatcher.apply(context);
 
                 isDump |= context.isDump();
                 modifiers.addAll(context.getModifiers());
