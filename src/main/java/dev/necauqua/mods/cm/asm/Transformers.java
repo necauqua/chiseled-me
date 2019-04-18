@@ -371,14 +371,12 @@ public final class Transformers {
                     mv.visitInsn(DMUL);
                     mv.visitVarInsn(DSTORE, 5); // param double z
                 });
-                p.insertAfterAll(ldcInsn(0.05), mv -> { // shifting on edges of aabb's
+                Hook mulBySize = mv -> {
                     mv.visitVarInsn(DLOAD, "size");
                     mv.visitInsn(DMUL);
-                });
-                p.insertBefore(varInsn(DSTORE, 3), 3, mv -> { // stepHeight
-                    mv.visitVarInsn(DLOAD, "size");
-                    mv.visitInsn(DMUL);
-                });
+                };
+                p.insertAfterAll(ldcInsn(0.05), mulBySize); // shifting on edges of aabb's
+                p.insertBefore(varInsn(DSTORE, 3), 3, mulBySize); // stepHeight
                 p.insertAfterAll(ldcInsn(0.6), mv -> { // div distanceWalked(Modified) for the step sounds
                     mv.visitVarInsn(DLOAD, "size");
                     mv.visitInsn(DDIV);
@@ -388,6 +386,7 @@ public final class Transformers {
                     mv.visitInsn(D2F);
                     mv.visitInsn(FDIV);
                 });
+                p.insertAfter(ldcInsn(0.20000000298023224), mulBySize); // step sound cancel height
             })
             .patchMethod(srg("createRunningParticles"), "()V")
             .with(p -> p
