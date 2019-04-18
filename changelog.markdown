@@ -18,7 +18,9 @@ because it is amazing, logical and I want more people to know about it.
  - German translation (by Vexatos)
  - Simplified Chinese translation (by 3TUSK)
 ### Fixed
- - Items dropped by entities are now scaled (not only drops as it was, but also things like wool from a sheep and others)
+ - Fixed hand bobbing movement
+ - Distance required to move to hear a step sound is scaled
+ - Items dropped by entities not by death are now scaled too (e.g. wool from a sheared sheep)
  - Reach distance not being scaled when small (this was intended in the first place thus is not configurable)
  - Distance between feet and the ground that affects the shadow alpha not being multiplied
  - Fall damage multiplier can now depend on size and be configured
