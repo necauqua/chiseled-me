@@ -18,6 +18,7 @@ because it is amazing, logical and I want more people to know about it.
  - German translation (by Vexatos)
  - Simplified Chinese translation (by 3TUSK)
 ### Fixed
+ - Fixed skeleton bbox not being scaled
  - Fixed hand bobbing movement
  - Distance required to move to hear a step sound is scaled
  - Items dropped by entities not by death are now scaled too (e.g. wool from a sheared sheep)
