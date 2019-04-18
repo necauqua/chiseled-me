@@ -70,4 +70,19 @@ public interface PatchContextDsl {
     default void replaceAll(Anchor anchor, Hook hook) {
         replace(anchor, 0, hook);
     }
+
+    default void insertAround(Anchor anchor, Hook before, Hook after) {
+        modify(INSERT_BEFORE, anchor, before);
+        modify(INSERT_AFTER, anchor, after);
+    }
+
+    default void insertAround(Anchor anchor, int nth, Hook before, Hook after) {
+        modify(INSERT_BEFORE, anchor, nth, before);
+        modify(INSERT_AFTER, anchor, nth, after);
+    }
+
+    default void insertAroundAll(Anchor anchor, Hook before, Hook after) {
+        modify(INSERT_BEFORE, anchor, 0, before);
+        modify(INSERT_AFTER, anchor, 0, after);
+    }
 }

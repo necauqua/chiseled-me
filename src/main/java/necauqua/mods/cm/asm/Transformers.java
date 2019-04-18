@@ -77,6 +77,7 @@ public final class Transformers {
     @Transformer
     public void cameraView() {
         inClass("net.minecraft.client.renderer.EntityRenderer")
+            .addField(ACC_PRIVATE, "$cm_bobbing_dirty_state", "Z")
             .patchMethod(srg("orientCamera"), "(F)V") // camera height & shift
             .with(p -> {
                 p.addLocal("size", FLOAT_TYPE);
@@ -132,6 +133,17 @@ public final class Transformers {
                     mv.visitVarInsn(FLOAD, "size");
                     mv.visitInsn(FMUL);
                 });
+                p.insertAround(methodInsn(INVOKESPECIAL, "net/minecraft/client/renderer/EntityRenderer", srg("applyBobbing"), "(F)V"),
+                    mv -> {
+                        mv.visitVarInsn(ALOAD, 0);
+                        mv.visitInsn(ICONST_1);
+                        mv.visitFieldInsn(PUTFIELD, "$cm_bobbing_dirty_state", "Z");
+                    },
+                    mv -> {
+                        mv.visitVarInsn(ALOAD, 0);
+                        mv.visitInsn(ICONST_0);
+                        mv.visitFieldInsn(PUTFIELD, "$cm_bobbing_dirty_state", "Z");
+                    });
             })
             .patchMethod(srg("applyBobbing"), "(F)V") // bobbing fix (-_-)
             .with(p -> {
@@ -141,15 +153,16 @@ public final class Transformers {
                     mv.visitHook(getSize);
                     mv.visitVarInsn(FSTORE, "size");
                 });
-                p.insertBefore(varInsn(FSTORE, 4), mv -> {
-                    mv.visitVarInsn(FLOAD, "size");
-                    mv.visitInsn(FDIV);
-                });
                 p.insertAfterAll(varInsn(FLOAD, 5), mv -> { // local float f2
-                    if (mv.getPass() <= 2) { // only first two
+                    if (mv.getPass() > 2) { // only first two
+                        return;
+                    }
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitFieldInsn(GETFIELD, "$cm_bobbing_dirty_state", "Z");
+                    mv.ifJump(IFEQ, () -> {
                         mv.visitVarInsn(FLOAD, "size");
                         mv.visitInsn(FMUL);
-                    }
+                    });
                 });
             })
             .patchMethod(srg("renderWorldPass"), "(IFJ)V") // these three are clipping
@@ -365,6 +378,15 @@ public final class Transformers {
                 p.insertBefore(varInsn(DSTORE, 3), 3, mv -> { // stepHeight
                     mv.visitVarInsn(DLOAD, "size");
                     mv.visitInsn(DMUL);
+                });
+                p.insertAfterAll(ldcInsn(0.6), mv -> { // div distanceWalked(Modified) for the step sounds
+                    mv.visitVarInsn(DLOAD, "size");
+                    mv.visitInsn(DDIV);
+                });
+                p.insertAfterAll(ldcInsn(0.35F), mv -> { // div local f for the swim sounds
+                    mv.visitVarInsn(DLOAD, "size");
+                    mv.visitInsn(D2F);
+                    mv.visitInsn(FDIV);
                 });
             })
             .patchMethod(srg("createRunningParticles"), "()V")
