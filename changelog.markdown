@@ -28,6 +28,11 @@ because it is amazing, logical and I want more people to know about it.
  - Changed incorrect portal bbox config entry name
 ### Changed
  - This project now adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) starting with version 1.1.0
+ - Mod package is changed from `necauqua.mods.cm` to `dev.necauqua.mods.cm` to comply with the
+ [maven naming conventions](https://maven.apache.org/guides/mini/guide-naming-conventions.html)
+ because I own the domain `necauqua.dev` and not `necauqua`.
+ This is a huge API change (and a commit touching all source files sadly)
+ but the first version was not semver anyway so nah
 
 ## [1.0] - 12016-06-20
 ### Added
