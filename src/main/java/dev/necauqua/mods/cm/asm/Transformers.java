@@ -532,6 +532,24 @@ public final class Transformers {
                 p.insertAfter(methodInsn(INVOKEVIRTUAL, "net/minecraft/block/Block", srg("onEntityCollidedWithBlock", "Block"), "(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/Entity;)V"),
                     mv -> mv.visitLabel(skipBlockCollision));
             });
+        inClass("net.minecraft.entity.monster.EntitySkeleton")
+            .patchMethod(srg("updateSize", "EntitySkeleton"), "(Lnet/minecraft/entity/monster/SkeletonType;)V")
+            .with(p -> {
+                p.addLocal("size", FLOAT_TYPE);
+                p.insertAfter(methodBegin(), mv -> {
+                    mv.visitVarInsn(ALOAD, 0); // EntitySkeleton this
+                    mv.visitHook(getSize);
+                    mv.visitVarInsn(FSTORE, "size");
+                });
+                Hook mulBySize = mv -> {
+                    mv.visitVarInsn(FLOAD, "size");
+                    mv.visitInsn(FMUL);
+                };
+                p.insertAfter(ldcInsn(0.7F), mulBySize);
+                p.insertAfter(ldcInsn(2.4F), mulBySize);
+                p.insertAfter(ldcInsn(0.6F), mulBySize);
+                p.insertAfter(ldcInsn(1.99F), mulBySize);
+            });
     }
 
     @Transformer
