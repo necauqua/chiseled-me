@@ -20,7 +20,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
-public class CraftItem extends ItemMod {
+public final class CraftItem extends ItemMod {
 
     private int boundAchievementId = -1;
     private boolean isGlowing = false;
