@@ -54,7 +54,7 @@ public final class Transformers {
     private static final Hook scale =
         mv -> mv.visitMethodInsn(INVOKESTATIC,
             "net/minecraft/client/renderer/GlStateManager",
-            srg("scale", "GlStateManager"),
+            srg("scale", "GlStateManager", "(FFF)V"),
             "(FFF)V",
             false);
 
@@ -167,7 +167,7 @@ public final class Transformers {
             })
             .patchMethod(srg("renderWorldPass"), "(IFJ)V") // these three are clipping
             .and(srg("renderCloudsCheck"), "(Lnet/minecraft/client/renderer/RenderGlobal;FI)V")
-            .and(srg("renderHand", "EntityRenderer"), "(FI)V")
+            .and(srg("renderHand", "EntityRenderer", "(FI)V"), "(FI)V")
             .with(p -> {
                 p.addLocal("size", FLOAT_TYPE);
                 p.insertAfter(methodBegin(), mv -> {
@@ -471,7 +471,7 @@ public final class Transformers {
                 p.addLocal("size", DOUBLE_TYPE);
                 p.insertBefore(varInsn(ALOAD, 2), mv -> { // setup
                     mv.visitVarInsn(ALOAD, 0); // NetHandlerPlayServer this
-                    mv.visitFieldInsn(GETFIELD, "playerEntity", "Lnet/minecraft/entity/player/EntityPlayerMP;");
+                    mv.visitFieldInsn(GETFIELD, srg("playerEntity"), "Lnet/minecraft/entity/player/EntityPlayerMP;");
                     mv.visitHook(getSize);
                     mv.visitInsn(F2D);
                     mv.visitVarInsn(DSTORE, "size");
@@ -603,7 +603,7 @@ public final class Transformers {
             });
 
         inClass("net.minecraft.client.multiplayer.PlayerControllerMP") // on client
-            .patchMethod(srg("getBlockReachDistance"), "()F")
+            .patchMethod(srg("getBlockReachDistance", "PlayerControllerMP"), "()F")
             .with(p -> p
                 .insertBefore(insn(FRETURN), mv -> {
                     mv.visitVarInsn(ALOAD, 0); // PlayerControllerMP this
@@ -614,7 +614,7 @@ public final class Transformers {
                     mv.visitInsn(FMUL);
                 }));
         inClass("net.minecraft.server.management.PlayerInteractionManager") // on server - only increase reach to match client
-            .patchMethod(srg("getBlockReachDistance"), "()D") // lol
+            .patchMethod("getBlockReachDistance", "()D") // lol
             .with(p ->
                 p.insertBefore(insn(DRETURN), mv -> {
                     mv.visitVarInsn(ALOAD, 0); // PlayerInteractionManager this
@@ -639,7 +639,8 @@ public final class Transformers {
                 })
             );
         inClass("net.minecraft.world.World") // when reach distance <= 1 this one null return screws up raytracing a bit so here's a fix
-            .patchMethod(srg("rayTraceBlocks", "World"), "(Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Vec3d;ZZZ)Lnet/minecraft/util/math/RayTraceResult;")
+            .patchMethod(srg("rayTraceBlocks", "World", "(Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Vec3d;ZZZ)Lnet/minecraft/util/math/RayTraceResult;"),
+                "(Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Vec3d;ZZZ)Lnet/minecraft/util/math/RayTraceResult;")
             .with(p -> p.replace(insn(ACONST_NULL), mv -> {
                 mv.visitTypeInsn(NEW, "net/minecraft/util/math/RayTraceResult");
                 mv.visitInsn(DUP);
@@ -711,7 +712,8 @@ public final class Transformers {
                     mv.visitInsn(FMUL);
                 }));
         inClass("net.minecraft.entity.player.EntityPlayer")
-            .patchMethod(srg("dropItem", "EntityPlayer"), "(Lnet/minecraft/item/ItemStack;ZZ)Lnet/minecraft/entity/item/EntityItem;")
+            .patchMethod(srg("dropItem", "EntityPlayer", "(Lnet/minecraft/item/ItemStack;ZZ)Lnet/minecraft/entity/item/EntityItem;"),
+                "(Lnet/minecraft/item/ItemStack;ZZ)Lnet/minecraft/entity/item/EntityItem;")
             .with(p -> p
                 .insertAfter(ldcInsn(0.30000001192092896), mv -> { // player's item drop hardcoded height
                     mv.visitVarInsn(ALOAD, 0); // EntityPlayer this
@@ -720,7 +722,7 @@ public final class Transformers {
                     mv.visitInsn(DMUL);
                 }));
         inClass("net.minecraft.entity.Entity")
-            .patchMethod("entityDropItem", "(Lnet/minecraft/item/ItemStack;F)Lnet/minecraft/entity/item/EntityItem;")
+            .patchMethod(srg("entityDropItem", "Entity"), "(Lnet/minecraft/item/ItemStack;F)Lnet/minecraft/entity/item/EntityItem;")
             .with(p -> {
                 p.addLocal("size", FLOAT_TYPE);
                 p.insertAfter(varInsn(FLOAD, 2), mv -> {

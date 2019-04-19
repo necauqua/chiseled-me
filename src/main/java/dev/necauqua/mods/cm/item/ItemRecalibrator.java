@@ -46,7 +46,7 @@ import java.util.List;
 import static dev.necauqua.mods.cm.ChiseledMe.MODID;
 import static dev.necauqua.mods.cm.item.ItemRecalibrator.RecalibrationEffect.*;
 
-public class ItemRecalibrator extends ItemMod {
+public final class ItemRecalibrator extends ItemMod {
 
     public static final IBehaviorDispenseItem DISPENSER_BEHAVIOR = (source, stack) -> {
         BlockPos at = source.getBlockPos().offset(source.getBlockState().getValue(BlockDispenser.FACING));
@@ -142,10 +142,10 @@ public class ItemRecalibrator extends ItemMod {
     public EnumRarity getRarity(ItemStack stack) {
         RecalibrationEffect effect = getEffectFromStack(stack);
         return effect.type == RESET ?
-                EnumRarity.UNCOMMON :
-                effect.tier <= (effect.type == REDUCTION ? 8 : 2) ?
-                        EnumRarity.RARE :
-                        EnumRarity.EPIC;
+            EnumRarity.UNCOMMON :
+            effect.tier <= (effect.type == REDUCTION ? 8 : 2) ?
+                EnumRarity.RARE :
+                EnumRarity.EPIC;
     }
 
     @Override
@@ -174,7 +174,7 @@ public class ItemRecalibrator extends ItemMod {
         NBTTagCompound nbt = stack.getTagCompound();
         byte type = nbt != null ? nbt.getByte("type") : 0;
         return new ResourceLocation(MODID, "recalibrator" +
-                (type == -1 ? "_reduction" : type == 1 ? "_amplification" : ""));
+            (type == -1 ? "_reduction" : type == 1 ? "_amplification" : ""));
     }
 
     @Override

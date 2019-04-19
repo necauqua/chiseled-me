@@ -31,7 +31,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class SetSizeCommand extends CommandBase {
+public final class SetSizeCommand extends CommandBase {
 
     @Override
     @Nonnull
