@@ -409,6 +409,34 @@ public final class Transformers {
         inClass("net.minecraft.client.entity.EntityOtherPlayerMP") // because stupid EntityOtherPlayerMP x 2
             .patchMethod(srg("onUpdate", "EntityOtherPlayerMP"), "()V")
             .with(libmSwingAnimation);
+        inClass("net.minecraft.client.entity.EntityPlayerSP")
+            .patchMethod(srg("updateAutoJump"), "(FF)V")
+            .with(p -> {
+                p.addLocal("size", FLOAT_TYPE);
+                p.insertAfter(ldcInsn(0.001F), mv -> {
+                    mv.visitVarInsn(ALOAD, 0); // EntityPlayerSP this
+                    mv.visitHook(getSize);
+                    mv.visitInsn(DUP);
+                    mv.visitVarInsn(FSTORE, "size");
+                    mv.visitInsn(FMUL);
+                });
+                Hook mulBySize = mv -> {
+                    mv.visitVarInsn(FLOAD, "size");
+                    mv.visitInsn(FMUL);
+                };
+                p.insertAfter(ldcInsn(0.001F), 2, mulBySize);
+                p.insertAfter(ldcInsn(-0.15F), mulBySize);
+                p.insertAfter(ldcInsn(7.0F), 2, mulBySize);
+                p.insertAfter(ldcInsn(0.75F), mulBySize);
+                p.insertAfter(ldcInsn(1.2F), mulBySize);
+                p.insertAfter(ldcInsn(0.5F), 2, mulBySize);
+                p.replace(insn(ICONST_1), 2, mv -> mv.visitInsn(ICONST_0));
+                p.insertAfterAll(ldcInsn(0.5099999904632568D), mv -> {
+                    mv.visitVarInsn(FLOAD, "size");
+                    mv.visitInsn(F2D);
+                    mv.visitInsn(DMUL);
+                });
+            });
     }
 
     @Transformer
