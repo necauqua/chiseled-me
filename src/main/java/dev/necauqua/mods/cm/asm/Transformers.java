@@ -863,9 +863,10 @@ public final class Transformers {
                             () -> {
                                 mv.visitVarInsn(ALOAD, 0);
                                 mv.visitFieldInsn(GETFIELD, "$cm_size", "D");
-                                mv.visitLdcInsn(0.25);
-                                mv.visitInsn(DCMPG);
-                                mv.ifJump(IFGE,
+                                mv.visitInsn(D2F);
+                                mv.visitLdcInsn(0.25F);
+                                mv.visitInsn(FCMPG);
+                                mv.ifJump(IFGT,
                                     () -> mv.visitInsn(ICONST_0),
                                     () -> mv.visitInsn(ICONST_1));
                             },
