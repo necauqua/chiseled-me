@@ -83,15 +83,23 @@ public final class EntitySizeManager {
 
     @SideOnly(Side.CLIENT)
     public static void enqueueSetSize(int entityId, float size) {
-        World clientWorld = Minecraft.getMinecraft().world;
-        if (clientWorld != null) {
-            Entity entity = clientWorld.getEntityByID(entityId);
-            if (entity != null) {
-                setSize(entity, size, false);
-                return;
+        ClientOnly.enqueueSetSize(entityId, size);
+    }
+
+    @SideOnly(Side.CLIENT)
+    private static class ClientOnly {
+
+        static void enqueueSetSize(int entityId, float size) {
+            World clientWorld = Minecraft.getMinecraft().world;
+            if (clientWorld != null) {
+                Entity entity = clientWorld.getEntityByID(entityId);
+                if (entity != null) {
+                    setSize(entity, size, false);
+                    return;
+                }
             }
+            spawnSetSizeQueue.put(entityId, size);
         }
-        spawnSetSizeQueue.put(entityId, size);
     }
 
     @SuppressWarnings("deprecation") // why?
