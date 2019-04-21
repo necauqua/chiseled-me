@@ -25,8 +25,7 @@ minecraft {
 
     replace '@VERSION@', project.version
     replace '@MC_VERSION@', version
-    replace '@API_VERSION@', '1.1'
-    replace '@UPDATE_URL@', 'https://raw.githubusercontent.com/necauqua/chiseled-me/master/updates.json'
+    replace '@API_VERSION@', project.version.take(project.version.lastIndexOf('.'))
 }
 
 // fix forgegradle runs being cached lol
@@ -59,6 +58,18 @@ processResources {
         exclude 'mcmod.info'
     }
 }
+
+task signJar(type: SignJar, dependsOn: reobfJar) {
+    onlyIf { project.hasProperty('keyStore') }
+    keyStore = project.keyStore
+    alias = project.keyStoreAlias
+    storePass = project.keyStorePass
+    keyPass = project.keyStoreKeyPass
+    inputFile = jar.archivePath
+    outputFile = jar.archivePath
+}
+
+build.dependsOn signJar
 
 import net.minecraftforge.gradle.user.TaskSourceCopy
 

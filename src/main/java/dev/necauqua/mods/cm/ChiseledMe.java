@@ -32,15 +32,18 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.util.EnumHelper;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.event.*;
 
 import javax.annotation.Nonnull;
 
 import static dev.necauqua.mods.cm.ChiseledMe.MODID;
 
-@Mod(modid = MODID, version = "@VERSION@", updateJSON = "@UPDATE_URL@")
+@Mod(modid = MODID,
+    version = "@VERSION@",
+    acceptedMinecraftVersions = "[@MC_VERSION@]",
+    updateJSON = "https://raw.githubusercontent.com/necauqua/chiseled-me/master/updates.json",
+    certificateFingerprint = "32a569c20662ddab26a3fd716efe161dd99ce487",
+    useMetadata= true)
 public final class ChiseledMe implements ChiseledMeInterface {
 
     public static final String MODID = "chiseled_me";
@@ -73,6 +76,11 @@ public final class ChiseledMe implements ChiseledMeInterface {
     public static final Item PYM_ESSENSE_B = new CraftItem("pym_essense_b").bindAchievement(15).setMaxStackSize(7);
 
     public static final ItemRecalibrator RECALIBRATOR = new ItemRecalibrator();
+
+    @EventHandler
+    public void preInit(FMLFingerprintViolationEvent e) {
+        Log.warn("FINGERPRINT VIOLATED: you're running some unauthorized modification of the mod, be warned");
+    }
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent e) {
