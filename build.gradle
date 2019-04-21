@@ -12,14 +12,14 @@ plugins {
     id 'org.jetbrains.gradle.plugin.idea-ext' version '0.5'
 }
 
-version = '1.1.0'
+version = '1.1.1'
 group = 'dev.necauqua.mods'
 
 sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
 
 minecraft {
-    version = '1.10.2-12.18.3.2185'
-    mappings = 'stable_29'
+    version = '1.11-13.19.1.2189'
+    mappings = 'stable_32'
     runDir = 'build/run'
     clientRunArgs += ['--username', 'dev'] // force the same username (not each time different PlayerXXX)
 

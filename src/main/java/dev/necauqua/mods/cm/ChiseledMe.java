@@ -50,21 +50,10 @@ public final class ChiseledMe implements ChiseledMeInterface {
 
     public static final CreativeTabs TAB = new CreativeTabs(MODID) {
 
-        private ItemStack icon;
-
         @Override
         @Nonnull
-        public Item getTabIconItem() {
-            return RECALIBRATOR; // whyyyyy is this abstract, MC's codebase is even worse than mine
-        }
-
-        @Override
-        @Nonnull
-        public ItemStack getIconItemStack() {
-            if (icon == null) {
-                icon = ItemRecalibrator.create(RecalibrationEffect.REDUCTION, (byte) 1);
-            }
-            return icon;
+        public ItemStack getTabIconItem() {
+            return ItemRecalibrator.create(RecalibrationEffect.REDUCTION, (byte) 1);
         }
     };
 

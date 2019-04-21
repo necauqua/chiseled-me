@@ -34,6 +34,6 @@ public final class Hooks {
     @CalledFromASM
     public static boolean cancelBlockCollision(Entity entity, IBlockState state, BlockPos pos) { // this makes nether portal more fun
         return Config.changePortalAABB && state.getBlock() == Blocks.PORTAL && getSize(entity) < 1.0F
-            && !entity.getEntityBoundingBox().intersectsWith(state.getSelectedBoundingBox(entity.world, pos));
+            && !entity.getEntityBoundingBox().intersects(state.getSelectedBoundingBox(entity.world, pos));
     }
 }

@@ -25,6 +25,7 @@ import net.minecraft.item.crafting.ShapelessRecipes;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.PotionType;
 import net.minecraft.potion.PotionUtils;
+import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.fml.common.registry.GameRegistry;
@@ -32,8 +33,8 @@ import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.RecipeSorter;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.stream.IntStream;
 
 import static dev.necauqua.mods.cm.item.ItemRecalibrator.RecalibrationEffect.AMPLIFICATION;
 import static dev.necauqua.mods.cm.item.ItemRecalibrator.RecalibrationEffect.REDUCTION;
@@ -44,7 +45,8 @@ import static net.minecraftforge.oredict.RecipeSorter.Category.SHAPELESS;
 
 public final class Recipes {
 
-    private Recipes() {}
+    private Recipes() {
+    }
 
     public static void init() {
         OreDictionary.registerOre("netherStar", ChiseledMe.BLUE_STAR);
@@ -119,7 +121,7 @@ public final class Recipes {
 
         @Override
         @Nonnull
-        public ItemStack[] getRemainingItems(InventoryCrafting inv) {
+        public NonNullList<ItemStack> getRemainingItems(InventoryCrafting inv) {
             ForgeHooks.getCraftingPlayer().addStat(Achievements.WEIRD_BEACON); // meh
             return super.getRemainingItems(inv);
         }
@@ -151,7 +153,6 @@ public final class Recipes {
         public boolean matches(@Nonnull InventoryCrafting inv, World world) {
             if (super.matches(inv, world)) {
                 ItemStack stack = inv.getStackInSlot(4);
-                assert stack != null : "stack in slot was null after match check";
                 return PotionUtils.getPotionFromItem(stack) == awkward;
             }
             return false;
@@ -166,14 +167,11 @@ public final class Recipes {
 
         @Override
         @Nonnull
-        public ItemStack[] getRemainingItems(InventoryCrafting inv) {
-            ItemStack[] remaining = super.getRemainingItems(inv);
-            for (int i = 0; i < inv.getSizeInventory(); i++) {
-                ItemStack stack = inv.getStackInSlot(i);
-                if (stack != null && stack.getItem() == ChiseledMe.BLUE_STAR) {
-                    remaining[i] = new ItemStack(NETHER_STAR);
-                }
-            }
+        public NonNullList<ItemStack> getRemainingItems(InventoryCrafting inv) {
+            NonNullList<ItemStack> remaining = super.getRemainingItems(inv);
+            IntStream.range(0, inv.getSizeInventory())
+                .filter(i -> inv.getStackInSlot(i).getItem() == ChiseledMe.BLUE_STAR)
+                .forEach(i -> remaining.set(i, new ItemStack(NETHER_STAR)));
             return remaining;
         }
     }
@@ -185,27 +183,20 @@ public final class Recipes {
             boolean once = false;
             for (int i = 0; i < inv.getSizeInventory(); i++) {
                 ItemStack stack = inv.getStackInSlot(i);
-                if (stack != null) {
-                    if (stack.getItem() == ChiseledMe.BLUE_STAR) {
-                        once = true;
-                    } else {
-                        return false;
-                    }
+                if (stack.getItem() == ChiseledMe.BLUE_STAR) {
+                    once = true;
+                } else if (!stack.isEmpty()) {
+                    return false;
                 }
             }
             return once;
         }
 
-        @Nullable
+        @Nonnull
         @Override
         public ItemStack getCraftingResult(@Nonnull InventoryCrafting inv) {
-            int c = 0;
-            for (int i = 0; i < inv.getSizeInventory(); i++) {
-                if (inv.getStackInSlot(i) != null) {
-                    ++c;
-                }
-            }
-            return new ItemStack(LAPIS_BLOCK, c);
+            long count = IntStream.range(0, inv.getSizeInventory()).filter(i -> !inv.getStackInSlot(i).isEmpty()).count();
+            return new ItemStack(LAPIS_BLOCK, (int) count);
         }
 
         @Override
@@ -213,7 +204,7 @@ public final class Recipes {
             return 9;
         }
 
-        @Nullable
+        @Nonnull
         @Override
         public ItemStack getRecipeOutput() {
             return new ItemStack(LAPIS_BLOCK);
@@ -221,14 +212,11 @@ public final class Recipes {
 
         @Override
         @Nonnull
-        public ItemStack[] getRemainingItems(@Nonnull InventoryCrafting inv) {
-            ItemStack[] ret = new ItemStack[inv.getSizeInventory()];
-            for (int i = 0; i < inv.getSizeInventory(); i++) {
-                ItemStack stack = inv.getStackInSlot(i);
-                if (stack != null && stack.getItem() == ChiseledMe.BLUE_STAR) {
-                    ret[i] = new ItemStack(NETHER_STAR);
-                }
-            }
+        public NonNullList<ItemStack> getRemainingItems(@Nonnull InventoryCrafting inv) {
+            NonNullList<ItemStack> ret = NonNullList.withSize(inv.getSizeInventory(), ItemStack.EMPTY);
+            IntStream.range(0, inv.getSizeInventory())
+                .filter(i -> inv.getStackInSlot(i).getItem() == ChiseledMe.BLUE_STAR)
+                .forEach(i -> ret.set(i, new ItemStack(NETHER_STAR)));
             ForgeHooks.getCraftingPlayer().addStat(Achievements.SURPRISE); // meh x2
             return ret;
         }

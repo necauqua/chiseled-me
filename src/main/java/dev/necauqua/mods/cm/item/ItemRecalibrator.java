@@ -27,10 +27,7 @@ import net.minecraft.item.EnumRarity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
@@ -86,7 +83,8 @@ public final class ItemRecalibrator extends ItemMod {
 
     @Override
     @Nonnull
-    public ActionResult<ItemStack> onItemRightClick(@Nonnull ItemStack stack, World world, EntityPlayer player, EnumHand hand) {
+    public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, @Nonnull EnumHand hand) {
+        ItemStack stack = player.getHeldItem(hand);
         ItemStack ret = stack;
         double dist = Config.recalibratorEntityReachDist;
         if (dist > 0.0 && player.isSneaking()) {
@@ -156,7 +154,7 @@ public final class ItemRecalibrator extends ItemMod {
     }
 
     @Override
-    public void getSubItems(@Nonnull Item item, @Nullable CreativeTabs tab, List<ItemStack> subItems) {
+    public void getSubItems(@Nonnull Item item, @Nullable CreativeTabs tab, NonNullList<ItemStack> subItems) {
         super.getSubItems(item, tab, subItems); // reset one
         for (byte i = 1; i <= 12; i++) {
             subItems.add(create(REDUCTION, i));
@@ -287,7 +285,6 @@ public final class ItemRecalibrator extends ItemMod {
                 nbt.setInteger("charges", charges + i);
                 stack.setTagCompound(nbt);
             } else {
-                //noinspection ConstantConditions - clearing nbt is fine, idea complaining again here
                 stack.setTagCompound(null); // set recalibrator to reset mode
                 if (isPlayer) {
                     ((EntityPlayer) entity).addStat(Achievements.RESET);
