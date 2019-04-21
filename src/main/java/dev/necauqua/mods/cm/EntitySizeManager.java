@@ -45,12 +45,14 @@ import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Map;
 
 import static dev.necauqua.mods.cm.ChiseledMe.MODID;
 import static dev.necauqua.mods.cm.EntitySizeManager.EntitySizeData.CAPABILITY;
-import static java.lang.Math.*;
+import static java.lang.Math.abs;
+import static java.lang.Math.log;
 
 public final class EntitySizeManager {
 
@@ -66,19 +68,27 @@ public final class EntitySizeManager {
     private static final Map<Integer, Float> spawnSetSizeQueue = Maps.newHashMap();
 
     public static float getSize(Entity entity) {
-        return entity.getCapability(CAPABILITY, null).interpSize;
+        EntitySizeData data = entity.getCapability(CAPABILITY, null);
+        return data != null ? data.interpSize : 1.0F;
     }
 
     public static float getRenderSize(Entity entity, float partialTick) {
-        return entity.getCapability(CAPABILITY, null).getRenderSize(partialTick);
+        EntitySizeData data = entity.getCapability(CAPABILITY, null);
+        return data != null ? data.getRenderSize(partialTick) : 1.0F;
     }
 
     public static void setSize(Entity entity, float size, boolean interp) {
-        entity.getCapability(CAPABILITY, null).setSize(size, interp);
+        EntitySizeData data = entity.getCapability(CAPABILITY, null);
+        if (data != null) {
+            data.setSize(size, interp);
+        }
     }
 
     public static void updateSize(Entity entity) {
-        entity.getCapability(CAPABILITY, null).updateSize();
+        EntitySizeData data = entity.getCapability(CAPABILITY, null);
+        if (data != null) {
+            data.updateSize();
+        }
     }
 
     @SideOnly(Side.CLIENT)
@@ -137,7 +147,11 @@ public final class EntitySizeManager {
 
     @SubscribeEvent
     public void onPlayerLogin(PlayerLoggedInEvent e) {
-        float size = ((Entity) e.player).getCapability(CAPABILITY, null).nextSize;
+        EntitySizeData data = ((Entity) e.player).getCapability(CAPABILITY, null);
+        if (data == null) {
+            return;
+        }
+        float size = data.nextSize;
         if (size != 1.0F) {
             if (e.player instanceof EntityPlayerMP) {
                 Network.sendEnqueueSetSizeToClient((EntityPlayerMP) e.player, e.player, size);
@@ -149,14 +163,16 @@ public final class EntitySizeManager {
     public void onStartTracking(PlayerEvent.StartTracking e) {
         Entity entity = e.getTarget();
         EntitySizeData data = entity.getCapability(CAPABILITY, null);
+        if (data == null) {
+            return;
+        }
         if (entity instanceof EntityItem) {
-            ItemStack stack = ((EntityItem) entity).getEntityItem();
+            ItemStack stack = ((EntityItem) entity).getItem();
             NBTTagCompound nbt = stack.getTagCompound();
             if (nbt != null && nbt.hasKey(NBT_KEY_SIZE, 5)) {
                 data.setSize(nbt.getFloat(NBT_KEY_SIZE), false);
                 nbt.removeTag(NBT_KEY_SIZE);
                 if (nbt.hasNoTags()) {
-                    //noinspection ConstantConditions - tag compound is nullable, lol
                     stack.setTagCompound(null);
                 }
             }
@@ -219,7 +235,7 @@ public final class EntitySizeManager {
             float h = originalHeight * size;
             entity.width = w * 2.0F;
             entity.height = h;
-            entity.setEntityBoundingBox(new AxisAlignedBB(pos.xCoord - w, pos.yCoord, pos.zCoord - w, pos.xCoord + w, pos.yCoord + h, pos.zCoord + w));
+            entity.setEntityBoundingBox(new AxisAlignedBB(pos.x - w, pos.y, pos.z - w, pos.x + w, pos.y + h, pos.z + w));
         }
 
         private void setAllSizes(float size) {
@@ -236,10 +252,12 @@ public final class EntitySizeManager {
                 return;
             }
             Entity[] parts = entity.getParts();
-            //noinspection ConstantConditions - parts ARE nullable, lol
             if (parts != null) {
                 for (Entity part : parts) {
-                    part.getCapability(CAPABILITY, null).setSize(size, interp);
+                    EntitySizeData data = part.getCapability(CAPABILITY, null);
+                    if (data != null) {
+                        data.setSize(size, interp);
+                    }
                 }
             }
             entity.dismountRidingEntity();
@@ -276,12 +294,12 @@ public final class EntitySizeManager {
         }
 
         @Override
-        public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing) {
+        public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing facing) {
             return capability == CAPABILITY;
         }
 
         @Override
-        public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing) {
+        public <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing) {
             return capability == CAPABILITY ?
                 CAPABILITY.cast(this) :
                 null;

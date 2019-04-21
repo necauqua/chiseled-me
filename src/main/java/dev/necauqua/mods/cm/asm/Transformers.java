@@ -350,7 +350,7 @@ public final class Transformers {
     @Transformer
     public void entityMotion() {
         inClass("net.minecraft.entity.Entity")
-            .patchMethod(srg("move", "Entity"), "(DDD)V")
+            .patchMethod(srg("move", "Entity"), "(Lnet/minecraft/entity/MoverType;DDD)V")
             .with(p -> {
                 p.addLocal("size", DOUBLE_TYPE);
                 p.insertAfter(methodBegin(), mv -> { // the speed
@@ -358,25 +358,25 @@ public final class Transformers {
                     mv.visitHook(getSize);
                     mv.visitInsn(F2D);
                     mv.visitVarInsn(DSTORE, "size");
-                    mv.visitVarInsn(DLOAD, 1); // param double x
+                    mv.visitVarInsn(DLOAD, 2); // param double x
                     mv.visitVarInsn(DLOAD, "size");
                     mv.visitInsn(DMUL);
-                    mv.visitVarInsn(DSTORE, 1); // param double x
-                    mv.visitVarInsn(DLOAD, 3); // param double y
+                    mv.visitVarInsn(DSTORE, 2); // param double x
+                    mv.visitVarInsn(DLOAD, 4); // param double y
                     mv.visitVarInsn(DLOAD, "size");
                     mv.visitInsn(DMUL);
-                    mv.visitVarInsn(DSTORE, 3); // param double y
-                    mv.visitVarInsn(DLOAD, 5); // param double z
+                    mv.visitVarInsn(DSTORE, 4); // param double y
+                    mv.visitVarInsn(DLOAD, 6); // param double z
                     mv.visitVarInsn(DLOAD, "size");
                     mv.visitInsn(DMUL);
-                    mv.visitVarInsn(DSTORE, 5); // param double z
+                    mv.visitVarInsn(DSTORE, 6); // param double z
                 });
                 Hook mulBySize = mv -> {
                     mv.visitVarInsn(DLOAD, "size");
                     mv.visitInsn(DMUL);
                 };
                 p.insertAfterAll(ldcInsn(0.05), mulBySize); // shifting on edges of aabb's
-                p.insertBefore(varInsn(DSTORE, 3), 3, mulBySize); // stepHeight
+                p.insertBefore(varInsn(DSTORE, 4), 3, mulBySize); // stepHeight
                 p.insertAfterAll(ldcInsn(0.6), mv -> { // div distanceWalked(Modified) for the step sounds
                     mv.visitVarInsn(DLOAD, "size");
                     mv.visitInsn(DDIV);
@@ -471,7 +471,7 @@ public final class Transformers {
                 p.addLocal("size", DOUBLE_TYPE);
                 p.insertBefore(varInsn(ALOAD, 2), mv -> { // setup
                     mv.visitVarInsn(ALOAD, 0); // NetHandlerPlayServer this
-                    mv.visitFieldInsn(GETFIELD, srg("playerEntity"), "Lnet/minecraft/entity/player/EntityPlayerMP;");
+                    mv.visitFieldInsn(GETFIELD, srg("player", "NetHandlerPlayServer"), "Lnet/minecraft/entity/player/EntityPlayerMP;");
                     mv.visitHook(getSize);
                     mv.visitInsn(F2D);
                     mv.visitVarInsn(DSTORE, "size");
@@ -558,24 +558,6 @@ public final class Transformers {
                 });
                 p.insertAfter(methodInsn(INVOKEVIRTUAL, "net/minecraft/block/Block", srg("onEntityCollidedWithBlock", "Block"), "(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/Entity;)V"),
                     mv -> mv.visitLabel(skipBlockCollision));
-            });
-        inClass("net.minecraft.entity.monster.EntitySkeleton")
-            .patchMethod(srg("updateSize", "EntitySkeleton"), "(Lnet/minecraft/entity/monster/SkeletonType;)V")
-            .with(p -> {
-                p.addLocal("size", FLOAT_TYPE);
-                p.insertAfter(methodBegin(), mv -> {
-                    mv.visitVarInsn(ALOAD, 0); // EntitySkeleton this
-                    mv.visitHook(getSize);
-                    mv.visitVarInsn(FSTORE, "size");
-                });
-                Hook mulBySize = mv -> {
-                    mv.visitVarInsn(FLOAD, "size");
-                    mv.visitInsn(FMUL);
-                };
-                p.insertAfter(ldcInsn(0.7F), mulBySize);
-                p.insertAfter(ldcInsn(2.4F), mulBySize);
-                p.insertAfter(ldcInsn(0.6F), mulBySize);
-                p.insertAfter(ldcInsn(1.99F), mulBySize);
             });
     }
 
@@ -672,8 +654,8 @@ public final class Transformers {
             .with(mulBySize);
 
         // those patches are for shooting mobs with hardcoded height, there is no way to make it universal currently
-        inClass("net.minecraft.entity.monster.EntitySkeleton")
-            .patchMethod(srg("getEyeHeight", "EntitySkeleton"), "()F")
+        inClass("net.minecraft.entity.monster.AbstractSkeleton")
+            .patchMethod(srg("getEyeHeight", "AbstractSkeleton"), "()F")
             .with(mulBySize);
         inClass("net.minecraft.entity.monster.EntitySnowman")
             .patchMethod(srg("getEyeHeight", "EntitySnowman"), "()F")
@@ -873,7 +855,7 @@ public final class Transformers {
                             () -> mv.visitInsn(ICONST_0)))))
             .patchMethod(srg("findEntityOnPath"), "(Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Vec3d;)Lnet/minecraft/entity/Entity;")
             .with(collisionPatch)
-            .patchMethod(srg("onHit"), "(Lnet/minecraft/util/math/RayTraceResult;)V")
+            .patchMethod(srg("onHit", "EntityArrow"), "(Lnet/minecraft/util/math/RayTraceResult;)V")
             .with(p -> {
 //                p.insertAfter(methodBegin(), mv -> {
 //                    mv.visitVarInsn(ALOAD, 1); // param RayTraceResult raytraceResultIn
