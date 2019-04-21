@@ -19,11 +19,13 @@ package dev.necauqua.mods.cm;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import static dev.necauqua.mods.cm.ChiseledMe.MODID;
+
 public final class Log {
 
     private Log() {}
 
-    private static Logger logger = LogManager.getLogger("Chiseled Me");
+    private static Logger logger = LogManager.getLogger(MODID);
 
     public static void trace(Object msg) {
         logger.trace(msg);

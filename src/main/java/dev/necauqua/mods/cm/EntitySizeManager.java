@@ -39,7 +39,6 @@ import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
@@ -109,12 +108,23 @@ public final class EntitySizeManager {
             if (size != null) {
                 setSize(entity, size, false);
             }
+        } else {
+            float size = getSize(entity);
+            if (size != 1.0F) {
+                Network.sendSetSizeToClients(entity, size, false);
+            }
         }
     }
 
     @SubscribeEvent
-    public void onDimChange(EntityTravelToDimensionEvent e) {
-        EntitySizeManager.setSize(e.getEntity(), 1.0F, false);
+    public void onPlayerCloned(PlayerEvent.Clone e) {
+        EntityPlayer player = e.getEntityPlayer();
+        if (!e.isWasDeath() && player instanceof EntityPlayerMP) {
+            float size = getSize(player);
+            if (size != 1.0F) {
+                Network.sendEnqueueSetSizeToClient((EntityPlayerMP) player, player, size);
+            }
+        }
     }
 
     @SubscribeEvent
@@ -205,6 +215,8 @@ public final class EntitySizeManager {
         }
 
         private void setAllSizes(float size) {
+            interpTicks = 0;
+            interpInterval = 0;
             prevSize = size;
             interpSize = size;
             nextSize = size;
@@ -227,7 +239,8 @@ public final class EntitySizeManager {
             prevSize = interpSize;
             nextSize = size;
             if (interp) {
-                interpInterval = (int) (abs(log(interpSize = prevSize) - log(size)) * TWO_OVER_LOG_TWO);
+                interpTicks = 0;
+                interpInterval = (int) (abs(log(prevSize) - log(nextSize)) * TWO_OVER_LOG_TWO);
                 return;
             }
             setBBoxSize(size);
