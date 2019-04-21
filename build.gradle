@@ -21,12 +21,16 @@ minecraft {
     version = '1.10.2-12.18.3.2185'
     mappings = 'stable_29'
     runDir = 'build/run'
-    clientRunArgs += ['--username', 'user']
+    clientRunArgs += ['--username', 'dev'] // force the same username (not each time different PlayerXXX)
 
     replace '@VERSION@', project.version
     replace '@API_VERSION@', '1.1'
     replace '@UPDATE_URL@', 'https://raw.githubusercontent.com/necauqua/chiseled-me/master/updates.json'
 }
+
+// fix forgegradle runs being cached lol
+runClient.outputs.upToDateWhen { false }
+runServer.outputs.upToDateWhen { false }
 
 jar {
     manifest {
@@ -61,7 +65,7 @@ task postProcessSources {
     dependsOn += tasks.withType(TaskSourceCopy.class)
     // only apply the srg preprocessing if the final jar is going to be obfuscated
     onlyIf {
-        gradle.taskGraph.hasTask(':reobfJar')
+        gradle.taskGraph.hasTask(reobfJar)
     }
     doLast {
         def map = [:].withDefault { [] }

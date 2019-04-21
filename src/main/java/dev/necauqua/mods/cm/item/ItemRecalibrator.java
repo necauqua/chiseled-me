@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package dev.necauqua.mods.cm.item;
 
 import dev.necauqua.mods.cm.*;
+import net.minecraft.block.BlockDispenser;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.dispenser.IBehaviorDispenseItem;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -31,6 +32,7 @@ import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -46,8 +48,23 @@ import static dev.necauqua.mods.cm.item.ItemRecalibrator.RecalibrationEffect.*;
 
 public class ItemRecalibrator extends ItemMod {
 
+    public static final IBehaviorDispenseItem DISPENSER_BEHAVIOR = (source, stack) -> {
+        BlockPos at = source.getBlockPos().offset(source.getBlockState().getValue(BlockDispenser.FACING));
+        List<Entity> list = source.getWorld().getEntitiesWithinAABB(Entity.class, new AxisAlignedBB(at));
+        if (list.isEmpty()) {
+            return stack;
+        }
+        RecalibrationEffect effect = getEffectFromStack(stack);
+        ItemStack worked = stack.copy();
+        for (Entity entity : list) {
+            worked = effect.apply(entity, worked);
+        }
+        return worked;
+    };
+
     public ItemRecalibrator() {
         super("recalibrator");
+        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(this, DISPENSER_BEHAVIOR);
         setMaxStackSize(1);
     }
 
@@ -100,9 +117,7 @@ public class ItemRecalibrator extends ItemMod {
         } else {
             ret = getEffectFromStack(stack).apply(player, stack.copy());
         }
-        return new ActionResult<>(EnumActionResult.SUCCESS, player.isCreative() ?
-            stack :
-            ret);
+        return new ActionResult<>(EnumActionResult.SUCCESS, player.isCreative() ? stack : ret);
     }
 
     @Override
@@ -127,12 +142,10 @@ public class ItemRecalibrator extends ItemMod {
     public EnumRarity getRarity(ItemStack stack) {
         RecalibrationEffect effect = getEffectFromStack(stack);
         return effect.type == RESET ?
-            EnumRarity.UNCOMMON :
-            effect.tier <= (effect.type == REDUCTION ?
-                8 :
-                2) ?
-                EnumRarity.RARE :
-                EnumRarity.EPIC;
+                EnumRarity.UNCOMMON :
+                effect.tier <= (effect.type == REDUCTION ? 8 : 2) ?
+                        EnumRarity.RARE :
+                        EnumRarity.EPIC;
     }
 
     @Override
@@ -161,7 +174,7 @@ public class ItemRecalibrator extends ItemMod {
         NBTTagCompound nbt = stack.getTagCompound();
         byte type = nbt != null ? nbt.getByte("type") : 0;
         return new ResourceLocation(MODID, "recalibrator" +
-            (type == -1 ? "_reduction" : type == 1 ? "_amplification" : ""));
+                (type == -1 ? "_reduction" : type == 1 ? "_amplification" : ""));
     }
 
     @Override
@@ -186,14 +199,8 @@ public class ItemRecalibrator extends ItemMod {
             this.type = type;
             this.tier = tier;
             this.charges = charges;
-            int maxTier = (byte) (type == REDUCTION ?
-                12 :
-                type == AMPLIFICATION ?
-                    4 :
-                    0);
-            size = tier <= maxTier ?
-                (float) Math.pow(2.0, tier * type) :
-                1.0F;
+            int maxTier = (byte) (type == REDUCTION ? 12 : type == AMPLIFICATION ? 4 : 0);
+            size = tier <= maxTier ? (float) Math.pow(2.0, tier * type) : 1.0F;
             maxCharges = (float) Math.pow(2.0, maxTier - tier);
         }
 
@@ -207,29 +214,22 @@ public class ItemRecalibrator extends ItemMod {
 
         @SideOnly(Side.CLIENT)
         public String getChargesLeft() {
-            return type == RESET ?
-                null :
-                I18n.format("item.chiseled_me:recalibrator.charges", (int) (maxCharges - charges));
+            if (type == RESET) {
+                return null;
+            }
+            return I18n.format("item.chiseled_me:recalibrator.charges", (int) (maxCharges - charges));
         }
 
         @SideOnly(Side.CLIENT)
         public String getDisplayString(String sub) {
-            int s = (int) (type == REDUCTION ?
-                1.0F / size :
-                size);
-            String name = type == REDUCTION ?
-                "reduction" :
-                type == AMPLIFICATION ?
-                    "amplification" :
-                    "reset";
+            int s = (int) (type == REDUCTION ? 1.0F / size : size);
+            String name = type == REDUCTION ? "reduction" : type == AMPLIFICATION ? "amplification" : "reset";
             return I18n.format("item.chiseled_me:recalibrator." + name + "." + sub, s);
         }
 
         public ItemStack apply(Entity entity, ItemStack stack) {
             boolean isPlayer = entity instanceof EntityPlayer;
-            int i = isPlayer ?
-                1 :
-                2;
+            int i = isPlayer ? 1 : 2;
             if (size != EntitySizeManager.getSize(entity)) {
                 if (!entity.world.isRemote) {
                     EntitySizeManager.setSize(entity, size, true);
@@ -281,20 +281,21 @@ public class ItemRecalibrator extends ItemMod {
             } else {
                 i *= 4;
             }
-            if (type != RESET) {
-                if (charges < maxCharges - i) {
-                    NBTTagCompound nbt = stack.getTagCompound();
-                    if (nbt == null) {
-                        nbt = new NBTTagCompound();
-                    }
-                    nbt.setInteger("charges", charges + i);
-                    stack.setTagCompound(nbt);
-                } else {
-                    //noinspection ConstantConditions - clearing nbt is fine, idea complaining again here
-                    stack.setTagCompound(null); // set recalibrator to reset mode
-                    if (isPlayer) {
-                        ((EntityPlayer) entity).addStat(Achievements.RESET);
-                    }
+            if (type == RESET) {
+                return stack;
+            }
+            if (charges < maxCharges - i) {
+                NBTTagCompound nbt = stack.getTagCompound();
+                if (nbt == null) {
+                    nbt = new NBTTagCompound();
+                }
+                nbt.setInteger("charges", charges + i);
+                stack.setTagCompound(nbt);
+            } else {
+                //noinspection ConstantConditions - clearing nbt is fine, idea complaining again here
+                stack.setTagCompound(null); // set recalibrator to reset mode
+                if (isPlayer) {
+                    ((EntityPlayer) entity).addStat(Achievements.RESET);
                 }
             }
             return stack;

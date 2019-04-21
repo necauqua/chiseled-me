@@ -13,11 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package dev.necauqua.mods.cm.item;
 
 import dev.necauqua.mods.cm.Achievements;
-import dev.necauqua.mods.cm.ChiseledMe;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
@@ -29,7 +27,6 @@ public class CraftItem extends ItemMod {
 
     public CraftItem(String name) {
         super(name);
-        setCreativeTab(ChiseledMe.TAB);
     }
 
     // this method uses int id because circular static class loading results in
