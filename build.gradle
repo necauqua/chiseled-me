@@ -79,6 +79,7 @@ task postProcessSources {
     onlyIf { project.gradle.taskGraph.hasTask(reobfJar) }
     doLast {
         def map = [:].withDefault { [] }
+        println(genSrgs.mcpToSrg)
         genSrgs.mcpToSrg.eachLine {
             def split = it.split(' ')
             def type = split[0]

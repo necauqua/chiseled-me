@@ -45,29 +45,38 @@ public final class Network {
         chan.register(new Network());
     }
 
-    @SubscribeEvent
     @SideOnly(Side.CLIENT)
+    @SubscribeEvent
     public void onClientReceive(ClientCustomPacketEvent e) {
-        PacketBuffer payload = new PacketBuffer(e.getPacket().payload());
-        switch (payload.readByte()) {
-            case 0: {
-                World clientWorld = Minecraft.getMinecraft().world;
-                if (clientWorld != null) {
-                    int id = payload.readInt();
-                    Entity entity = clientWorld.getEntityByID(id);
-                    if (entity != null) {
-                        EntitySizeManager.setSize(entity, payload.readFloat(), payload.readBoolean());
+        ClientOnly.onClientReceive(e);
+    }
+
+    // idk, sideonly on method does not work for some reason
+    @SideOnly(Side.CLIENT)
+    private static class ClientOnly {
+
+        static void onClientReceive(ClientCustomPacketEvent e) {
+            PacketBuffer payload = new PacketBuffer(e.getPacket().payload());
+            switch (payload.readByte()) {
+                case 0: {
+                    World clientWorld = Minecraft.getMinecraft().world;
+                    if (clientWorld != null) {
+                        int id = payload.readInt();
+                        Entity entity = clientWorld.getEntityByID(id);
+                        if (entity != null) {
+                            EntitySizeManager.setSize(entity, payload.readFloat(), payload.readBoolean());
+                        } else {
+                            Log.warn("Client entity with id " + id + " is null! This mean you've desynced somewhere =/");
+                        }
                     } else {
-                        Log.warn("Client entity with id " + id + " is null! This mean you've desynced somewhere =/");
+                        Log.warn("Somehow client world does not yet exist, this should never happen!");
                     }
-                } else {
-                    Log.warn("Somehow client world does not yet exist, this should never happen!");
+                    break;
                 }
-                break;
-            }
-            case 1: {
-                EntitySizeManager.enqueueSetSize(payload.readInt(), payload.readFloat());
-                break;
+                case 1: {
+                    EntitySizeManager.enqueueSetSize(payload.readInt(), payload.readFloat());
+                    break;
+                }
             }
         }
     }

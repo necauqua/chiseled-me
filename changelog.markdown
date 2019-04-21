@@ -24,6 +24,7 @@ because it is amazing, logical and I want more people to know about it.
  - German translation (by Vexatos)
  - Simplified Chinese translation (by 3TUSK)
 ### Fixed
+ - Fixed (possible) server crashes
  - Fixed size being reset after traveling to another dimension
  - Fixed skeleton bbox not being scaled
  - Fixed hand bobbing movement

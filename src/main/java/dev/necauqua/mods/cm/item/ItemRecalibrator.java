@@ -17,7 +17,7 @@ package dev.necauqua.mods.cm.item;
 
 import dev.necauqua.mods.cm.*;
 import net.minecraft.block.BlockDispenser;
-import net.minecraft.client.resources.I18n;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.dispenser.IBehaviorDispenseItem;
 import net.minecraft.entity.Entity;
@@ -36,8 +36,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -111,7 +109,7 @@ public final class ItemRecalibrator extends ItemMod {
                     }
                 }
             }
-            if (target != null && !target.isInvisibleToPlayer(player) && !(target instanceof EntityPlayer)) {
+            if (target != null && !target.isInvisible() && !(target instanceof EntityPlayer)) {
                 ret = getEffectFromStack(stack).apply(target, stack.copy());
             }
         } else {
@@ -122,7 +120,6 @@ public final class ItemRecalibrator extends ItemMod {
 
     @Override
     @Nonnull
-    @SideOnly(Side.CLIENT) // why this is not client-only by default?
     public String getItemStackDisplayName(@Nonnull ItemStack stack) {
         return getEffectFromStack(stack).getDisplayString("name");
     }
@@ -212,19 +209,17 @@ public final class ItemRecalibrator extends ItemMod {
             return charges / maxCharges;
         }
 
-        @SideOnly(Side.CLIENT)
         public String getChargesLeft() {
             if (type == RESET) {
                 return null;
             }
-            return I18n.format("item.chiseled_me:recalibrator.charges", (int) (maxCharges - charges));
+            return I18n.translateToLocalFormatted("item.chiseled_me:recalibrator.charges", (int) (maxCharges - charges));
         }
 
-        @SideOnly(Side.CLIENT)
         public String getDisplayString(String sub) {
             int s = (int) (type == REDUCTION ? 1.0F / size : size);
             String name = type == REDUCTION ? "reduction" : type == AMPLIFICATION ? "amplification" : "reset";
-            return I18n.format("item.chiseled_me:recalibrator." + name + "." + sub, s);
+            return I18n.translateToLocalFormatted("item.chiseled_me:recalibrator." + name + "." + sub, s);
         }
 
         public ItemStack apply(Entity entity, ItemStack stack) {
