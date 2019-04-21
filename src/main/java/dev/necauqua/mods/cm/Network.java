@@ -58,7 +58,7 @@ public final class Network {
                     if (entity != null) {
                         EntitySizeManager.setSize(entity, payload.readFloat(), payload.readBoolean());
                     } else {
-                        Log.warn("Client entity with id " + id + " is null! This mean you're desynced somewhere =/");
+                        Log.warn("Client entity with id " + id + " is null! This mean you've desynced somewhere =/");
                     }
                 } else {
                     Log.warn("Somehow client world does not yet exist, this should never happen!");
