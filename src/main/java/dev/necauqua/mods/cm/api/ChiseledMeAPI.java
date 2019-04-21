@@ -13,15 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package dev.necauqua.mods.cm.api;
 
 import net.minecraft.entity.Entity;
 
-// oh looks like licence also restricts the necauqua.mods.cm.api package too - so learn how to use soft deps, it's a useful knowledge :)
-
 /**
- * Example use as soft dependency (if you bundle this API with your mod then you're doing it WRONG as Searge once said):
+ * Example use as soft dependency (if you bundle this API with your mod then
+ * you're doing it WRONG):
  *
  * <pre><code>
  * public float getSize(Entity entity) {
@@ -43,9 +41,8 @@ import net.minecraft.entity.Entity;
 public final class ChiseledMeAPI {
 
     /**
-     * If Chiseled Me is in you mod list, after pre-initialization stage
-     * this will be populated (with reflection hacks) with proper
-     * implementation to use.
+     * If the mod is loaded, after pre-initialization stage this will be
+     * populated (with reflection hacks) with proper implementation to use.
      * <p>
      * Also it is a mod instance.
      **/
