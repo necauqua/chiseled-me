@@ -112,10 +112,9 @@ public final class EntitySizeManager {
         }
     }
 
-    @SuppressWarnings("deprecation") // why?
     @SubscribeEvent
-    public void attachCapabilities(AttachCapabilitiesEvent.Entity e) {
-        e.addCapability(new ResourceLocation(MODID, "size"), new EntitySizeData(e.getEntity()));
+    public void attachCapabilities(AttachCapabilitiesEvent<Entity> e) {
+        e.addCapability(new ResourceLocation(MODID, "size"), new EntitySizeData(e.getObject()));
     }
 
     @SubscribeEvent
@@ -172,7 +171,7 @@ public final class EntitySizeManager {
             if (nbt != null && nbt.hasKey(NBT_KEY_SIZE, 5)) {
                 data.setSize(nbt.getFloat(NBT_KEY_SIZE), false);
                 nbt.removeTag(NBT_KEY_SIZE);
-                if (nbt.hasNoTags()) {
+                if (nbt.isEmpty()) {
                     stack.setTagCompound(null);
                 }
             }

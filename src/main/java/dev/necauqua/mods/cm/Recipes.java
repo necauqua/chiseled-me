@@ -52,13 +52,13 @@ public final class Recipes {
         OreDictionary.registerOre("netherStar", ChiseledMe.BLUE_STAR);
         GameRegistry.addShapelessRecipe(new ItemStack(ChiseledMe.BLUE_STAR), NETHER_STAR, LAPIS_BLOCK);
 
-        GameRegistry.addRecipe(new BlueStarDecraftRecipe());
+        GameRegistry.addShapedRecipe(new BlueStarDecraftRecipe());
         RecipeSorter.register("chiseled_me:blue_star_decraft", BlueStarDecraftRecipe.class, SHAPELESS, "after:minecraft:shapeless");
 
-        GameRegistry.addRecipe(new OverridenBeaconRecipe());
+        GameRegistry.addShapedRecipe(new OverridenBeaconRecipe());
         RecipeSorter.register("chiseled_me:overriden_beacon", OverridenBeaconRecipe.class, SHAPED, "after:minecraft:shaped before:forge:shapedore");
 
-        GameRegistry.addRecipe(new PymContainerRecipe());
+        GameRegistry.addShapedRecipe(new PymContainerRecipe());
         RecipeSorter.register("chiseled_me:container", PymContainerRecipe.class, SHAPED, "after:minecraft:shaped before:minecraft:shapeless");
 
         GameRegistry.addShapelessRecipe(

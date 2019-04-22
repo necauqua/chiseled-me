@@ -188,7 +188,7 @@ public final class Transformers {
     @Transformer
     public void entityRender() {
         inClass("net.minecraft.client.renderer.entity.RenderManager")
-            .patchMethod(srg("doRenderEntity"), "(Lnet/minecraft/entity/Entity;DDDFFZ)V")
+            .patchMethod(srg("renderEntity"), "(Lnet/minecraft/entity/Entity;DDDFFZ)V")
             .with(p -> {
                 p.addLocal("size", DOUBLE_TYPE);
                 p.insertBefore(varInsn(ALOAD, 11), 2, mv -> {
@@ -404,7 +404,7 @@ public final class Transformers {
                 mv.visitInsn(FDIV);
             });
         inClass("net.minecraft.entity.EntityLivingBase")
-            .patchMethod(srg("moveEntityWithHeading", "EntityLivingBase"), "(FF)V")
+            .patchMethod(srg("travel", "EntityLivingBase"), "(FFF)V")
             .with(libmSwingAnimation);
         inClass("net.minecraft.client.entity.EntityOtherPlayerMP") // because stupid EntityOtherPlayerMP x 2
             .patchMethod(srg("onUpdate", "EntityOtherPlayerMP"), "()V")
@@ -556,7 +556,7 @@ public final class Transformers {
                     mv.visitMethodInsn(INVOKESTATIC, "dev/necauqua/mods/cm/Hooks", "cancelBlockCollision", "(Lnet/minecraft/entity/Entity;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/util/math/BlockPos;)Z", false);
                     mv.visitJumpInsn(IFNE, skipBlockCollision);
                 });
-                p.insertAfter(methodInsn(INVOKEVIRTUAL, "net/minecraft/block/Block", srg("onEntityCollidedWithBlock", "Block"), "(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/Entity;)V"),
+                p.insertAfter(methodInsn(INVOKEVIRTUAL, "net/minecraft/block/Block", srg("onEntityCollision", "Block"), "(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/Entity;)V"),
                     mv -> mv.visitLabel(skipBlockCollision));
             });
     }

@@ -17,6 +17,7 @@ package dev.necauqua.mods.cm.item;
 
 import dev.necauqua.mods.cm.*;
 import net.minecraft.block.BlockDispenser;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.dispenser.IBehaviorDispenseItem;
@@ -88,7 +89,7 @@ public final class ItemRecalibrator extends ItemMod {
         ItemStack ret = stack;
         double dist = Config.recalibratorEntityReachDist;
         if (dist > 0.0 && player.isSneaking()) {
-            Vec3d start = player.getPositionVector().addVector(0.0, player.getEyeHeight(), 0.0);
+            Vec3d start = player.getPositionVector().add(0.0, player.getEyeHeight(), 0.0);
             Vec3d end = start.add(player.getLook(1.0F).scale(dist));
             AxisAlignedBB range = new AxisAlignedBB(player.posX - dist, player.posY - dist, player.posZ - dist, player.posX + dist, player.posY + dist, player.posZ + dist);
             Entity target = null;
@@ -123,7 +124,7 @@ public final class ItemRecalibrator extends ItemMod {
     }
 
     @Override
-    public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced) {
+    public void addInformation(ItemStack stack, @Nullable World world, List<String> tooltip, ITooltipFlag flagIn) {
         RecalibrationEffect effect = getEffectFromStack(stack);
         tooltip.add(effect.getDisplayString("tooltip"));
         String uses = effect.getChargesLeft();
@@ -154,8 +155,8 @@ public final class ItemRecalibrator extends ItemMod {
     }
 
     @Override
-    public void getSubItems(@Nonnull Item item, @Nullable CreativeTabs tab, NonNullList<ItemStack> subItems) {
-        super.getSubItems(item, tab, subItems); // reset one
+    public void getSubItems(@Nonnull CreativeTabs tab, @Nonnull NonNullList<ItemStack> subItems) {
+        super.getSubItems(tab, subItems); // reset one
         for (byte i = 1; i <= 12; i++) {
             subItems.add(create(REDUCTION, i));
         }

@@ -18,9 +18,11 @@ package dev.necauqua.mods.cm;
 
 import dev.necauqua.mods.cm.item.ItemRecalibrator;
 import dev.necauqua.mods.cm.item.ItemRecalibrator.RecalibrationEffect;
+import net.minecraft.advancements.Advancement;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.stats.Achievement;
+import net.minecraftforge.common.AchievementPage;
 import net.minecraftforge.common.AchievementPage;
 
 import java.util.List;
@@ -87,7 +89,7 @@ public final class Achievements extends AchievementPage {
 
     @SuppressWarnings("ConstantConditions") // idk why idea complains about parent being null
     private static Achievement create(String name, int column, int row, ItemStack stack, Achievement parent) {
-        return new Achievement("chiseled_me:" + name, "chiseled_me:" + name, column, row, stack, parent)
+        return new Advancement("chiseled_me:" + name, "chiseled_me:" + name, column, row, stack, parent)
             .registerStat();
     }
 }
