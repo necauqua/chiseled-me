@@ -129,7 +129,7 @@ public final class Transformers {
                     mv.visitInsn(D2F);
                     mv.visitInsn(FMUL);
                 });
-                p.insertAfterAll(ldcInsn(0.05F), mv -> { // camera offset fix
+                p.insertAfter(ldcInsn(0.05F), mv -> { // another clipping fix
                     mv.visitVarInsn(FLOAD, "size");
                     mv.visitInsn(FMUL);
                 });
@@ -386,7 +386,7 @@ public final class Transformers {
                     mv.visitInsn(D2F);
                     mv.visitInsn(FDIV);
                 });
-                p.insertAfter(ldcInsn(0.20000000298023224), mulBySize); // step sound cancel height
+                p.insertAfter(ldcInsn(0.20000000298023224), mulBySize); // block step collision
             })
             .patchMethod(srg("createRunningParticles"), "()V")
             .with(p -> p

@@ -10,9 +10,10 @@ buildscript {
 plugins {
     id 'net.minecraftforge.gradle.forge' version '2.0.2'
     id 'org.jetbrains.gradle.plugin.idea-ext' version '0.5'
+    id 'co.riiid.gradle' version '0.4.2'
 }
 
-version = '1.1.2'
+version = '1.1.255'
 group = 'dev.necauqua.mods'
 
 sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
@@ -57,6 +58,52 @@ processResources {
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
     }
+}
+
+def extractChangelog() {
+    def header = "## [${project.version}]"
+    return file('changelog.markdown')
+            .text
+            .readLines()
+            .dropWhile { !it.startsWith(header) }
+            .drop(1)
+            .takeWhile { !it.startsWith('## ') }
+            .join('\n')
+            .trim()
+}
+
+github {
+    token = project.githubReleasesToken
+    owner = System.properties['user.name']
+    repo = project.name
+    tagName = "v${project.version}"
+    name = tagName
+    body = extractChangelog()
+    assets = jar.destinationDir.listFiles().findAll { !it.name.contains('sources') }
+}
+
+task gitTag {
+    group = 'publishing'
+    doLast {
+        println('bash -c "echo $kek"'
+                .getInputStream()
+                .readLines())
+        println("git tag -sa v${project.version} -m \"Release ${project.version}\""
+                .execute()
+                .getErrorStream()
+                .readLines())
+        println("git push --tags"
+                .execute()
+                .getErrorStream()
+                .readLines())
+    }
+}
+
+githubRelease.group = 'publishing'
+githubRelease.dependsOn build, gitTag
+
+task publish(dependsOn: githubRelease) {
+    group = 'publishing'
 }
 
 task signJar(type: SignJar, dependsOn: reobfJar) {
