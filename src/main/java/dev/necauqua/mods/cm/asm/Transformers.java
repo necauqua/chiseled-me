@@ -129,7 +129,7 @@ public final class Transformers {
                     mv.visitInsn(D2F);
                     mv.visitInsn(FMUL);
                 });
-                p.insertAfterAll(ldcInsn(0.05F), mv -> { // camera offset fix
+                p.insertAfter(ldcInsn(0.05F), mv -> { // another clipping fix
                     mv.visitVarInsn(FLOAD, "size");
                     mv.visitInsn(FMUL);
                 });
@@ -166,7 +166,7 @@ public final class Transformers {
                 });
             })
             .patchMethod(srg("renderWorldPass"), "(IFJ)V") // these three are clipping
-            .and(srg("renderCloudsCheck"), "(Lnet/minecraft/client/renderer/RenderGlobal;FI)V")
+            .and(srg("renderCloudsCheck"), "(Lnet/minecraft/client/renderer/RenderGlobal;FIDDD)V")
             .and(srg("renderHand", "EntityRenderer", "(FI)V"), "(FI)V")
             .with(p -> {
                 p.addLocal("size", FLOAT_TYPE);
@@ -353,7 +353,7 @@ public final class Transformers {
             .patchMethod(srg("move", "Entity"), "(Lnet/minecraft/entity/MoverType;DDD)V")
             .with(p -> {
                 p.addLocal("size", DOUBLE_TYPE);
-                p.insertAfter(methodBegin(), mv -> { // the speed
+                p.insertAfter(methodBegin(), mv -> {
                     mv.visitVarInsn(ALOAD, 0);  // Entity this
                     mv.visitHook(getSize);
                     mv.visitInsn(F2D);
@@ -386,7 +386,7 @@ public final class Transformers {
                     mv.visitInsn(D2F);
                     mv.visitInsn(FDIV);
                 });
-                p.insertAfter(ldcInsn(0.20000000298023224), mulBySize); // step sound cancel height
+                p.insertAfter(ldcInsn(0.20000000298023224), mulBySize); // block step collision
             })
             .patchMethod(srg("createRunningParticles"), "()V")
             .with(p -> p
