@@ -28,7 +28,7 @@ public final class MethodPatcher implements MethodPatcherDsl {
     private final String transformerName;
     private final boolean optional;
 
-    private boolean matched = false;
+    private int matched = 0;
 
     private final List<Pair<String, String>> methodsToPatch = new ArrayList<>();
     private Patch patch = p -> {}; // empty stub
@@ -57,11 +57,11 @@ public final class MethodPatcher implements MethodPatcherDsl {
     }
 
     public boolean didMatch() {
-        return matched;
+        return matched == methodsToPatch.size();
     }
 
     public void apply(PatchContextDsl context) {
-        matched = true;
+        ++matched;
         patch.accept(context);
     }
 
