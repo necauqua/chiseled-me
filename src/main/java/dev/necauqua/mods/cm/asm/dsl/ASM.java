@@ -167,6 +167,9 @@ public final class ASM {
 
     // *** boilerplate for declarativeness *** //
 
+    /**
+     * Calls to this method are transformed with a smart Gradle task
+     */
     public static String srg(String mcpName) {
         return mcpName;
     }
