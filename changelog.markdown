@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog], and this project adheres to
 Also dates in this file are in [Holocene Calendar]
 because it is amazing, logical and I want more people to know about it.
 
+## [1.1.3] 12019-07-14
+### Changed
+ - This version of the mod works with 1.11, 1.11.1 and 1.11.2 Minecraft versions
+
 ## [1.1.2] 12019-04-22
 ### Changed
  - Updated the mod to work with minecraft version 1.11.2
@@ -59,7 +63,7 @@ because it is amazing, logical and I want more people to know about it.
 
 ## [1.0] - 12016-06-20
 ### Added
- - The mod was released
+ - The 2016 version of the mod, when it was first released
 
 
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html "Semantic Versioning"

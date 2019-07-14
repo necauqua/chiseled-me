@@ -27,7 +27,6 @@ import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.TransformerExclusions
 import java.util.Map;
 
 @Name("Chiseled Me ASM")
-@MCVersion("@MC_VERSION@")
 @SortingIndex(1001) // above 1000 so notch->srg deobfuscation would happen before us
 @TransformerExclusions("dev.necauqua.mods.cm")
 public final class Plugin implements IFMLLoadingPlugin, IClassTransformer {

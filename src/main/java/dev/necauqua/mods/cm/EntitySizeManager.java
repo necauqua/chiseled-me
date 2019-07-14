@@ -51,8 +51,7 @@ import java.util.Map;
 
 import static dev.necauqua.mods.cm.ChiseledMe.MODID;
 import static dev.necauqua.mods.cm.EntitySizeManager.EntitySizeData.CAPABILITY;
-import static java.lang.Math.abs;
-import static java.lang.Math.log;
+import static java.lang.Math.*;
 
 public final class EntitySizeManager {
 
