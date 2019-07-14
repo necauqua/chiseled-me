@@ -11,7 +11,8 @@ because it is amazing, logical and I want more people to know about it.
 ### Changed
  - This version of the mod works with 1.11, 1.11.1 and 1.11.2 Minecraft versions
 ### Fixed
- - Fixed clipping distance not being changed with size when clouds were enabled (fixes #15)
+ - Clipping distance not being changed with size when clouds were enabled (fixes #15)
+ - Pistons, shulker and other players now move resized player properly
 
 ## [1.1.2] 12019-04-22
 ### Changed

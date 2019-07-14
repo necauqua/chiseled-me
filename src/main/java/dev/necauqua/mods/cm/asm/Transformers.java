@@ -358,18 +358,23 @@ public final class Transformers {
                     mv.visitHook(getSize);
                     mv.visitInsn(F2D);
                     mv.visitVarInsn(DSTORE, "size");
-                    mv.visitVarInsn(DLOAD, 2); // param double x
-                    mv.visitVarInsn(DLOAD, "size");
-                    mv.visitInsn(DMUL);
-                    mv.visitVarInsn(DSTORE, 2); // param double x
-                    mv.visitVarInsn(DLOAD, 4); // param double y
-                    mv.visitVarInsn(DLOAD, "size");
-                    mv.visitInsn(DMUL);
-                    mv.visitVarInsn(DSTORE, 4); // param double y
-                    mv.visitVarInsn(DLOAD, 6); // param double z
-                    mv.visitVarInsn(DLOAD, "size");
-                    mv.visitInsn(DMUL);
-                    mv.visitVarInsn(DSTORE, 6); // param double z
+
+                    mv.visitVarInsn(ALOAD, 1); // MoverType mover type
+                    mv.visitFieldInsn(GETSTATIC, "net/minecraft/entity/MoverType", srg("SELF"), "Lnet/minecraft/entity/MoverType;");
+                    mv.ifJump(IF_ACMPNE, () -> {
+                        mv.visitVarInsn(DLOAD, 2); // param double x
+                        mv.visitVarInsn(DLOAD, "size");
+                        mv.visitInsn(DMUL);
+                        mv.visitVarInsn(DSTORE, 2); // param double x
+                        mv.visitVarInsn(DLOAD, 4); // param double y
+                        mv.visitVarInsn(DLOAD, "size");
+                        mv.visitInsn(DMUL);
+                        mv.visitVarInsn(DSTORE, 4); // param double y
+                        mv.visitVarInsn(DLOAD, 6); // param double z
+                        mv.visitVarInsn(DLOAD, "size");
+                        mv.visitInsn(DMUL);
+                        mv.visitVarInsn(DSTORE, 6); // param double z
+                    });
                 });
                 Hook mulBySize = mv -> {
                     mv.visitVarInsn(DLOAD, "size");
