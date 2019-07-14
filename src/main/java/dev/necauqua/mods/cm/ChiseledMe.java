@@ -40,9 +40,9 @@ import static dev.necauqua.mods.cm.ChiseledMe.MODID;
 
 @Mod(modid = MODID,
     version = "@VERSION@",
-    acceptedMinecraftVersions = "[@MC_VERSION@]",
+    acceptedMinecraftVersions = "@MC_VERSION_RANGE@",
     updateJSON = "https://raw.githubusercontent.com/necauqua/chiseled-me/master/updates.json",
-    certificateFingerprint = "32a569c20662ddab26a3fd716efe161dd99ce487",
+    certificateFingerprint = "c677c954974252994736eb15e855e1e6fc5a2e62",
     useMetadata= true)
 public final class ChiseledMe implements ChiseledMeInterface {
 

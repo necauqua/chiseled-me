@@ -10,9 +10,11 @@ buildscript {
 plugins {
     id 'net.minecraftforge.gradle.forge' version '2.0.2'
     id 'org.jetbrains.gradle.plugin.idea-ext' version '0.5'
+    id 'co.riiid.gradle' version '0.4.2'
+    id 'com.matthewprenger.cursegradle' version '1.3.0'
 }
 
-version = '1.1.2'
+version = '1.1.3'
 group = 'dev.necauqua.mods'
 
 sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
@@ -24,7 +26,7 @@ minecraft {
     clientRunArgs += ['--username', 'dev'] // force the same username (not each time different PlayerXXX)
 
     replace '@VERSION@', project.version
-    replace '@MC_VERSION@', version
+    replace '@MC_VERSION_RANGE@', '[1.11,1.11.2]'
     replace '@API_VERSION@', project.version.take(project.version.lastIndexOf('.'))
 }
 
@@ -59,8 +61,77 @@ processResources {
     }
 }
 
+def extractChangelog() {
+    if (project.hasProperty('changelog')) {
+        return project.changelog
+    }
+    def header = "## [${project.version}]"
+    return project.ext.changelog = file('changelog.markdown')
+            .text
+            .readLines()
+            .dropWhile { !it.startsWith(header) }
+            .drop(1)
+            .takeWhile { !it.startsWith('## ') }
+            .join('\n')
+            .trim()
+}
+
+if (project.hasProperty('githubToken')) {
+
+    task makeReleaseGitTag(type: Exec) {
+        def tag = "v${project.version}"
+        commandLine 'bash', '-c',
+                "git tag -sa v${project.version} -m \"Release $tag\" " +
+                        "&& script -qefc 'git push origin refs/tags/$tag' /dev/null"
+        // git push requires interactive shell even when
+        // ssh-agent knows the passphrase for the key
+        // so we emulate having a tty with the `script` program
+        // no actual input is needed so everything works fine
+    }
+
+    github {
+        token = project.githubToken
+        owner = 'necauqua'
+        repo = 'chiseled-me'
+        tagName = "v${project.version}"
+        name = tagName
+        body = extractChangelog()
+        assets = jar.destinationDir.listFiles().findAll { !it.name.contains('sources') }
+    }
+    githubRelease.group = 'publishing'
+    githubRelease.dependsOn build, makeReleaseGitTag
+}
+
+if (project.hasProperty('curseApiKey')) {
+    def curseID = '250075'
+    curseforge {
+        apiKey = project.curseApiKey
+        project {
+            id = curseID
+            changelog = extractChangelog()
+            changelogType = 'markdown'
+            releaseType = 'release'
+        }
+    }
+    // move this task to our group too
+    tasks['curseforge'].group = 'publishing'
+    // and hide single-project task since we have only one project by default
+    project.afterEvaluate {
+        tasks['curseforge' + curseID].group = null
+    }
+}
+
+task publish(dependsOn: ['githubRelease', 'curseforge']) {
+    group = 'publishing'
+}
+
 task signJar(type: SignJar, dependsOn: reobfJar) {
     onlyIf { project.hasProperty('keyStore') }
+    // gradle executes the whole task body (well it cant stop execution after onlyIf{} call)
+    // and then flips out on project.keyStore if it has no keyStore
+    if (!project.hasProperty('keyStore')) {
+        return
+    }
     keyStore = project.keyStore
     alias = project.keyStoreAlias
     storePass = project.keyStorePass
