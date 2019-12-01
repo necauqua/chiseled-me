@@ -1,18 +1,22 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog], and this project adheres to
-[Semantic Versioning].
+The format is based on [Keep a Changelog], and this project adheres to [Semantic Versioning].
 
-Also dates in this file are in [Holocene Calendar]
-because it is amazing, logical and I want more people to know about it.
+Also dates in this file are in [Holocene Calendar] because it is amazing, logical and I want more people to know about it.
 
-## [1.1.3] 12019-07-14
+## [1.1.3] 12019-12-02
 ### Changed
+ - The whole core was rewritten to use an actual field for the size in Entity class, not a Forge capability, which is a huge optimization
+ - This also means that all sizes in your worlds will be reset since they are now stored directly in entity NBT and not in a forgecap one
  - This version of the mod works with 1.11, 1.11.1 and 1.11.2 Minecraft versions
 ### Fixed
  - Clipping distance not being changed with size when clouds were enabled (fixes #15)
  - Pistons, shulker and other players now move resized player properly
+ - Little jumpy bounce when falling on block when small
+ - Teleports to enormous negative y values when becoming big
+ - Wall-climbing-like behavior when small
+ - Network code was revised and the de-syncs should be gone now
 
 ## [1.1.2] 12019-04-22
 ### Changed

@@ -46,11 +46,13 @@ import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 import java.lang.reflect.Field;
 
-import static dev.necauqua.mods.cm.EntitySizeManager.getSize;
-import static dev.necauqua.mods.cm.EntitySizeManager.setSize;
+import static dev.necauqua.mods.cm.ChiseledMe.MODID;
+import static dev.necauqua.mods.cm.EntitySizeManager.*;
+import static dev.necauqua.mods.cm.asm.dsl.ASM.srg;
 
 /** This class holds misc event handlers. **/
 public final class Handlers {
+    private static final String NBT_KEY_SIZE = MODID + ":size";
 
     private Handlers() {}
 
@@ -63,7 +65,7 @@ public final class Handlers {
 
     private static void fixBedAABB() {
         try {
-            Field f = ReflectionHelper.findField(BlockBed.class, "field_185513_c", "BED_AABB");
+            Field f = ReflectionHelper.findField(BlockBed.class, srg("BED_AABB"), "BED_AABB");
             AxisAlignedBB aabb = new AxisAlignedBB(0.0, 0.1875, 0.0, 1.0, 0.5625, 1.0);
             EnumHelper.setFailsafeFieldValue(f, null, aabb); // this can set final non-primitive fields
         } catch (Exception e) {
@@ -72,39 +74,18 @@ public final class Handlers {
     }
 
     @SubscribeEvent
-    public void onEntityJoinWorldEvent(EntityJoinWorldEvent e) {
-        Entity entity = e.getEntity();
-        Entity thrower;
-        if (entity instanceof EntityThrowable) {
-            thrower = ((EntityThrowable) entity).getThrower();
-        } else if (entity instanceof EntityArrow) {
-            thrower = ((EntityArrow) entity).shootingEntity;
-        } else if (entity instanceof IThrowableEntity) {
-            thrower = ((IThrowableEntity) entity).getThrower();
-        } else {
-            return;
-        }
-        if (thrower != null) {
-            float size = getSize(thrower);
-            if (size != 1.0F) {
-                setSize(entity, size, false);
-            }
-        }
-    }
-
-    @SubscribeEvent
     public void onLivingFall(LivingFallEvent event) {
         EntityLivingBase entity = event.getEntityLiving();
-        float size = getSize(entity);
-        if (size == 1.0F) {
+        double size = getSize(entity);
+        if (size == 1.0) {
             return;
         }
-        if (size < 1.0F && Config.scaleSmall) {
-            event.setDamageMultiplier(event.getDamageMultiplier() * size);
+        if (size < 1.0 && Config.scaleSmall) {
+            event.setDamageMultiplier((float) (event.getDamageMultiplier() * size));
             return;
         }
-        if (size > 1.0F && Config.scaleBig) {
-            event.setDamageMultiplier(event.getDamageMultiplier() * size);
+        if (size > 1.0 && Config.scaleBig) {
+            event.setDamageMultiplier((float) (event.getDamageMultiplier() * size));
         }
     }
 
@@ -116,8 +97,8 @@ public final class Handlers {
     }
 
     @SubscribeEvent
-    public void onEntityMount(EntityMountEvent e) { // todo this is temp, remove after riding fix (not soon)
-        if (e.isMounting() && (getSize(e.getEntityMounting()) != 1.0F || getSize(e.getEntityBeingMounted()) != 1.0F)) {
+    public void onEntityMount(EntityMountEvent e) {
+        if (e.isMounting() && (getSize(e.getEntityMounting()) != 1.0 || getSize(e.getEntityBeingMounted()) != 1.0)) {
             e.setCanceled(true);
         }
     }
@@ -128,11 +109,11 @@ public final class Handlers {
     @SubscribeEvent
     public void onPlayerSleepInBed(PlayerSleepInBedEvent e) {
         EntityPlayer player = e.getEntityPlayer();
-        float size = getSize(player);
-        if (size < 1.0F) {
+        double size = getSize(player);
+        if (size < 1.0) {
             e.setResult(TOO_SMALL);
             player.sendMessage(new TextComponentTranslation("chiseled_me.bed.too_small"));
-        } else if (size > 1.0F) {
+        } else if (size > 1.0) {
             e.setResult(TOO_BIG);
             player.sendMessage(new TextComponentTranslation("chiseled_me.bed.too_big"));
         }
@@ -140,8 +121,8 @@ public final class Handlers {
 
     @SubscribeEvent
     public void onLivingDrops(LivingDropsEvent e) {
-        float size = getSize(e.getEntity());
-        if (size != 1.0F) {
+        double size = getSize(e.getEntity());
+        if (size != 1.0) {
             for (EntityItem item : e.getDrops()) {
                 EntitySizeManager.setSize(item, size, false);
             }
@@ -150,8 +131,8 @@ public final class Handlers {
 
     @SubscribeEvent
     public void onPlayerDrop(ItemTossEvent e) {
-        float size = getSize(e.getPlayer());
-        if (size != 1.0F) {
+        double size = getSize(e.getPlayer());
+        if (size != 1.0) {
             EntitySizeManager.setSize(e.getEntityItem(), size, false);
         }
     }
@@ -159,21 +140,56 @@ public final class Handlers {
     @SubscribeEvent
     public void onPlayerBreak(BlockEvent.HarvestDropsEvent e) {
         EntityPlayer player = e.getHarvester();
-        float size;
+        double size;
         if (player != null && (size = getSize(player)) < 1.0) {
             for (ItemStack stack : e.getDrops()) {
                 NBTTagCompound nbt = stack.getTagCompound();
                 if (nbt == null) {
                     nbt = new NBTTagCompound();
                 }
-                nbt.setFloat("chiseled_me:size", size);
+                nbt.setDouble("chiseled_me:size", size);
                 stack.setTagCompound(nbt);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public void onEntityJoinWorld(EntityJoinWorldEvent e) {
+        Entity entity = e.getEntity();
+
+        if (entity instanceof EntityItem) {
+            ItemStack stack = ((EntityItem) entity).getItem();
+            NBTTagCompound nbt = stack.getTagCompound();
+            if (nbt != null && nbt.hasKey(NBT_KEY_SIZE, 6)) {
+                setSize(entity, nbt.getDouble(NBT_KEY_SIZE), false);
+                nbt.removeTag(NBT_KEY_SIZE);
+                if (nbt.hasNoTags()) {
+                    stack.setTagCompound(null);
+                }
+            }
+            return;
+        }
+
+        Entity thrower;
+        if (entity instanceof EntityThrowable) {
+            thrower = ((EntityThrowable) entity).getThrower();
+        } else if (entity instanceof EntityArrow) {
+            thrower = ((EntityArrow) entity).shootingEntity;
+        } else if (entity instanceof IThrowableEntity) {
+            thrower = ((IThrowableEntity) entity).getThrower();
+        } else {
+            return;
+        }
+        if (thrower != null) {
+            double size = getSize(thrower);
+            if (size != 1.0) {
+                setSize(entity, size, false);
             }
         }
     }
 
     @SubscribeEvent(priority = EventPriority.LOW)
     public void onPlayerBreakSpeed(PlayerEvent.BreakSpeed e) {
-        e.setNewSpeed(e.getNewSpeed() * getSize(e.getEntity()));
+        e.setNewSpeed((float) (e.getNewSpeed() * getSize(e.getEntity())));
     }
 }

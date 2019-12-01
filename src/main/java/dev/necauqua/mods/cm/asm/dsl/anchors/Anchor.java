@@ -29,7 +29,7 @@ public abstract class Anchor {
 
     public abstract ContextMethodVisitor apply(ContextMethodVisitor context, Modifier modifier);
 
-    protected final void visit(Modifier modifier, ContextMethodVisitor context, Runnable original, BooleanSupplier matches, IntSupplier pass) {
+    protected static void visit(Modifier modifier, ContextMethodVisitor context, Runnable original, BooleanSupplier matches, IntSupplier pass) {
         ModifierType type = modifier.getType();
         if (type == INSERT_AFTER) {
             original.run();

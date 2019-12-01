@@ -18,16 +18,20 @@ package dev.necauqua.mods.cm.asm.dsl.anchors;
 
 import dev.necauqua.mods.cm.asm.dsl.ContextMethodVisitor;
 import dev.necauqua.mods.cm.asm.dsl.Modifier;
+import org.objectweb.asm.util.Printer;
 
 import javax.annotation.Nullable;
 
-public final class LdcInsnAnchor extends Anchor {
+public final class TypeInsnAnchor extends Anchor {
+
+    private final int opcode;
 
     @Nullable
-    private final Object cst;
+    private final String type;
 
-    public LdcInsnAnchor(@Nullable Object cst) {
-        this.cst = cst;
+    public TypeInsnAnchor(int opcode, @Nullable String type) {
+        this.opcode = opcode;
+        this.type = type;
     }
 
     @Override
@@ -36,10 +40,10 @@ public final class LdcInsnAnchor extends Anchor {
             private int n = 0;
 
             @Override
-            public void visitLdcInsn(Object _cst) {
+            public void visitTypeInsn(int _opcode, String _type) {
                 visit(modifier, context,
-                    () -> super.visitLdcInsn(_cst),
-                    () -> cst == null || _cst.equals(cst),
+                    () -> super.visitTypeInsn(_opcode, _type),
+                    () -> _opcode == opcode && (type == null || _type.equals(type)),
                     () -> ++n
                 );
             }
@@ -48,6 +52,6 @@ public final class LdcInsnAnchor extends Anchor {
 
     @Override
     public String toString() {
-        return "LDC " + cst;
+        return Printer.OPCODES[opcode] + " " + type;
     }
 }

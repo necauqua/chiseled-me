@@ -17,11 +17,8 @@
 package dev.necauqua.mods.cm;
 
 import io.netty.buffer.Unpooled;
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.FMLEventChannel;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent.ClientCustomPacketEvent;
@@ -38,49 +35,34 @@ public final class Network {
 
     private Network() {}
 
-    private static FMLEventChannel chan;
+    private static FMLEventChannel channel;
 
     public static void init() {
-        chan = NetworkRegistry.INSTANCE.newEventDrivenChannel(MODID);
-        chan.register(new Network());
+        channel = NetworkRegistry.INSTANCE.newEventDrivenChannel(MODID);
+        channel.register(new Network());
     }
 
     @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public void onClientReceive(ClientCustomPacketEvent e) {
-        ClientOnly.onClientReceive(e);
-    }
-
-    // idk, sideonly on method does not work for some reason
-    @SideOnly(Side.CLIENT)
-    private static class ClientOnly {
-
-        static void onClientReceive(ClientCustomPacketEvent e) {
-            PacketBuffer payload = new PacketBuffer(e.getPacket().payload());
-            switch (payload.readByte()) {
-                case 0: {
-                    World clientWorld = Minecraft.getMinecraft().world;
-                    if (clientWorld != null) {
-                        int id = payload.readInt();
-                        Entity entity = clientWorld.getEntityByID(id);
-                        if (entity != null) {
-                            EntitySizeManager.setSize(entity, payload.readFloat(), payload.readBoolean());
-                        } else {
-                            Log.warn("Client entity with id " + id + " is null! This mean you've desynced somewhere =/");
-                        }
-                    } else {
-                        Log.warn("Somehow client world does not yet exist, this should never happen!");
-                    }
-                    break;
-                }
-                case 1: {
-                    EntitySizeManager.enqueueSetSize(payload.readInt(), payload.readFloat());
-                    break;
-                }
-            }
+        PacketBuffer payload = new PacketBuffer(e.getPacket().payload());
+        byte id = payload.readByte();
+        if (id != 0) {
+            invalidPacket(id, payload);
+            return;
         }
+        EntitySizeManager.setSizeClient(payload.readInt(), payload.readDouble(), payload.readBoolean());
     }
 
+    public static void setSizeOnClient(EntityPlayerMP client, int entityId, double size, boolean interpolate) {
+        channel.sendTo(packet(0, p -> {
+            p.writeInt(entityId);
+            p.writeDouble(size);
+            p.writeBoolean(interpolate);
+        }), client);
+    }
+
+    @SuppressWarnings("SameParameterValue") // maybe in the future there will be some other packets
     private static FMLProxyPacket packet(int id, Consumer<PacketBuffer> data) {
         PacketBuffer payload = new PacketBuffer(Unpooled.buffer());
         payload.writeByte(id);
@@ -88,18 +70,21 @@ public final class Network {
         return new FMLProxyPacket(payload, MODID);
     }
 
-    public static void sendSetSizeToClients(Entity entity, float size, boolean interp) {
-        chan.sendToDimension(packet(0, p -> {
-            p.writeInt(entity.getEntityId());
-            p.writeFloat(size);
-            p.writeBoolean(interp);
-        }), entity.dimension);
-    }
-
-    public static void sendEnqueueSetSizeToClient(EntityPlayerMP client, Entity entity, float size) {
-        chan.sendTo(packet(1, p -> {
-            p.writeInt(entity.getEntityId());
-            p.writeFloat(size);
-        }), client);
+    private static void invalidPacket(byte id, PacketBuffer payload) {
+        StringBuilder out = new StringBuilder("Invalid packet received, its content was: ").append(id);
+        int i = -1;
+        while (payload.isReadable() && i++ < 16) {
+            byte b = payload.readByte();
+            String hex = Integer.toHexString(b);
+            out.append(", ");
+            if (hex.length() < 2) {
+                out.append('0');
+            }
+            out.append(hex);
+        }
+        if (payload.isReadable()) {
+            out.append("and ").append(payload.readableBytes()).append(" bytes more...");
+        }
+        Log.error(out);
     }
 }
