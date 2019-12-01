@@ -64,6 +64,6 @@ public final class PatchContext implements PatchContextDsl {
 
     @Override
     public String getClassName() {
-        return parent.getParent().getClassName().replace('.', '/');
+        return parent.getParent().getClassName();
     }
 }

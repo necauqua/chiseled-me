@@ -32,7 +32,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.util.EnumHelper;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.event.*;
+import net.minecraftforge.fml.common.event.FMLFingerprintViolationEvent;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 
 import javax.annotation.Nonnull;
 
@@ -43,7 +46,7 @@ import static dev.necauqua.mods.cm.ChiseledMe.MODID;
     acceptedMinecraftVersions = "@MC_VERSION_RANGE@",
     updateJSON = "https://raw.githubusercontent.com/necauqua/chiseled-me/master/updates.json",
     certificateFingerprint = "c677c954974252994736eb15e855e1e6fc5a2e62",
-    useMetadata= true)
+    useMetadata = true)
 public final class ChiseledMe implements ChiseledMeInterface {
 
     public static final String MODID = "chiseled_me";
@@ -82,7 +85,7 @@ public final class ChiseledMe implements ChiseledMeInterface {
 
     @EventHandler
     public void init(FMLInitializationEvent e) {
-        RandomUtils.forEachStaticField(getClass(), ItemMod.class, ItemMod::init);
+        Utils.forEachStaticField(getClass(), ItemMod.class, ItemMod::init);
         Handlers.init();
         Achievements.init();
         Recipes.init();
@@ -96,17 +99,17 @@ public final class ChiseledMe implements ChiseledMeInterface {
 
     @Override
     public float getSizeOf(Entity entity) {
-        return EntitySizeManager.getSize(entity);
+        return (float) EntitySizeManager.getSize(entity);
     }
 
     @Override
     public float getRenderSizeOf(Entity entity, float partialTick) {
-        return EntitySizeManager.getRenderSize(entity, partialTick);
+        return (float) EntitySizeManager.getRenderSize(entity, partialTick);
     }
 
     @Override
     public void setSizeOf(Entity entity, float size, boolean interp) {
-        EntitySizeManager.setSize(entity, size, interp);
+        EntitySizeManager.setSizeAndSync(entity, size, interp);
     }
 
     private static void populateApi(ChiseledMeInterface api) {

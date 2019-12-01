@@ -19,11 +19,14 @@ package dev.necauqua.mods.cm.asm.dsl.anchors;
 import dev.necauqua.mods.cm.asm.dsl.ContextMethodVisitor;
 import dev.necauqua.mods.cm.asm.dsl.Modifier;
 
+import javax.annotation.Nullable;
+
 public final class LdcInsnAnchor extends Anchor {
 
+    @Nullable
     private final Object cst;
 
-    public LdcInsnAnchor(Object cst) {
+    public LdcInsnAnchor(@Nullable Object cst) {
         this.cst = cst;
     }
 
@@ -36,7 +39,7 @@ public final class LdcInsnAnchor extends Anchor {
             public void visitLdcInsn(Object _cst) {
                 visit(modifier, context,
                     () -> super.visitLdcInsn(_cst),
-                    () -> _cst.equals(cst),
+                    () -> cst == null || _cst.equals(cst),
                     () -> ++n
                 );
             }

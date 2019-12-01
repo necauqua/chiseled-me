@@ -17,7 +17,7 @@ package dev.necauqua.mods.cm.item;
 
 import dev.necauqua.mods.cm.*;
 import net.minecraft.block.BlockDispenser;
-import net.minecraft.util.text.translation.I18n;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.dispenser.IBehaviorDispenseItem;
 import net.minecraft.entity.Entity;
@@ -89,7 +89,7 @@ public final class ItemRecalibrator extends ItemMod {
         double dist = Config.recalibratorEntityReachDist;
         if (dist > 0.0 && player.isSneaking()) {
             Vec3d start = player.getPositionVector().addVector(0.0, player.getEyeHeight(), 0.0);
-            Vec3d end = start.add(player.getLook(1.0F).scale(dist));
+            Vec3d end = start.add(player.getLook(1.0f).scale(dist));
             AxisAlignedBB range = new AxisAlignedBB(player.posX - dist, player.posY - dist, player.posZ - dist, player.posX + dist, player.posY + dist, player.posZ + dist);
             Entity target = null;
             for (Entity entity : world.getEntitiesWithinAABBExcludingEntity(player, range)) {
@@ -178,7 +178,6 @@ public final class ItemRecalibrator extends ItemMod {
     }
 
     public static class RecalibrationEffect {
-
         public static final byte REDUCTION = -1;
         public static final byte RESET = 0;
         public static final byte AMPLIFICATION = 1;
@@ -195,7 +194,7 @@ public final class ItemRecalibrator extends ItemMod {
             this.tier = tier;
             this.charges = charges;
             int maxTier = (byte) (type == REDUCTION ? 12 : type == AMPLIFICATION ? 4 : 0);
-            size = tier <= maxTier ? (float) Math.pow(2.0, tier * type) : 1.0F;
+            size = tier <= maxTier ? (float) Math.pow(2.0, tier * type) : 1.0f;
             maxCharges = (float) Math.pow(2.0, maxTier - tier);
         }
 
@@ -211,13 +210,13 @@ public final class ItemRecalibrator extends ItemMod {
             if (type == RESET) {
                 return null;
             }
-            return I18n.translateToLocalFormatted("item.chiseled_me:recalibrator.charges", (int) (maxCharges - charges));
+            return I18n.format("item.chiseled_me:recalibrator.charges", (int) (maxCharges - charges));
         }
 
         public String getDisplayString(String sub) {
-            int s = (int) (type == REDUCTION ? 1.0F / size : size);
+            int s = (int) (type == REDUCTION ? 1.0f / size : size);
             String name = type == REDUCTION ? "reduction" : type == AMPLIFICATION ? "amplification" : "reset";
-            return I18n.translateToLocalFormatted("item.chiseled_me:recalibrator." + name + "." + sub, s);
+            return I18n.format("item.chiseled_me:recalibrator." + name + "." + sub, s);
         }
 
         public ItemStack apply(Entity entity, ItemStack stack) {
@@ -225,8 +224,7 @@ public final class ItemRecalibrator extends ItemMod {
             int i = isPlayer ? 1 : 2;
             if (size != EntitySizeManager.getSize(entity)) {
                 if (!entity.world.isRemote) {
-                    EntitySizeManager.setSize(entity, size, true);
-                    Network.sendSetSizeToClients(entity, size, true); // notify all clients 'bout this
+                    EntitySizeManager.setSizeAndSync(entity, size, true);
                 }
                 if (isPlayer) {
                     EntityPlayer player = (EntityPlayer) entity;

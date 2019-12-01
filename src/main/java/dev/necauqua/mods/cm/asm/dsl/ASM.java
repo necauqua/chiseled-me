@@ -22,6 +22,8 @@ import dev.necauqua.mods.cm.asm.dsl.anchors.*;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 
+import javax.annotation.Nonnull;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
@@ -58,9 +60,14 @@ public final class ASM {
             if (m.isAnnotationPresent(Transformer.class)) {
                 try {
                     currentTransformer = m.getName();
+                    Log.debug("Found transformer " + m.getName());
                     m.invoke(holder);
-                } catch (Exception e) {
-                    throw new IllegalStateException("Can't load transformer '" + m.getName() + "'!", e); // this should not happen
+                } catch (IllegalAccessException e) {
+                    throw new AssertionError("Transformer method has illegal access", e); // this should not happen
+                } catch (IllegalArgumentException e) {
+                    throw new IllegalStateException("Transformer methods should not be static of have parameters!", e);
+                } catch (InvocationTargetException e) {
+                    throw new RuntimeException(e.getCause()); // method threw an exception, rethrow it
                 }
             }
         }
@@ -170,8 +177,14 @@ public final class ASM {
     /**
      * Calls to this method are transformed with a smart Gradle task
      */
+    @SuppressWarnings("unused")
     public static String srg(String mcpName) {
-        return mcpName;
+        // funky hack that allows you to run this without preprocessing from Intellij IDEA
+        if (System.getProperty("java.class.path").contains("idea_rt")) {
+            return mcpName;
+        }
+        // but still keep the check for incorrect compilation or whatever
+        throw new IllegalStateException("Gradle preprocessing was not applied! Macro: srg(\"" + mcpName + "\")");
     }
 
     /**
@@ -179,7 +192,10 @@ public final class ASM {
      */
     @SuppressWarnings("unused")
     public static String srg(String mcpName, String className) {
-        return mcpName;
+        if (System.getProperty("java.class.path").contains("idea_rt")) {
+            return mcpName;
+        }
+        throw new IllegalStateException("Gradle preprocessing was not applied! Macro: srg(\"" + mcpName + "\", \"" + className + "\")");
     }
 
     /**
@@ -187,14 +203,17 @@ public final class ASM {
      */
     @SuppressWarnings("unused")
     public static String srg(String mcpName, String className, String methodDesc) {
-        return mcpName;
+        if (System.getProperty("java.class.path").contains("idea_rt")) {
+            return mcpName;
+        }
+        throw new IllegalStateException("Gradle preprocessing was not applied! Macro: srg(\"" + mcpName + "\", \"" + className + "\", \"" + methodDesc + "\")");
     }
 
-    public static ClassPatcher inClass(String className) {
+    public static ClassPatcherDsl inClass(String className) {
         if (currentTransformer == null) {
             throw new IllegalStateException("Can't use 'inClass' outside transformer method!");
         }
-        return patchers.computeIfAbsent(className, ClassPatcher::new);
+        return patchers.computeIfAbsent(className.replaceAll("/", "."), ClassPatcher::new);
     }
 
     public static Anchor methodBegin() {
@@ -205,12 +224,28 @@ public final class ASM {
         return new InsnAnchor(opcode);
     }
 
-    public static Anchor ldcInsn(Object cst) {
+    public static Anchor ldcInsn(@Nonnull Object cst) {
         return new LdcInsnAnchor(cst);
+    }
+
+    public static Anchor ldcInsn() {
+        return new LdcInsnAnchor(null);
+    }
+
+    public static Anchor intInsn(int opcode, int value) {
+        return new IntInsnAnchor(opcode, value);
     }
 
     public static Anchor varInsn(int opcode, int var) {
         return new VarInsnAnchor(opcode, var);
+    }
+
+    public static Anchor typeInsn(int opcode, @Nonnull String type) {
+        return new TypeInsnAnchor(opcode, type);
+    }
+
+    public static Anchor typeInsn(int opcode) {
+        return new TypeInsnAnchor(opcode, null);
     }
 
     public static Anchor jumpInsn(int opcode) {

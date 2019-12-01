@@ -17,7 +17,6 @@
 package dev.necauqua.mods.cm.cmd;
 
 import dev.necauqua.mods.cm.EntitySizeManager;
-import dev.necauqua.mods.cm.Network;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -56,8 +55,7 @@ public final class SetSizeCommand extends CommandBase {
             interp = args[2].matches("t|true|y|yes");
         }
         Entity entity = getEntity(server, sender, args[0]);
-        EntitySizeManager.setSize(entity, size, interp);
-        Network.sendSetSizeToClients(entity, size, interp);
+        EntitySizeManager.setSizeAndSync(entity, size, interp);
         sender.sendMessage(new TextComponentTranslation("commands.chiseled_me:setsizeof.message", entity.getDisplayName(), size));
     }
 

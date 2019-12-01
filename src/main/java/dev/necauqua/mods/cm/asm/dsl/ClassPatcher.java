@@ -20,11 +20,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class ClassPatcher implements ClassPatcherDsl {
-
     private final String className;
 
     private final List<FieldDesc> fields = new ArrayList<>();
+    private final List<MethodDesc> methods = new ArrayList<>();
     private final List<MethodPatcher> methodPatchers = new ArrayList<>();
+    private final List<String> extraInterfaces = new ArrayList<>();
+    private final List<String> strippedInterfaces = new ArrayList<>();
 
     public ClassPatcher(String className) {
         this.className = className;
@@ -38,6 +40,18 @@ public final class ClassPatcher implements ClassPatcherDsl {
         return fields;
     }
 
+    public List<MethodDesc> getMethods() {
+        return methods;
+    }
+
+    public List<String> getExtraInterfaces() {
+        return extraInterfaces;
+    }
+
+    public List<String> getStrippedInterfaces() {
+        return strippedInterfaces;
+    }
+
     public String getClassName() {
         return className;
     }
@@ -49,8 +63,19 @@ public final class ClassPatcher implements ClassPatcherDsl {
     }
 
     @Override
-    public ClassPatcherDsl addField(int acc, String name, String desc) {
-        return addField(acc, name, desc, null);
+    public ClassPatcherDsl addMethod(int acc, String name, String desc, String sign, String[] exceptions, Hook code) {
+        methods.add(new MethodDesc(acc, name, desc, sign, exceptions, code));
+        return this;
+    }
+
+    public ClassPatcherDsl addInterface(String iface) {
+        extraInterfaces.add(iface);
+        return this;
+    }
+
+    public ClassPatcherDsl stripInterface(String iface) {
+        strippedInterfaces.add(iface);
+        return this;
     }
 
     @Override
@@ -72,8 +97,49 @@ public final class ClassPatcher implements ClassPatcherDsl {
         return patch;
     }
 
-    public static final class FieldDesc {
+    public static final class MethodDesc {
+        private final int acc;
+        private final String name;
+        private final String desc;
+        private final String sign;
+        private final String[] exceptions;
+        private final Hook code;
 
+        public MethodDesc(int acc, String name, String desc, String sign, String[] exceptions, Hook code) {
+            this.acc = acc;
+            this.name = name;
+            this.desc = desc;
+            this.sign = sign;
+            this.exceptions = exceptions;
+            this.code = code;
+        }
+
+        public int getAcc() {
+            return acc;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getDesc() {
+            return desc;
+        }
+
+        public String getSign() {
+            return sign;
+        }
+
+        public String[] getExceptions() {
+            return exceptions;
+        }
+
+        public Hook getCode() {
+            return code;
+        }
+    }
+
+    public static final class FieldDesc {
         private final int acc;
         private final String name;
         private final String desc;

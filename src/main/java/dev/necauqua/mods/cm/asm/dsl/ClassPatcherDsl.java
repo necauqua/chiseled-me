@@ -24,6 +24,20 @@ public interface ClassPatcherDsl {
         return addField(acc, name, desc, null);
     }
 
+    ClassPatcherDsl addMethod(int acc, String name, String desc, String sign, String[] exceptions, Hook code);
+
+    default ClassPatcherDsl addMethod(int acc, String name, String desc, String sign, Hook code) {
+        return addMethod(acc, name, desc, sign, null, code);
+    }
+
+    default ClassPatcherDsl addMethod(int acc, String name, String desc, Hook code) {
+        return addMethod(acc, name, desc, null, null, code);
+    }
+
+    ClassPatcherDsl addInterface(String iface);
+
+    ClassPatcherDsl stripInterface(String iface);
+
     MethodPatcherDsl patchMethod(String name, String desc);
 
     MethodPatcherDsl patchMethodOptionally(String name, String desc);

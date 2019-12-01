@@ -26,7 +26,7 @@ import net.minecraft.entity.Entity;
  *     if (Loader.isModLoaded("chiseled_me")) {
  *         return getSizeImpl(entity);
  *     }
- *     return 1.0F;
+ *     return 1.0f;
  * }
  *
  * {@literal @}Optional.Method(modid = "chiseled_me")
@@ -50,12 +50,12 @@ public final class ChiseledMeAPI {
 
         @Override
         public float getSizeOf(Entity entity) {
-            return 1.0F;
+            return 1.0f;
         }
 
         @Override
         public float getRenderSizeOf(Entity entity, float partialTick) {
-            return 1.0F;
+            return 1.0f;
         }
 
         @Override

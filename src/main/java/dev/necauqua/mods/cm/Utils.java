@@ -20,9 +20,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.function.Consumer;
 
-public final class RandomUtils {
+public final class Utils {
 
-    private RandomUtils() {}
+    private Utils() {}
 
     @SuppressWarnings("unchecked")
     public static <T> void forEachStaticField(Class<?> holder, Class<T> type, Consumer<T> action) {

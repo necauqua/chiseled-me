@@ -18,16 +18,17 @@ package dev.necauqua.mods.cm.asm.dsl;
 
 import dev.necauqua.mods.cm.Log;
 import dev.necauqua.mods.cm.asm.dsl.ClassPatcher.FieldDesc;
+import dev.necauqua.mods.cm.asm.dsl.ClassPatcher.MethodDesc;
 import org.apache.commons.lang3.tuple.Pair;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.LocalVariablesSorter;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toMap;
 import static org.objectweb.asm.Opcodes.ASM5;
 
@@ -54,11 +55,24 @@ public final class ClassPatchVisitor extends ClassVisitor {
 
     @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-        super.visit(version, access, name, signature, superName, interfaces);
+        List<String> ifaces = new ArrayList<>(asList(interfaces));
+        ifaces.addAll(patcher.getExtraInterfaces());
+        ifaces.removeAll(patcher.getStrippedInterfaces());
+
+        super.visit(version, access, name, signature, superName, ifaces.toArray(new String[0]));
+
         for (FieldDesc f : patcher.getFields()) {
             Log.debug("  - Adding field: " + f.getName() + "(" + f.getDesc() + ")");
             cv.visitField(f.getAcc(), f.getName(), f.getDesc(), f.getSign(), null)
-                    .visitEnd();
+                .visitEnd();
+        }
+
+        for (MethodDesc m : patcher.getMethods()) {
+            Log.debug("  - Adding method: " + m.getName() + m.getDesc());
+            MethodVisitor mv = cv.visitMethod(m.getAcc(), m.getName(), m.getDesc(), m.getSign(), m.getExceptions());
+            mv.visitCode();
+            m.getCode().accept(new ContextMethodVisitor(name, emptyMap(), mv, mv));
+            mv.visitEnd();
         }
     }
 
@@ -66,11 +80,11 @@ public final class ClassPatchVisitor extends ClassVisitor {
     public void visitEnd() {
         super.visitEnd();
         patcher.getMethodPatchers().stream()
-                .filter(mp -> !mp.didMatch())
-                .forEach(missedMethods::add);
+            .filter(mp -> !mp.didMatch())
+            .forEach(missedMethods::add);
         modifiers.stream()
-                .filter(m -> !m.didMatch())
-                .forEach(missedModifiers::add);
+            .filter(m -> !m.didMatch())
+            .forEach(missedModifiers::add);
     }
 
     @Override

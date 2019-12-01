@@ -48,7 +48,7 @@ public final class Config {
         enableBigSizes = c.getBoolean("enableBigs", "main", true,
             "Big sizes are OP and bugged even more then small.");
 
-        recalibratorEntityReachDist = c.getFloat("recalibratorReach", "main", 64.0F, 0.0F, 256.0F,
+        recalibratorEntityReachDist = c.getFloat("recalibratorReach", "main", 64.0f, 0.0f, 256.0f,
             "How far (in blocks) the recalibrator can reach to change entity size. Can set to 0 to disable changing entities at all");
 
         recalibratorItemEntityBBoxOffset = c.getBoolean("recalibratorItemEntityBBoxOffset", "misc", true,

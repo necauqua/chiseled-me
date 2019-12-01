@@ -71,7 +71,7 @@ public final class Achievements extends AchievementPage {
     private Achievements() {
         super("Chiseled Me"); // soo.. no lang keys? m'key
         List<Achievement> achievements = getAchievements();
-        RandomUtils.forEachStaticField(getClass(), Achievement.class, achievements::add);
+        Utils.forEachStaticField(getClass(), Achievement.class, achievements::add);
         if (!Config.enableSupersmalls) {
             achievements.remove(SUPERSMALLS);
             achievements.remove(THE_LIMIT);

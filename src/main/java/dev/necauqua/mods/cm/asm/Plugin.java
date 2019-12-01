@@ -19,7 +19,6 @@ package dev.necauqua.mods.cm.asm;
 import dev.necauqua.mods.cm.asm.dsl.ASM;
 import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
-import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.MCVersion;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.Name;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.SortingIndex;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.TransformerExclusions;
