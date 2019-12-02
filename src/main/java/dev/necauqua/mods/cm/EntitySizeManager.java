@@ -78,7 +78,7 @@ public final class EntitySizeManager {
 
     @SideOnly(Side.CLIENT)
     public static void setSizeClient(int entityId, double size, boolean interp) {
-        Entity entity = getEntityById(entityId);
+        Entity entity = ClientOnly.getEntityById(entityId);
         if (entity != null) {
             setSize(entity, size, interp);
         } else {
@@ -86,21 +86,23 @@ public final class EntitySizeManager {
         }
     }
 
-    private static int getEntityId(Entity entity) {
-        return entity instanceof EntityPlayer ? -1 : entity.getEntityId();
+    @SideOnly(Side.CLIENT)
+    private static class ClientOnly {
+        @Nullable
+        private static Entity getEntityById(int id) {
+            Minecraft mc = Minecraft.getMinecraft();
+            if (id == -1) {
+                return mc.player;
+            }
+            if (mc.world == null) {
+                return null;
+            }
+            return mc.world.getEntityByID(id);
+        }
     }
 
-    @SideOnly(Side.CLIENT)
-    @Nullable
-    private static Entity getEntityById(int id) {
-        Minecraft mc = Minecraft.getMinecraft();
-        if (id == -1) {
-            return mc.player;
-        }
-        if (mc.world == null) {
-            return null;
-        }
-        return mc.world.getEntityByID(id);
+    private static int getEntityId(Entity entity) {
+        return entity instanceof EntityPlayer ? -1 : entity.getEntityId();
     }
 
     public static void setSizeOnTrackingClients(Entity entity, double size, boolean interpolate) {
