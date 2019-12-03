@@ -32,10 +32,9 @@ import java.util.function.Consumer;
 import static dev.necauqua.mods.cm.ChiseledMe.MODID;
 
 public final class Network {
+    private static FMLEventChannel channel;
 
     private Network() {}
-
-    private static FMLEventChannel channel;
 
     public static void init() {
         channel = NetworkRegistry.INSTANCE.newEventDrivenChannel(MODID);
@@ -47,16 +46,28 @@ public final class Network {
     public void onClientReceive(ClientCustomPacketEvent e) {
         PacketBuffer payload = new PacketBuffer(e.getPacket().payload());
         byte id = payload.readByte();
-        if (id != 0) {
-            invalidPacket(id, payload);
-            return;
+        switch (id) {
+            case 0:
+                EntitySizeManager.setSizeClient(payload.readInt(), payload.readDouble(), payload.readBoolean());
+                break;
+            case 1:
+                EntitySizeManager.setSizeClient(-1, payload.readDouble(), payload.readBoolean());
+                break;
+            default:
+                invalidPacket(id, payload);
         }
-        EntitySizeManager.setSizeClient(payload.readInt(), payload.readDouble(), payload.readBoolean());
     }
 
     public static void setSizeOnClient(EntityPlayerMP client, int entityId, double size, boolean interpolate) {
         channel.sendTo(packet(0, p -> {
             p.writeInt(entityId);
+            p.writeDouble(size);
+            p.writeBoolean(interpolate);
+        }), client);
+    }
+
+    public static void setSizeOfClient(EntityPlayerMP client, double size, boolean interpolate) {
+        channel.sendTo(packet(1, p -> {
             p.writeDouble(size);
             p.writeBoolean(interpolate);
         }), client);

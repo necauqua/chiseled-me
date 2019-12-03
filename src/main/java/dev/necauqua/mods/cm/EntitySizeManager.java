@@ -77,16 +77,6 @@ public final class EntitySizeManager {
     }
 
     @SideOnly(Side.CLIENT)
-    public static void setSizeClient(int entityId, double size, boolean interp) {
-        Entity entity = ClientOnly.getEntityById(entityId);
-        if (entity != null) {
-            setSize(entity, size, interp);
-        } else {
-            spawnSetSizeQueue.addKey(entityId, new SetSize(size, interp));
-        }
-    }
-
-    @SideOnly(Side.CLIENT)
     private static class ClientOnly {
         @Nullable
         private static Entity getEntityById(int id) {
@@ -101,20 +91,32 @@ public final class EntitySizeManager {
         }
     }
 
-    private static int getEntityId(Entity entity) {
-        return entity instanceof EntityPlayer ? -1 : entity.getEntityId();
+    @SideOnly(Side.CLIENT)
+    public static void setSizeClient(int entityId, double size, boolean interp) {
+        Entity entity = ClientOnly.getEntityById(entityId);
+        if (entity != null) {
+            setSize(entity, size, interp);
+        } else {
+            spawnSetSizeQueue.addKey(entityId, new SetSize(size, interp));
+        }
     }
 
     public static void setSizeOnTrackingClients(Entity entity, double size, boolean interpolate) {
         if (entity.world.isRemote) {
             return;
         }
-        int id = getEntityId(entity);
-        if (id == -1) {
-            Network.setSizeOnClient((EntityPlayerMP) entity, id, size, interpolate);
+        if (entity instanceof EntityPlayerMP) {
+            Network.setSizeOfClient((EntityPlayerMP) entity, size, interpolate);
         }
         for (EntityPlayer entityPlayer : ((WorldServer) entity.world).getEntityTracker().getTrackingPlayers(entity)) {
-            Network.setSizeOnClient((EntityPlayerMP) entityPlayer, id, size, interpolate);
+            Network.setSizeOnClient((EntityPlayerMP) entityPlayer, entity.getEntityId(), size, interpolate);
+        }
+    }
+
+    private static void trySetSizeFromQueue(int id, Entity entity) {
+        SetSize size = spawnSetSizeQueue.removeObject(id);
+        if (size != null) {
+            setSize(entity, size.size, size.interp);
         }
     }
 
@@ -122,10 +124,10 @@ public final class EntitySizeManager {
     public void onEntityJoinWorld(EntityJoinWorldEvent e) {
         Entity entity = e.getEntity();
         if (entity.world.isRemote) {
-            SetSize size = spawnSetSizeQueue.removeObject(getEntityId(entity));
-            if (size != null) {
-                setSize(entity, size.size, size.interp);
+            if (entity instanceof EntityPlayer) {
+                trySetSizeFromQueue(-1, entity);
             }
+            trySetSizeFromQueue(entity.getEntityId(), entity);
         } else {
             double size = getSize(entity);
             if (size != 1.0) {
@@ -138,8 +140,8 @@ public final class EntitySizeManager {
     public void onStartTracking(PlayerEvent.StartTracking e) {
         Entity entity = e.getTarget();
         double size = getSize(entity);
-        if (size != 1.0f) {
-            setSizeOnClient((EntityPlayerMP) e.getEntityPlayer(), getEntityId(entity), size, false);
+        if (size != 1.0) {
+            setSizeOnClient((EntityPlayerMP) e.getEntityPlayer(), entity.getEntityId(), size, false);
         }
     }
 
