@@ -15,9 +15,11 @@
  */
 package dev.necauqua.mods.cm.item;
 
-import dev.necauqua.mods.cm.*;
+import dev.necauqua.mods.cm.Achievements;
+import dev.necauqua.mods.cm.ChiseledMe;
+import dev.necauqua.mods.cm.Config;
+import dev.necauqua.mods.cm.EntitySizeManager;
 import net.minecraft.block.BlockDispenser;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.dispenser.IBehaviorDispenseItem;
 import net.minecraft.entity.Entity;
@@ -32,6 +34,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
@@ -206,17 +209,19 @@ public final class ItemRecalibrator extends ItemMod {
             return charges / maxCharges;
         }
 
+        @SuppressWarnings("deprecation") // I18n, because of weird sideonly annotation behavior
         public String getChargesLeft() {
             if (type == RESET) {
                 return null;
             }
-            return I18n.format("item.chiseled_me:recalibrator.charges", (int) (maxCharges - charges));
+            return I18n.translateToLocalFormatted("item.chiseled_me:recalibrator.charges", (int) (maxCharges - charges));
         }
 
+        @SuppressWarnings("deprecation") // ^ same as above
         public String getDisplayString(String sub) {
             int s = (int) (type == REDUCTION ? 1.0f / size : size);
             String name = type == REDUCTION ? "reduction" : type == AMPLIFICATION ? "amplification" : "reset";
-            return I18n.format("item.chiseled_me:recalibrator." + name + "." + sub, s);
+            return I18n.translateToLocalFormatted("item.chiseled_me:recalibrator." + name + "." + sub, s);
         }
 
         public ItemStack apply(Entity entity, ItemStack stack) {
