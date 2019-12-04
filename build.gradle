@@ -109,6 +109,9 @@ if (project.hasProperty('curseApiKey')) {
             changelog = extractChangelog()
             changelogType = 'markdown'
             releaseType = 'release'
+
+            addGameVersion '1.11'
+            addGameVersion '1.11.1'
         }
     }
     // move this task to our group too
