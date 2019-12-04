@@ -291,7 +291,7 @@ public final class Transformers {
             .patchMethod("toString", "()Ljava/lang/String;")
             .with(p -> {
                 p.replace(intInsn(BIPUSH, 7), mv -> mv.visitIntInsn(BIPUSH, 8));
-                p.replace(ldcInsn(), mv -> mv.visitLdcInsn("%s[\'%s\'/%d, l=\'%s\', x=%.2f, y=%.2f, z=%.2f, cm:size=%.4f]"));
+                p.replace(ldcInsn(), mv -> mv.visitLdcInsn("%s['%s'/%d, l='%s', x=%.2f, y=%.2f, z=%.2f, cm:size=%.4f]"));
                 p.insertAfter(insn(AASTORE), mv -> {
                     mv.visitInsn(DUP);
                     mv.visitIntInsn(BIPUSH, 7);

@@ -31,12 +31,14 @@ public class ContextMethodVisitor extends MethodVisitor {
     private final MethodVisitor root;
 
     private int pass = 1; // used in `code` lambdas here and there
+    private final int[] currentLineNumber; // used for debug
 
     public ContextMethodVisitor(String className, Map<String, Integer> locals, MethodVisitor parent, MethodVisitor root) {
         super(Opcodes.ASM5, parent);
         this.className = className.replace('.', '/');
         this.locals = locals;
         this.root = root;
+        this.currentLineNumber = new int[]{0};
     }
 
     public ContextMethodVisitor(ContextMethodVisitor mv) {
@@ -44,6 +46,15 @@ public class ContextMethodVisitor extends MethodVisitor {
         className = mv.className;
         locals = mv.locals;
         root = mv.root;
+        currentLineNumber = mv.currentLineNumber;
+    }
+
+    public void setCurrentLineNumber(int currentLineNumber) {
+        this.currentLineNumber[0] = currentLineNumber;
+    }
+
+    public int getCurrentLineNumber() {
+        return currentLineNumber[0];
     }
 
     public void setPass(int pass) {
@@ -52,6 +63,10 @@ public class ContextMethodVisitor extends MethodVisitor {
 
     public int getPass() {
         return pass;
+    }
+
+    public String getClassName() {
+        return className;
     }
 
     // Additional methods:

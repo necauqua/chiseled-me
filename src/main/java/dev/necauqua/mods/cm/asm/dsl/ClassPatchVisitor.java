@@ -123,14 +123,13 @@ public final class ClassPatchVisitor extends ClassVisitor {
 
         LocalVariablesSorter lvs = new LocalVariablesSorter(access, desc, visitor);
         Map<String, Integer> localIndices = locals.stream().collect(toMap(Pair::getLeft, p -> lvs.newLocal(p.getRight())));
-        ContextMethodVisitor patched = new ContextMethodVisitor(className, localIndices, lvs, visitor);
+        ContextMethodVisitor context = new ContextMethodVisitor(className, localIndices, lvs, visitor);
+        ContextMethodVisitor patched = context;
 
         for (Modifier mod : modifiers) {
             patched = mod.apply(patched);
         }
-        if (isDump) {
-            return MethodDumper.create(patched, "original", className, name + desc);
-        }
-        return patched;
+        MethodVisitor lineNumberReader = new LineNumberReader(patched, context);
+        return isDump ? MethodDumper.create(lineNumberReader, "original", className, name + desc) : lineNumberReader;
     }
 }
