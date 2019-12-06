@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 
 Also dates in this file are in [Holocene Calendar] because it is amazing, logical and I want more people to know about it.
 
+## [1.1.4] 12019-12-06
+### Fixed
+ - Server-side entity bounding box not being properly set on logging in with non-standard size
+
 ## [1.1.3] 12019-12-05
 ### Changed
  - The whole core was rewritten to use an actual field for the size in Entity class, not a Forge capability, which is a huge optimization
