@@ -259,9 +259,10 @@ public final class Transformers {
                     mv.visitInsn(DCONST_0);
                     mv.visitInsn(DCMPL);
                     mv.ifJump(IFEQ, () -> {
-                        mv.visitVarInsn(ALOAD, 0);
+                        mv.visitVarInsn(ALOAD, 0); // Entity this
                         mv.visitVarInsn(DLOAD, "size");
-                        mv.visitFieldInsn(PUTFIELD, SIZE_FIELD, "D");
+                        mv.visitInsn(ICONST_0);
+                        mv.visitMethodInsn(INVOKEVIRTUAL, "setEntitySize", "(DZ)V");
                     });
                 });
             })
