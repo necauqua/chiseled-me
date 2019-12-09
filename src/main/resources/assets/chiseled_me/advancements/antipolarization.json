@@ -1,0 +1,35 @@
+{
+  "parent": "chiseled_me:blue_nether_star",
+  "display": {
+    "icon": {
+      "item": "chiseled_me:pym_essence_b"
+    },
+    "title": {
+      "translate": "advancement.chiseled_me:antipolarization"
+    },
+    "description": {
+      "translate": "advancement.chiseled_me:antipolarization.desc"
+    },
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "stuff": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "chiseled_me:pym_essence_b"
+          }
+        ]
+      }
+    }
+  },
+  "rewards": {
+    "recipes": [
+      "chiseled_me:recalibrator_amplification_1",
+      "chiseled_me:recalibrator_amplification_2",
+      "chiseled_me:recalibrator_amplification_3",
+      "chiseled_me:recalibrator_amplification_4"
+    ]
+  }
+}

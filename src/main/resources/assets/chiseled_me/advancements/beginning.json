@@ -1,0 +1,32 @@
+{
+  "parent": "chiseled_me:root",
+  "display": {
+    "icon": {
+      "item": "chiseled_me:pym_container"
+    },
+    "title": {
+      "translate": "advancement.chiseled_me:beginning"
+    },
+    "description": {
+      "translate": "advancement.chiseled_me:beginning.desc"
+    },
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "stuff": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "chiseled_me:pym_container"
+          }
+        ]
+      }
+    }
+  },
+  "rewards": {
+    "recipes": [
+      "chiseled_me:pym_essence"
+    ]
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "parent": "chiseled_me:concentrated",
+  "display": {
+    "icon": {
+      "item": "chiseled_me:recalibrator",
+      "data": 9
+    },
+    "title": {
+      "translate": "advancement.chiseled_me:supersmalls"
+    },
+    "description": {
+      "translate": "advancement.chiseled_me:supersmalls.desc"
+    },
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "stuff": {
+      "trigger": "chiseled_me:size",
+      "conditions": {
+        "size": 0.001953125
+      }
+    }
+  }
+}

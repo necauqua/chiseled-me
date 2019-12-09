@@ -15,34 +15,39 @@
  */
 package dev.necauqua.mods.cm.item;
 
-import dev.necauqua.mods.cm.Achievements;
-import dev.necauqua.mods.cm.ChiseledMe;
 import dev.necauqua.mods.cm.Config;
-import dev.necauqua.mods.cm.EntitySizeManager;
+import dev.necauqua.mods.cm.SidedHandler;
+import dev.necauqua.mods.cm.advancements.AdvancementTriggers;
 import net.minecraft.block.BlockDispenser;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.dispenser.IBehaviorDispenseItem;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.EnumRarity;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.*;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-import static dev.necauqua.mods.cm.ChiseledMe.MODID;
-import static dev.necauqua.mods.cm.item.ItemRecalibrator.RecalibrationEffect.*;
+import static dev.necauqua.mods.cm.ChiseledMe.RECALIBRATOR;
+import static dev.necauqua.mods.cm.ChiseledMe.ns;
+import static dev.necauqua.mods.cm.item.ItemRecalibrator.RecalibrationType.*;
+import static dev.necauqua.mods.cm.size.EntitySizeManager.getSize;
+import static dev.necauqua.mods.cm.size.EntitySizeManager.setSizeAndSync;
 
 public final class ItemRecalibrator extends ItemMod {
 
@@ -64,20 +69,39 @@ public final class ItemRecalibrator extends ItemMod {
         super("recalibrator");
         BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(this, DISPENSER_BEHAVIOR);
         setMaxStackSize(1);
+
+        addPropertyOverride(ns("recalibrator_type"),
+            (stack, worldIn, entityIn) -> {
+                int nbtFactor = getEffectFromStack(stack).type.getFactor();
+                if (nbtFactor != 0) {
+                    return nbtFactor;
+                }
+                // this is so stupid, need that for advancement icons
+                int meta = stack.getMetadata();
+                return meta == 0 ? 0 : meta <= 12 ? -1 : 1;
+            });
+
+        // maybe someone someday will make some cool model/texture based on that
+        addPropertyOverride(ns("recalibrator_tier"),
+            (stack, worldIn, entityIn) -> {
+                int nbtTier = getEffectFromStack(stack).tier;
+                if (nbtTier != 0) {
+                    return nbtTier;
+                }
+                // advancements should do it correctly here too
+                int meta = stack.getMetadata();
+                return meta == 0 ? 0 : meta <= 12 ? meta : meta - 12;
+            });
     }
 
     public static RecalibrationEffect getEffectFromStack(ItemStack stack) {
-        NBTTagCompound nbt = stack.getTagCompound();
-        if (nbt != null && nbt.hasKey("type", 1) && nbt.hasKey("tier", 1) && nbt.hasKey("charges", 3)) {
-            return new RecalibrationEffect(nbt.getByte("type"), nbt.getByte("tier"), nbt.getInteger("charges"));
-        }
-        return new RecalibrationEffect(RESET, (byte) 0, 0);
+        return RecalibrationEffect.fromNBT(stack.getTagCompound());
     }
 
-    public static ItemStack create(byte type, byte tier) {
-        ItemStack stack = new ItemStack(ChiseledMe.RECALIBRATOR);
+    public static ItemStack create(RecalibrationType type, byte tier) {
+        ItemStack stack = new ItemStack(RECALIBRATOR);
         NBTTagCompound nbt = new NBTTagCompound();
-        nbt.setByte("type", type);
+        nbt.setByte("type", (byte) type.getFactor());
         nbt.setByte("tier", tier);
         nbt.setInteger("charges", 0);
         stack.setTagCompound(nbt);
@@ -91,7 +115,7 @@ public final class ItemRecalibrator extends ItemMod {
         ItemStack ret = stack;
         double dist = Config.recalibratorEntityReachDist;
         if (dist > 0.0 && player.isSneaking()) {
-            Vec3d start = player.getPositionVector().addVector(0.0, player.getEyeHeight(), 0.0);
+            Vec3d start = player.getPositionVector().add(0.0, player.getEyeHeight(), 0.0);
             Vec3d end = start.add(player.getLook(1.0f).scale(dist));
             AxisAlignedBB range = new AxisAlignedBB(player.posX - dist, player.posY - dist, player.posZ - dist, player.posX + dist, player.posY + dist, player.posZ + dist);
             Entity target = null;
@@ -126,7 +150,7 @@ public final class ItemRecalibrator extends ItemMod {
     }
 
     @Override
-    public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced) {
+    public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         RecalibrationEffect effect = getEffectFromStack(stack);
         tooltip.add(effect.getDisplayString("tooltip"));
         String uses = effect.getChargesLeft();
@@ -157,48 +181,81 @@ public final class ItemRecalibrator extends ItemMod {
     }
 
     @Override
-    public void getSubItems(@Nonnull Item item, @Nullable CreativeTabs tab, NonNullList<ItemStack> subItems) {
-        super.getSubItems(item, tab, subItems); // reset one
-        for (byte i = 1; i <= 12; i++) {
-            subItems.add(create(REDUCTION, i));
-        }
-        for (byte i = 1; i <= 4; i++) {
-            subItems.add(create(AMPLIFICATION, i));
+    public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items) {
+        super.getSubItems(tab, items); // reset one
+        if (isInCreativeTab(tab)) {
+            for (byte i = 1; i <= 12; i++) {
+                items.add(create(REDUCTION, i));
+            }
+            for (byte i = 1; i <= 4; i++) {
+                items.add(create(AMPLIFICATION, i));
+            }
         }
     }
 
-    @Override
-    protected ResourceLocation getModelResource(ItemStack stack) {
-        NBTTagCompound nbt = stack.getTagCompound();
-        byte type = nbt != null ? nbt.getByte("type") : 0;
-        return new ResourceLocation(MODID, "recalibrator" +
-            (type == -1 ? "_reduction" : type == 1 ? "_amplification" : ""));
-    }
+    public enum RecalibrationType {
+        REDUCTION(-1, 12),
+        RESET(0, 0),
+        AMPLIFICATION(1, 4);
 
-    @Override
-    protected String[] getModelVariants() {
-        return new String[]{"recalibrator_reduction", "recalibrator_amplification"};
+        private final int factor;
+        private final int maxTier;
+
+        RecalibrationType(int factor, int maxTier) {
+            this.factor = factor;
+            this.maxTier = maxTier;
+        }
+
+        public int getFactor() {
+            return factor;
+        }
+
+        public int getMaxTier() {
+            return maxTier;
+        }
+
+        static RecalibrationType fromFactor(int factor) {
+            switch (factor) {
+                case -1:
+                    return REDUCTION;
+                case 1:
+                    return AMPLIFICATION;
+                default:
+                    return RESET;
+            }
+        }
     }
 
     public static class RecalibrationEffect {
-        public static final byte REDUCTION = -1;
-        public static final byte RESET = 0;
-        public static final byte AMPLIFICATION = 1;
 
-        private final byte type;
-        private final byte tier;
+        private final RecalibrationType type;
+        private final int tier;
         private final int charges;
-
         private final float size;
         private final float maxCharges;
 
-        public RecalibrationEffect(byte type, byte tier, int charges) {
+        public static RecalibrationEffect fromNBT(@Nullable NBTTagCompound nbt) {
+            if (nbt != null) {
+                RecalibrationType type = fromFactor(nbt.getByte("type"));
+                if (type != RESET) {
+                    byte tier = nbt.getByte("tier");
+                    if (tier > 0 && tier <= type.getMaxTier()) {
+                        int charges = nbt.getInteger("charges");
+                        if (charges >= 0) {
+                            return new RecalibrationEffect(type, tier, charges);
+                        }
+                    }
+                }
+            }
+            return new RecalibrationEffect(RESET, (byte) 0, 0);
+        }
+
+        private RecalibrationEffect(RecalibrationType type, int tier, int charges) {
             this.type = type;
             this.tier = tier;
             this.charges = charges;
-            int maxTier = (byte) (type == REDUCTION ? 12 : type == AMPLIFICATION ? 4 : 0);
-            size = tier <= maxTier ? (float) Math.pow(2.0, tier * type) : 1.0f;
-            maxCharges = (float) Math.pow(2.0, maxTier - tier);
+            size = (float) Math.pow(2.0, tier * type.getFactor());
+            maxCharges = (float) Math.pow(2.0, type.getMaxTier() - tier + 4);
         }
 
         public boolean showBar() {
@@ -209,73 +266,32 @@ public final class ItemRecalibrator extends ItemMod {
             return charges / maxCharges;
         }
 
-        @SuppressWarnings("deprecation") // I18n, because of weird sideonly annotation behavior
         public String getChargesLeft() {
             if (type == RESET) {
                 return null;
             }
-            return I18n.translateToLocalFormatted("item.chiseled_me:recalibrator.charges", (int) (maxCharges - charges));
+            return SidedHandler.instance.getLocalization("item.chiseled_me:recalibrator.charges", (int) (maxCharges - charges));
         }
 
-        @SuppressWarnings("deprecation") // ^ same as above
         public String getDisplayString(String sub) {
             int s = (int) (type == REDUCTION ? 1.0f / size : size);
-            String name = type == REDUCTION ? "reduction" : type == AMPLIFICATION ? "amplification" : "reset";
-            return I18n.translateToLocalFormatted("item.chiseled_me:recalibrator." + name + "." + sub, s);
+            String name = type.name().toLowerCase();
+            return SidedHandler.instance.getLocalization("item.chiseled_me:recalibrator." + name + "." + sub, s);
         }
 
         public ItemStack apply(Entity entity, ItemStack stack) {
             boolean isPlayer = entity instanceof EntityPlayer;
             int i = isPlayer ? 1 : 2;
-            if (size != EntitySizeManager.getSize(entity)) {
+            double currentSize = getSize(entity);
+            if (size != currentSize) {
                 if (!entity.world.isRemote) {
-                    EntitySizeManager.setSizeAndSync(entity, size, true);
+                    setSizeAndSync(entity, size, true);
                 }
                 if (isPlayer) {
-                    EntityPlayer player = (EntityPlayer) entity;
-                    if (type == REDUCTION) {
-                        switch (tier) {
-                            case 1:
-                                player.addStat(Achievements.CABLEWORK);
-                                break;
-                            case 2:
-                                player.addStat(Achievements.BIG_STAIRS);
-                                break;
-                            case 3:
-                                player.addStat(Achievements.MOUSE_HOLES);
-                                break;
-                            case 4:
-                                player.addStat(Achievements.C_AND_B_GALORE);
-                                break;
-                            case 8:
-                                player.addStat(Achievements.C_AND_B_SQUARED);
-                                break;
-                            case 9:
-                                player.addStat(Achievements.SUPERSMALLS);
-                                break;
-                            case 12:
-                                player.addStat(Achievements.THE_LIMIT);
-                                break;
-                        }
-                    } else if (type == AMPLIFICATION) {
-                        switch (tier) {
-                            case 1:
-                                player.addStat(Achievements.DOUBLE);
-                                break;
-                            case 2:
-                                player.addStat(Achievements.QUADRUPLE);
-                                break;
-                            case 3:
-                                player.addStat(Achievements.OCTUPLE);
-                                break;
-                            case 4:
-                                player.addStat(Achievements.SEXDECUPLE);
-                                break;
-                        }
-                    }
+                    AdvancementTriggers.SIZE.trigger((EntityPlayer) entity, currentSize, size);
+                } else {
+                    i *= 4;
                 }
-            } else {
-                i *= 4;
             }
             if (type == RESET) {
                 return stack;
@@ -289,8 +305,11 @@ public final class ItemRecalibrator extends ItemMod {
                 stack.setTagCompound(nbt);
             } else {
                 stack.setTagCompound(null); // set recalibrator to reset mode
-                if (isPlayer) {
-                    ((EntityPlayer) entity).addStat(Achievements.RESET);
+                if (entity instanceof EntityPlayerMP) {
+                    EntityPlayerMP player = (EntityPlayerMP) entity;
+                    if (!player.isCreative()) { // because in creative the item wont be replaced
+                        AdvancementTriggers.RECALIBRATOR_RESET.trigger(player);
+                    }
                 }
             }
             return stack;

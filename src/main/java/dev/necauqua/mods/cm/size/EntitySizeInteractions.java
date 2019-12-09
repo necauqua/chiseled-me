@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-package dev.necauqua.mods.cm;
+package dev.necauqua.mods.cm.size;
 
+import dev.necauqua.mods.cm.ChiseledMe.OnInit;
+import dev.necauqua.mods.cm.Config;
+import dev.necauqua.mods.cm.Log;
 import net.minecraft.block.BlockBed;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -28,7 +31,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.EnumHelper;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
@@ -47,25 +49,23 @@ import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import java.lang.reflect.Field;
 
 import static dev.necauqua.mods.cm.ChiseledMe.MODID;
-import static dev.necauqua.mods.cm.EntitySizeManager.*;
 import static dev.necauqua.mods.cm.asm.dsl.ASM.srg;
+import static dev.necauqua.mods.cm.size.EntitySizeManager.getSize;
+import static dev.necauqua.mods.cm.size.EntitySizeManager.setSize;
 
 /** This class holds misc event handlers. **/
-public final class Handlers {
+public final class EntitySizeInteractions {
     private static final String NBT_KEY_SIZE = MODID + ":size";
 
-    private Handlers() {}
+    private EntitySizeInteractions() {}
 
-    public static void init() {
-        MinecraftForge.EVENT_BUS.register(new Handlers());
-        if (Config.changeBedAABB) {
-            fixBedAABB();
+    @OnInit
+    public static void fixBedAABB() {
+        if (!Config.changeBedAABB) {
+            return;
         }
-    }
-
-    private static void fixBedAABB() {
         try {
-            Field f = ReflectionHelper.findField(BlockBed.class, srg("BED_AABB"), "BED_AABB");
+            Field f = ReflectionHelper.findField(BlockBed.class, srg("BED_AABB"));
             AxisAlignedBB aabb = new AxisAlignedBB(0.0, 0.1875, 0.0, 1.0, 0.5625, 1.0);
             EnumHelper.setFailsafeFieldValue(f, null, aabb); // this can set final non-primitive fields
         } catch (Exception e) {
@@ -74,7 +74,7 @@ public final class Handlers {
     }
 
     @SubscribeEvent
-    public void onLivingFall(LivingFallEvent event) {
+    public static void onLivingFall(LivingFallEvent event) {
         EntityLivingBase entity = event.getEntityLiving();
         double size = getSize(entity);
         if (size == 1.0) {
@@ -90,14 +90,14 @@ public final class Handlers {
     }
 
     @SubscribeEvent
-    public void onPlayerInteract(EntityInteractSpecific e) {
+    public static void onPlayerInteract(EntityInteractSpecific e) {
         if (getSize(e.getEntity()) != getSize(e.getTarget())) {
             e.setCanceled(true);
         }
     }
 
     @SubscribeEvent
-    public void onEntityMount(EntityMountEvent e) {
+    public static void onEntityMount(EntityMountEvent e) {
         if (e.isMounting() && (getSize(e.getEntityMounting()) != 1.0 || getSize(e.getEntityBeingMounted()) != 1.0)) {
             e.setCanceled(true);
         }
@@ -107,7 +107,7 @@ public final class Handlers {
     private static final SleepResult TOO_BIG = EnumHelper.addStatus("TOO_BIG");
 
     @SubscribeEvent
-    public void onPlayerSleepInBed(PlayerSleepInBedEvent e) {
+    public static void onPlayerSleepInBed(PlayerSleepInBedEvent e) {
         EntityPlayer player = e.getEntityPlayer();
         double size = getSize(player);
         if (size < 1.0) {
@@ -120,7 +120,7 @@ public final class Handlers {
     }
 
     @SubscribeEvent
-    public void onLivingDrops(LivingDropsEvent e) {
+    public static void onLivingDrops(LivingDropsEvent e) {
         double size = getSize(e.getEntity());
         if (size != 1.0) {
             for (EntityItem item : e.getDrops()) {
@@ -130,7 +130,7 @@ public final class Handlers {
     }
 
     @SubscribeEvent
-    public void onPlayerDrop(ItemTossEvent e) {
+    public static void onPlayerDrop(ItemTossEvent e) {
         double size = getSize(e.getPlayer());
         if (size != 1.0) {
             EntitySizeManager.setSize(e.getEntityItem(), size, false);
@@ -138,7 +138,7 @@ public final class Handlers {
     }
 
     @SubscribeEvent
-    public void onPlayerBreak(BlockEvent.HarvestDropsEvent e) {
+    public static void onPlayerBreak(BlockEvent.HarvestDropsEvent e) {
         EntityPlayer player = e.getHarvester();
         double size;
         if (player != null && (size = getSize(player)) < 1.0) {
@@ -154,7 +154,7 @@ public final class Handlers {
     }
 
     @SubscribeEvent
-    public void onEntityJoinWorld(EntityJoinWorldEvent e) {
+    public static void onEntityJoinWorld(EntityJoinWorldEvent e) {
         Entity entity = e.getEntity();
 
         if (entity instanceof EntityItem) {
@@ -163,7 +163,7 @@ public final class Handlers {
             if (nbt != null && nbt.hasKey(NBT_KEY_SIZE, 6)) {
                 setSize(entity, nbt.getDouble(NBT_KEY_SIZE), false);
                 nbt.removeTag(NBT_KEY_SIZE);
-                if (nbt.hasNoTags()) {
+                if (nbt.isEmpty()) {
                     stack.setTagCompound(null);
                 }
             }
@@ -189,7 +189,7 @@ public final class Handlers {
     }
 
     @SubscribeEvent(priority = EventPriority.LOW)
-    public void onPlayerBreakSpeed(PlayerEvent.BreakSpeed e) {
+    public static void onPlayerBreakSpeed(PlayerEvent.BreakSpeed e) {
         e.setNewSpeed((float) (e.getNewSpeed() * getSize(e.getEntity())));
     }
 }

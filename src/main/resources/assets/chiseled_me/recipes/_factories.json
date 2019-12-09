@@ -1,0 +1,9 @@
+{
+  "ingredients": {
+    "potion": "dev.necauqua.mods.cm.Recipes$PotionIngredientFactory"
+  },
+  "conditions": {
+    "supersmall_enabled": "dev.necauqua.mods.cm.Recipes$SupersmallsEnabledCondition",
+    "big_enabled": "dev.necauqua.mods.cm.Recipes$BigEnabledCondition"
+  }
+}

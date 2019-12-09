@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:dragon_breath"
+    },
+    {
+      "item": "pym_essence"
+    },
+    {
+      "item": "pym_essence"
+    },
+    {
+      "item": "pym_essence"
+    }
+  ],
+  "result": {
+    "item": "recalibrator",
+    "nbt": {
+      "type": -1,
+      "tier": 3
+    }
+  }
+}

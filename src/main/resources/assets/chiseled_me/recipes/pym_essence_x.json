@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "conditions": [
+    {
+      "type": "forge:or",
+      "values": [
+        {
+          "type": "supersmall_enabled"
+        },
+        {
+          "type": "big_enabled"
+        }
+      ]
+    }
+  ],
+  "ingredients": [
+    {
+      "item": "pym_container_x"
+    },
+    {
+      "item": "minecraft:nether_star"
+    },
+    {
+      "item": "minecraft:redstone_block"
+    }
+  ],
+  "result": {
+    "item": "pym_essence_x"
+  }
+}

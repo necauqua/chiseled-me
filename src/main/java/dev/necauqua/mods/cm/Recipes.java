@@ -16,153 +16,163 @@
 
 package dev.necauqua.mods.cm;
 
-import dev.necauqua.mods.cm.item.ItemRecalibrator;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
+import dev.necauqua.mods.cm.ChiseledMe.OnInit;
+import dev.necauqua.mods.cm.advancements.AdvancementTriggers;
+import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.inventory.InventoryCrafting;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.ShapedRecipes;
-import net.minecraft.item.crafting.ShapelessRecipes;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.item.crafting.*;
 import net.minecraft.potion.PotionType;
 import net.minecraft.potion.PotionUtils;
+import net.minecraft.util.JsonUtils;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.common.crafting.IConditionFactory;
+import net.minecraftforge.common.crafting.IIngredientFactory;
+import net.minecraftforge.common.crafting.JsonContext;
+import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.registry.GameRegistry.ObjectHolder;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.oredict.OreDictionary;
-import net.minecraftforge.oredict.RecipeSorter;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import javax.annotation.Nonnull;
-import java.util.Arrays;
+import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.BooleanSupplier;
 import java.util.stream.IntStream;
 
-import static dev.necauqua.mods.cm.item.ItemRecalibrator.RecalibrationEffect.AMPLIFICATION;
-import static dev.necauqua.mods.cm.item.ItemRecalibrator.RecalibrationEffect.REDUCTION;
-import static net.minecraft.init.Blocks.*;
+import static dev.necauqua.mods.cm.ChiseledMe.ns;
+import static net.minecraft.init.Blocks.LAPIS_BLOCK;
 import static net.minecraft.init.Items.*;
-import static net.minecraftforge.oredict.RecipeSorter.Category.SHAPED;
-import static net.minecraftforge.oredict.RecipeSorter.Category.SHAPELESS;
 
 public final class Recipes {
 
-    private Recipes() {
-    }
+    @ObjectHolder("chiseled_me:blue_star")
+    private static Item BLUE_STAR = null;
 
-    public static void init() {
-        OreDictionary.registerOre("netherStar", ChiseledMe.BLUE_STAR);
-        GameRegistry.addShapelessRecipe(new ItemStack(ChiseledMe.BLUE_STAR), NETHER_STAR, LAPIS_BLOCK);
+    @ObjectHolder("chiseled_me:pym_essence_b")
+    private static Item ESSENCE_B = null;
 
-        GameRegistry.addRecipe(new BlueStarDecraftRecipe());
-        RecipeSorter.register("chiseled_me:blue_star_decraft", BlueStarDecraftRecipe.class, SHAPELESS, "after:minecraft:shapeless");
+    @ObjectHolder("chiseled_me:pym_essence_x")
+    private static Item ESSENCE_X = null;
 
-        GameRegistry.addRecipe(new OverridenBeaconRecipe());
-        RecipeSorter.register("chiseled_me:overriden_beacon", OverridenBeaconRecipe.class, SHAPED, "after:minecraft:shaped before:forge:shapedore");
+    private Recipes() {}
 
-        GameRegistry.addRecipe(new PymContainerRecipe());
-        RecipeSorter.register("chiseled_me:container", PymContainerRecipe.class, SHAPED, "after:minecraft:shaped before:minecraft:shapeless");
+    @SuppressWarnings("unused") // referred from json
+    public static final class SupersmallsEnabledCondition implements IConditionFactory {
 
-        GameRegistry.addShapelessRecipe(
-            new ItemStack(ChiseledMe.PYM_ESSENSE),
-            ChiseledMe.PYM_CONTAINER,
-            REDSTONE_BLOCK, REDSTONE_BLOCK, REDSTONE_BLOCK, REDSTONE_BLOCK,
-            REDSTONE_BLOCK, REDSTONE_BLOCK, REDSTONE_BLOCK, REDSTONE_BLOCK
-        );
-        for (int i = 1; i <= 8; i++) {
-            Object[] params = new Object[i + 1];
-            params[0] = DRAGON_BREATH;
-            for (int j = 1; j <= i; j++) {
-                params[j] = ChiseledMe.PYM_ESSENSE;
-            }
-            GameRegistry.addShapelessRecipe(ItemRecalibrator.create(REDUCTION, (byte) i), params);
-        }
-        if (Config.enableSupersmalls || Config.enableBigSizes) {
-            GameRegistry.addShapedRecipe(
-                new ItemStack(ChiseledMe.PYM_CONTAINER_X),
-                "xyx",
-                "yzy",
-                "xyx",
-                'x', IRON_BLOCK, 'y', DIAMOND_BLOCK, 'z', ChiseledMe.PYM_CONTAINER // this is so original i cant even..
-            );
-            GameRegistry.addShapelessRecipe(new ItemStack(ChiseledMe.PYM_ESSENSE_X), ChiseledMe.PYM_CONTAINER_X, NETHER_STAR, REDSTONE_BLOCK);
-        }
-        if (Config.enableSupersmalls) {
-            for (int i = 1; i <= 4; i++) {
-                Object[] params = new Object[i + 1];
-                params[0] = DRAGON_BREATH;
-                for (int j = 1; j <= i; j++) {
-                    params[j] = ChiseledMe.PYM_ESSENSE_X;
-                }
-                GameRegistry.addShapelessRecipe(ItemRecalibrator.create(REDUCTION, (byte) (i + 8)), params);
-            }
-        }
-        if (Config.enableBigSizes) {
-            GameRegistry.addRecipe(new BlueEssenseRecipe());
-            RecipeSorter.register("chiseled_me:blue_essense", BlueEssenseRecipe.class, SHAPELESS, "after:minecraft:shapeless");
-            for (int i = 1; i <= 4; i++) {
-                Object[] params = new Object[i + 1];
-                params[0] = DRAGON_BREATH;
-                for (int j = 1; j <= i; j++) {
-                    params[j] = ChiseledMe.PYM_ESSENSE_B;
-                }
-                GameRegistry.addShapelessRecipe(ItemRecalibrator.create(AMPLIFICATION, (byte) i), params);
-            }
+        @Override
+        public BooleanSupplier parse(JsonContext context, JsonObject json) {
+            return () -> Config.enableSupersmalls;
         }
     }
 
-    private static class OverridenBeaconRecipe extends ShapedRecipes {
+    @SuppressWarnings("unused") // referred from json
+    public static final class BigEnabledCondition implements IConditionFactory {
 
-        public OverridenBeaconRecipe() {
-            super(3, 3, new ItemStack[]{
-                new ItemStack(GLASS), new ItemStack(GLASS), new ItemStack(GLASS),
-                new ItemStack(GLASS), new ItemStack(ChiseledMe.BLUE_STAR), new ItemStack(GLASS),
-                new ItemStack(OBSIDIAN), new ItemStack(OBSIDIAN), new ItemStack(OBSIDIAN)
-            }, createBlueBeacon());
+        @Override
+        public BooleanSupplier parse(JsonContext context, JsonObject json) {
+            return () -> Config.enableBigSizes;
+        }
+    }
+
+    @SuppressWarnings("unused") // referred from json
+    public static final class PotionIngredientFactory implements IIngredientFactory {
+
+        private static final Map<String, Item> potionTypes = new HashMap<>();
+
+        static {
+            potionTypes.put("regular", POTIONITEM);
+            potionTypes.put("splash", SPLASH_POTION);
+            potionTypes.put("lingering", LINGERING_POTION);
         }
 
         @Override
         @Nonnull
-        public NonNullList<ItemStack> getRemainingItems(InventoryCrafting inv) {
-            ForgeHooks.getCraftingPlayer().addStat(Achievements.WEIRD_BEACON); // meh
-            return super.getRemainingItems(inv);
-        }
-
-        private static ItemStack createBlueBeacon() {
-            ItemStack beacon = new ItemStack(BEACON);
-            NBTTagCompound nbt = new NBTTagCompound();
-            NBTTagCompound tag = new NBTTagCompound();
-            tag.setByte("chiseled_me:color", (byte) 3);
-            nbt.setTag("BlockEntityTag", tag);
-            beacon.setTagCompound(nbt);
-            return beacon;
-        }
-    }
-
-    private static class PymContainerRecipe extends ShapedRecipes { // wait why recipes do not work with nbt??
-
-        private static PotionType awkward = PotionType.getPotionTypeForName("minecraft:awkward");
-
-        private PymContainerRecipe() {
-            super(3, 3, new ItemStack[]{
-                new ItemStack(IRON_INGOT), new ItemStack(DIAMOND), new ItemStack(IRON_INGOT),
-                new ItemStack(DIAMOND), new ItemStack(POTIONITEM), new ItemStack(DIAMOND),
-                new ItemStack(IRON_INGOT), new ItemStack(DIAMOND), new ItemStack(IRON_INGOT)
-            }, new ItemStack(ChiseledMe.PYM_CONTAINER));
-        }
-
-        @Override
-        public boolean matches(@Nonnull InventoryCrafting inv, World world) {
-            if (super.matches(inv, world)) {
-                ItemStack stack = inv.getStackInSlot(4);
-                return PotionUtils.getPotionFromItem(stack) == awkward;
+        public Ingredient parse(JsonContext context, JsonObject json) {
+            String potionType = JsonUtils.getString(json, "potion_type", "regular");
+            Item item = potionTypes.get(potionType);
+            if (item == null) {
+                throw new JsonSyntaxException("Expected potion_type to be one of regular, splash or lingering, was " + potionType);
             }
-            return false;
+            String potionName = context.appendModId(JsonUtils.getString(json, "potion"));
+            PotionType potion = PotionType.getPotionTypeForName(potionName);
+            if (potion == null) {
+                throw new JsonSyntaxException("No potion registered for name " + potionName);
+            }
+            return new Ingredient(PotionUtils.addPotionToItemStack(new ItemStack(item), potion)) {
+                @Override
+                public boolean apply(@Nullable ItemStack stack) {
+                    return stack != null && stack.getItem() == item && PotionUtils.getPotionFromItem(stack) == potion;
+                }
+            };
         }
     }
 
-    private static class BlueEssenseRecipe extends ShapelessRecipes {
+    @OnInit
+    public static void beaconRecipeHack() {
+        // disallow the blue star in the standard beacon recipe
+        // it is allowed there because its registered as a nether star in ore dictionary
+        // and vanilla recipes take precedence over the custom ones
 
-        private BlueEssenseRecipe() {
-            super(new ItemStack(ChiseledMe.PYM_ESSENSE_B), Arrays.asList(new ItemStack(ChiseledMe.PYM_ESSENSE_X), new ItemStack(ChiseledMe.BLUE_STAR)));
+        ShapedRecipes beaconRecipe = (ShapedRecipes) CraftingManager.REGISTRY.getObject(new ResourceLocation("beacon"));
+        if (beaconRecipe == null) {
+            Log.warn("Failed to fix the beacon recipe");
+            return;
+        }
+        NonNullList<Ingredient> ingredients = beaconRecipe.getIngredients();
+        Ingredient ore = ingredients.get(4);
+        Ingredient fixed = new Ingredient(ore.getMatchingStacks()) {
+            @Override
+            public ItemStack[] getMatchingStacks() {
+                return ore.getMatchingStacks();
+            }
+
+            @Override
+            @SideOnly(Side.CLIENT)
+            public IntList getValidItemStacksPacked() {
+                return ore.getValidItemStacksPacked();
+            }
+
+            @Override
+            public boolean apply(@Nullable ItemStack stack) {
+                return (stack == null || stack.getItem() != BLUE_STAR) && ore.apply(stack);
+            }
+        };
+        ingredients.set(4, fixed);
+    }
+
+    @SubscribeEvent
+    public static void onRegisterRecipes(RegistryEvent.Register<IRecipe> e) {
+        OreDictionary.registerOre("netherStar", BLUE_STAR);
+
+        e.getRegistry().register(new BlueStarDecraftRecipe().setRegistryName(ns("blue_star_decraft")));
+
+        if (Config.enableBigSizes) {
+            e.getRegistry().register(new BlueEssenceRecipe().setRegistryName(ns("pym_essence_b")));
+        }
+    }
+
+    private static class BlueEssenceRecipe extends ShapelessRecipes {
+
+        private static final NonNullList<Ingredient> INGREDIENTS = NonNullList.create();
+
+        static {
+            INGREDIENTS.add(Ingredient.fromItem(ESSENCE_X));
+            INGREDIENTS.add(Ingredient.fromItem(BLUE_STAR));
+        }
+
+        private BlueEssenceRecipe() {
+            super("", new ItemStack(ESSENCE_B), INGREDIENTS);
         }
 
         @Override
@@ -170,20 +180,25 @@ public final class Recipes {
         public NonNullList<ItemStack> getRemainingItems(InventoryCrafting inv) {
             NonNullList<ItemStack> remaining = super.getRemainingItems(inv);
             IntStream.range(0, inv.getSizeInventory())
-                .filter(i -> inv.getStackInSlot(i).getItem() == ChiseledMe.BLUE_STAR)
+                .filter(i -> inv.getStackInSlot(i).getItem() == BLUE_STAR)
                 .forEach(i -> remaining.set(i, new ItemStack(NETHER_STAR)));
             return remaining;
         }
     }
 
-    private static class BlueStarDecraftRecipe implements IRecipe {
+    private static class BlueStarDecraftRecipe extends IForgeRegistryEntry.Impl<IRecipe> implements IRecipe {
+
+        @Override
+        public boolean canFit(int width, int height) {
+            return width * height >= 1;
+        }
 
         @Override
         public boolean matches(@Nonnull InventoryCrafting inv, @Nonnull World world) {
             boolean once = false;
             for (int i = 0; i < inv.getSizeInventory(); i++) {
                 ItemStack stack = inv.getStackInSlot(i);
-                if (stack.getItem() == ChiseledMe.BLUE_STAR) {
+                if (stack.getItem() == BLUE_STAR) {
                     once = true;
                 } else if (!stack.isEmpty()) {
                     return false;
@@ -199,11 +214,6 @@ public final class Recipes {
             return new ItemStack(LAPIS_BLOCK, (int) count);
         }
 
-        @Override
-        public int getRecipeSize() {
-            return 9;
-        }
-
         @Nonnull
         @Override
         public ItemStack getRecipeOutput() {
@@ -215,10 +225,19 @@ public final class Recipes {
         public NonNullList<ItemStack> getRemainingItems(@Nonnull InventoryCrafting inv) {
             NonNullList<ItemStack> ret = NonNullList.withSize(inv.getSizeInventory(), ItemStack.EMPTY);
             IntStream.range(0, inv.getSizeInventory())
-                .filter(i -> inv.getStackInSlot(i).getItem() == ChiseledMe.BLUE_STAR)
+                .filter(i -> inv.getStackInSlot(i).getItem() == BLUE_STAR)
                 .forEach(i -> ret.set(i, new ItemStack(NETHER_STAR)));
-            ForgeHooks.getCraftingPlayer().addStat(Achievements.SURPRISE); // meh x2
+
+            AdvancementTriggers.BLUE_STAR_DECRAFT.trigger(ForgeHooks.getCraftingPlayer());
+
             return ret;
+        }
+
+        @Override
+        public NonNullList<Ingredient> getIngredients() {
+            NonNullList<Ingredient> list = NonNullList.create();
+            list.add(Ingredient.fromItem(BLUE_STAR));
+            return list;
         }
     }
 }

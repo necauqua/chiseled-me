@@ -16,9 +16,13 @@
 
 package dev.necauqua.mods.cm;
 
+import dev.necauqua.mods.cm.ChiseledMe.OnPreInit;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.fml.relauncher.FMLInjectionData;
 
 import java.io.File;
+
+import static dev.necauqua.mods.cm.ChiseledMe.MODID;
 
 public final class Config {
 
@@ -30,7 +34,6 @@ public final class Config {
     public static boolean enableBigSizes;
     public static float recalibratorEntityReachDist;
     public static boolean recalibratorItemEntityBBoxOffset;
-
     public static boolean scaleSmall, scaleBig;
 
     private static void load(Configuration c) {
@@ -69,8 +72,9 @@ public final class Config {
         scaleBig = (fallEffect & 1) == 1;
     }
 
-    public static void init(File configFolder) {
-        File file = new File(configFolder, ChiseledMe.MODID + ".cfg");
+    @OnPreInit
+    public static void init() {
+        File file = new File(/* .minecraft dir */(File) FMLInjectionData.data()[6], "config/" + MODID + ".cfg");
         Configuration c = new Configuration(file);
         c.load();
         load(c);

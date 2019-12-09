@@ -1,0 +1,41 @@
+{
+  "parent": "chiseled_me:beginning",
+  "display": {
+    "icon": {
+      "item": "chiseled_me:pym_essence"
+    },
+    "title": {
+      "translate": "advancement.chiseled_me:essence"
+    },
+    "description": {
+      "translate": "advancement.chiseled_me:essence.desc"
+    },
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "stuff": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "chiseled_me:pym_essence"
+          }
+        ]
+      }
+    }
+  },
+  "rewards": {
+    "recipes": [
+      "chiseled_me:recalibrator_reset",
+      "chiseled_me:recalibrator_reduction_1",
+      "chiseled_me:recalibrator_reduction_2",
+      "chiseled_me:recalibrator_reduction_3",
+      "chiseled_me:recalibrator_reduction_4",
+      "chiseled_me:recalibrator_reduction_5",
+      "chiseled_me:recalibrator_reduction_6",
+      "chiseled_me:recalibrator_reduction_7",
+      "chiseled_me:recalibrator_reduction_8",
+      "chiseled_me:pym_container_x"
+    ]
+  }
+}

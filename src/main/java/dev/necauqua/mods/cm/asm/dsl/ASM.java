@@ -17,6 +17,7 @@
 package dev.necauqua.mods.cm.asm.dsl;
 
 import dev.necauqua.mods.cm.ChiseledMe;
+import dev.necauqua.mods.cm.ChiseledMe.OnPreInit;
 import dev.necauqua.mods.cm.Log;
 import dev.necauqua.mods.cm.asm.dsl.anchors.*;
 import org.objectweb.asm.ClassReader;
@@ -42,6 +43,7 @@ public final class ASM {
 
     private ASM() {}
 
+    @OnPreInit
     public static void check() {
         if (!loadedAtAll) {
             Log.error("\n" +
@@ -111,7 +113,16 @@ public final class ASM {
             }
         };
         ClassPatchVisitor visitor = new ClassPatchVisitor(writer, patcher);
-        reader.accept(visitor, ClassReader.SKIP_FRAMES);
+        try {
+            reader.accept(visitor, ClassReader.SKIP_FRAMES);
+        } catch (RuntimeException e) {
+            String method = visitor.getVisitingMethod();
+            if (method != null) {
+                String shortName = className.substring(className.lastIndexOf('.') + 1);
+                throw new RuntimeException("Failed patching method " + shortName + "." + method, e);
+            }
+            throw e;
+        }
         byte[] modified = writer.toByteArray();
         // we dont collect all misses and then fail with all of them printed because
         // a class could be loaded at any time, so we can't know when to finally check

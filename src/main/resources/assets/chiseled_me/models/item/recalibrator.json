@@ -1,4 +1,23 @@
 {
-  "textures": { "layer0": "chiseled_me:items/recalibrator_reset" },
-  "parent": "item/generated"
+  "parent": "item/generated",
+  "overrides": [
+    {
+      "predicate": {
+        "chiseled_me:recalibrator_type": -1
+      },
+      "model": "chiseled_me:item/recalibrator_reduction"
+    },
+    {
+      "predicate": {
+        "chiseled_me:recalibrator_type": 0
+      },
+      "model": "chiseled_me:item/recalibrator_reset"
+    },
+    {
+      "predicate": {
+        "chiseled_me:recalibrator_type": 1
+      },
+      "model": "chiseled_me:item/recalibrator_amplification"
+    }
+  ]
 }

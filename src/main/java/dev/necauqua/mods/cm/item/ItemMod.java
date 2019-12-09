@@ -17,58 +17,28 @@
 package dev.necauqua.mods.cm.item;
 
 import dev.necauqua.mods.cm.ChiseledMe;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.block.model.ModelBakery;
-import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.registry.GameRegistry;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import static dev.necauqua.mods.cm.ChiseledMe.MODID;
+import static dev.necauqua.mods.cm.ChiseledMe.ns;
 
 public class ItemMod extends Item {
-
-    protected final String name;
-
-    private final ResourceLocation defaultModel;
+    private boolean isGlowing = false;
 
     public ItemMod(String name) {
-        this.name = name;
-        setRegistryName(MODID, name);
-        setUnlocalizedName(MODID + ":" + name);
+        setRegistryName(ns(name));
+        setTranslationKey(MODID + ":" + name);
         setCreativeTab(ChiseledMe.TAB);
-        defaultModel = new ResourceLocation(MODID, name);
     }
 
-    public void init() {
-        GameRegistry.register(this);
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-            clientRegister();
-        }
+    public ItemMod setGlowing() {
+        isGlowing = true;
+        return this;
     }
 
-    @SideOnly(Side.CLIENT)
-    protected ResourceLocation getModelResource(ItemStack stack) {
-        return defaultModel;
-    }
-
-    protected String[] getModelVariants() {
-        return new String[0];
-    }
-
-    @SideOnly(Side.CLIENT)
-    private void clientRegister() {
-        Minecraft.getMinecraft().getRenderItem().getItemModelMesher().register(this, s -> new ModelResourceLocation(getModelResource(s), "inventory"));
-        String[] vs = getModelVariants();
-        ResourceLocation[] variants = new ResourceLocation[vs.length + 1];
-        variants[0] = defaultModel;
-        for (int i = 0; i < vs.length; i++) {
-            variants[i + 1] = new ResourceLocation(MODID, vs[i]);
-        }
-        ModelBakery.registerItemVariants(this, variants);
+    @Override
+    public boolean hasEffect(ItemStack stack) {
+        return isGlowing || super.hasEffect(stack);
     }
 }

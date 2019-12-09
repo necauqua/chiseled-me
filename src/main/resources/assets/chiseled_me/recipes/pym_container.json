@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "idi",
+    "dpd",
+    "idi"
+  ],
+  "key": {
+    "i": {
+      "item": "minecraft:iron_ingot"
+    },
+    "d": {
+      "item": "minecraft:diamond"
+    },
+    "p": {
+      "type": "potion",
+      "potion_type": "regular",
+      "potion": "minecraft:awkward",
+      "__comment": "yes, I added a full-blown ingredient factory because neither MC nor Forge has one (at the time of writing)",
+      "__comment2": "didn't use item_nbt ingradient because it matches exact nbt (so e.g. renamed awkward potion wouldn't work), yay ocd"
+    }
+  },
+  "result": {
+    "item": "pym_container"
+  }
+}
