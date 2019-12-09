@@ -1,0 +1,20 @@
+{
+  "parent": "chiseled_me:essence",
+  "display": {
+    "icon": {
+      "item": "chiseled_me:recalibrator"
+    },
+    "title": {
+      "translate": "advancement.chiseled_me:depletion"
+    },
+    "description": {
+      "translate": "advancement.chiseled_me:depletion.desc"
+    },
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "stuff": {
+      "trigger": "chiseled_me:recalibrator_reset"
+    }
+  }
+}

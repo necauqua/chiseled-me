@@ -1,0 +1,36 @@
+{
+  "parent": "chiseled_me:essence",
+  "display": {
+    "icon": {
+      "item": "chiseled_me:pym_container_x",
+      "nbt": {
+        "type": -1,
+        "tier": 4
+      }
+    },
+    "title": {
+      "translate": "advancement.chiseled_me:advancements"
+    },
+    "description": {
+      "translate": "advancement.chiseled_me:advancements.desc"
+    },
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "stuff": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "chiseled_me:pym_container_x"
+          }
+        ]
+      }
+    }
+  },
+  "rewards": {
+    "recipes": [
+      "chiseled_me:pym_essence_x"
+    ]
+  }
+}

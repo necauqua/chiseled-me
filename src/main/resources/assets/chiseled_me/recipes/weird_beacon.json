@@ -1,0 +1,27 @@
+{
+  "type": "forge:ore_shaped",
+  "pattern": [
+    "ggg",
+    "gsg",
+    "ooo"
+  ],
+  "key": {
+    "g": {
+      "item": "minecraft:glass"
+    },
+    "s": {
+      "item": "blue_star"
+    },
+    "o": {
+      "item": "minecraft:obsidian"
+    }
+  },
+  "result": {
+    "item": "minecraft:beacon",
+    "nbt": {
+      "BlockEntityTag": {
+        "chiseled_me:color": 3
+      }
+    }
+  }
+}

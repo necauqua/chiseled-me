@@ -1,0 +1,35 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "conditions": [
+    {
+      "type": "forge:or",
+      "values": [
+        {
+          "type": "supersmall_enabled"
+        },
+        {
+          "type": "big_enabled"
+        }
+      ]
+    }
+  ],
+  "pattern": [
+    "idi",
+    "dpd",
+    "idi"
+  ],
+  "key": {
+    "i": {
+      "item": "minecraft:iron_block"
+    },
+    "d": {
+      "item": "minecraft:diamond_block"
+    },
+    "p": {
+      "item": "pym_container"
+    }
+  },
+  "result": {
+    "item": "pym_container_x"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "parent": "chiseled_me:blue_nether_star",
+  "display": {
+    "icon": {
+      "item": "minecraft:lapis_block"
+    },
+    "title": {
+      "translate": "advancement.chiseled_me:surprise"
+    },
+    "description": {
+      "translate": "advancement.chiseled_me:surprise.desc"
+    },
+    "announce_to_chat": false,
+    "frame": "challenge",
+    "hidden": true
+  },
+  "criteria": {
+    "stuff": {
+      "trigger": "chiseled_me:blue_star_decraft"
+    }
+  }
+}

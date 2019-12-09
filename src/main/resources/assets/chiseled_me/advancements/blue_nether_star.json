@@ -1,0 +1,33 @@
+{
+  "parent": "chiseled_me:concentrated",
+  "display": {
+    "icon": {
+      "item": "chiseled_me:blue_star"
+    },
+    "title": {
+      "translate": "advancement.chiseled_me:blue_nether_star"
+    },
+    "description": {
+      "translate": "advancement.chiseled_me:blue_nether_star.desc"
+    },
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "stuff": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "chiseled_me:blue_star"
+          }
+        ]
+      }
+    }
+  },
+  "rewards": {
+    "recipes": [
+      "chiseled_me:weird_beacon",
+      "chiseled_me:pym_essence_b"
+    ]
+  }
+}

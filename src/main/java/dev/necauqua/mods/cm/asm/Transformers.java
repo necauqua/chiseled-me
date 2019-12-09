@@ -425,7 +425,7 @@ public final class Transformers {
     @Transformer
     public void entityRender() {
         inClass("net/minecraft/client/renderer/entity/RenderManager")
-            .patchMethod(srg("doRenderEntity"), "(Lnet/minecraft/entity/Entity;DDDFFZ)V")
+            .patchMethod(srg("renderEntity"), "(Lnet/minecraft/entity/Entity;DDDFFZ)V")
             .with(p -> {
                 p.addLocal("size", DOUBLE_TYPE);
                 p.insertBefore(varInsn(ALOAD, 11), 2, mv -> {
@@ -651,7 +651,7 @@ public final class Transformers {
                 mv.visitInsn(FDIV);
             });
         inClass("net/minecraft/entity/EntityLivingBase")
-            .patchMethod(srg("moveEntityWithHeading", "EntityLivingBase"), "(FF)V")
+            .patchMethod(srg("travel", "EntityLivingBase"), "(FFF)V")
             .with(libmSwingAnimation);
         inClass("net/minecraft/client/entity/EntityOtherPlayerMP") // because stupid EntityOtherPlayerMP x 2
             .patchMethod(srg("onUpdate", "EntityOtherPlayerMP"), "()V")
@@ -809,19 +809,7 @@ public final class Transformers {
                 mv.visitInsn(FMUL);
             }))
             .patchMethod(srg("doBlockCollisions"), "()V")
-            .with(p -> {
-                Label skipBlockCollision = new Label();
-                p.insertBefore(varInsn(ALOAD, 8), mv -> { // could've hooked in BlockPortal#onEntityCollidedWithBlock but this is more flexible
-                    mv.visitVarInsn(ALOAD, 0); // Entity this
-                    mv.visitVarInsn(ALOAD, 8); // local IBlockState iblockstate
-                    mv.visitVarInsn(ALOAD, 4); // local BlockPos blockpos$pooledmutableblockpos2
-                    mv.visitMethodInsn(INVOKESTATIC, "dev/necauqua/mods/cm/Hooks", "cancelBlockCollision", "(Lnet/minecraft/entity/Entity;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/util/math/BlockPos;)Z", false);
-                    mv.visitJumpInsn(IFNE, skipBlockCollision);
-                });
-                p.insertAfter(methodInsn(INVOKEVIRTUAL, "net/minecraft/block/Block", srg("onEntityCollidedWithBlock", "Block"), "(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/Entity;)V"),
-                    mv -> mv.visitLabel(skipBlockCollision));
-                p.insertAfterAll(ldcInsn(0.001), mulBySize);
-            })
+            .with(p -> p.insertAfterAll(ldcInsn(0.001), mulBySize))
             .patchMethod(srg("handleWaterMovement", "Entity"), "()Z")
             .with(p -> {
                 p.insertAfter(ldcInsn(-0.4000000059604645), mulBySize); // vertical AABB extension
@@ -901,7 +889,7 @@ public final class Transformers {
         inClass("net/minecraft/world/World") // when reach distance <= 1 this one null return screws up raytracing a bit so here's a fix
             .patchMethod(srg("rayTraceBlocks", "World", "(Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Vec3d;ZZZ)Lnet/minecraft/util/math/RayTraceResult;"),
                 "(Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Vec3d;ZZZ)Lnet/minecraft/util/math/RayTraceResult;")
-            .with(p -> p.replace(insn(ACONST_NULL), mv -> {
+            .with(p -> p.replace(insn(ACONST_NULL), 2, mv -> {
                 mv.visitTypeInsn(NEW, "net/minecraft/util/math/RayTraceResult");
                 mv.visitInsn(DUP);
                 mv.visitFieldInsn(GETSTATIC, "net/minecraft/util/math/RayTraceResult$Type", srg("MISS"),

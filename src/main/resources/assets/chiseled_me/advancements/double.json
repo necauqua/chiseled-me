@@ -1,0 +1,24 @@
+{
+  "parent": "chiseled_me:antipolarization",
+  "display": {
+    "icon": {
+      "item": "chiseled_me:recalibrator",
+      "data": 13
+    },
+    "title": {
+      "translate": "advancement.chiseled_me:double"
+    },
+    "description": {
+      "translate": "advancement.chiseled_me:double.desc"
+    },
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "stuff": {
+      "trigger": "chiseled_me:size",
+      "conditions": {
+        "size": 2
+      }
+    }
+  }
+}

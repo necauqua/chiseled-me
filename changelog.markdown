@@ -5,6 +5,19 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 
 Also dates in this file are in [Holocene Calendar] because it is amazing, logical and I want more people to know about it.
 
+## [1.12-2.0.0.0] 12019-12-09
+### Added
+ - Any recalibrator can be made into a reset one by putting it in the crafting field
+### Changed
+ - Increased the number of charges in 16 times for each recalibrator type (so the most powerful ones give you at least 16 uses now)
+ - Proper implementation of recipes and advancements (to replace old achievements)
+ - Yet another version scheme - now using the [Forge Versioning], since [Semantic Versioning] works poorly in scenario when you are modding other versioned product
+### Fixed
+ - Any item ID or translation key containing 'essense' was fixed to 'essence' (**THIS WILL DELETE ANY ESSENCES IN YOUR SAVES ON UPDATE**)
+ - Entering the nether portal on dedicated server when small now does not cause crashes
+### Removed
+ - Due to the server-crash fix the bounding box of the nether portal is not altered and takes a full block as in vanilla
+
 ## [1.1.4] 12019-12-06
 ### Fixed
  - Server-side entity bounding box not being properly set on logging in with non-standard size
@@ -76,7 +89,7 @@ Also dates in this file are in [Holocene Calendar] because it is amazing, logica
 ### Added
  - The 2016 version of the mod, when it was first released
 
-
+[Forge Versioning]: https://mcforge.readthedocs.io/en/latest/conventions/versioning/ "Forge Versioning"
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html "Semantic Versioning"
 [Keep a Changelog]: https://keepachangelog.com/en/1.0.0/ "Keep a Changelog"
 [Holocene Calendar]: https://en.wikipedia.org/wiki/Holocene_calendar "Holocene Calendar"

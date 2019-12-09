@@ -16,6 +16,8 @@
 
 package dev.necauqua.mods.cm;
 
+import dev.necauqua.mods.cm.ChiseledMe.OnPreInit;
+import dev.necauqua.mods.cm.size.EntitySizeManager;
 import io.netty.buffer.Unpooled;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.PacketBuffer;
@@ -24,34 +26,31 @@ import net.minecraftforge.fml.common.network.FMLEventChannel;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent.ClientCustomPacketEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.function.Consumer;
 
 import static dev.necauqua.mods.cm.ChiseledMe.MODID;
 
 public final class Network {
-    private static FMLEventChannel channel;
+    private static final FMLEventChannel channel = NetworkRegistry.INSTANCE.newEventDrivenChannel(MODID);
 
     private Network() {}
 
+    @OnPreInit
     public static void init() {
-        channel = NetworkRegistry.INSTANCE.newEventDrivenChannel(MODID);
-        channel.register(new Network());
+        channel.register(Network.class);
     }
 
-    @SideOnly(Side.CLIENT)
     @SubscribeEvent
-    public void onClientReceive(ClientCustomPacketEvent e) {
+    public static void onClientReceive(ClientCustomPacketEvent e) {
         PacketBuffer payload = new PacketBuffer(e.getPacket().payload());
         byte id = payload.readByte();
         switch (id) {
             case 0:
-                EntitySizeManager.setSizeClient(payload.readInt(), payload.readDouble(), payload.readBoolean());
+                EntitySizeManager.setClientSize(payload.readInt(), payload.readDouble(), payload.readBoolean());
                 break;
             case 1:
-                EntitySizeManager.setSizeClient(-1, payload.readDouble(), payload.readBoolean());
+                EntitySizeManager.setClientSize(-1, payload.readDouble(), payload.readBoolean());
                 break;
             default:
                 invalidPacket(id, payload);
@@ -73,7 +72,6 @@ public final class Network {
         }), client);
     }
 
-    @SuppressWarnings("SameParameterValue") // maybe in the future there will be some other packets
     private static FMLProxyPacket packet(int id, Consumer<PacketBuffer> data) {
         PacketBuffer payload = new PacketBuffer(Unpooled.buffer());
         payload.writeByte(id);

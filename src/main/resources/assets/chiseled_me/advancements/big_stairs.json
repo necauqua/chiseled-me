@@ -1,0 +1,24 @@
+{
+  "parent": "chiseled_me:essence",
+  "display": {
+    "icon": {
+      "item": "chiseled_me:recalibrator",
+      "data": 2
+    },
+    "title": {
+      "translate": "advancement.chiseled_me:big_stairs"
+    },
+    "description": {
+      "translate": "advancement.chiseled_me:big_stairs.desc"
+    },
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "stuff": {
+      "trigger": "chiseled_me:size",
+      "conditions": {
+        "size": 0.25
+      }
+    }
+  }
+}

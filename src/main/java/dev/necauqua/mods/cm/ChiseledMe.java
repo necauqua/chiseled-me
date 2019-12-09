@@ -18,28 +18,40 @@ package dev.necauqua.mods.cm;
 
 import dev.necauqua.mods.cm.api.ChiseledMeAPI;
 import dev.necauqua.mods.cm.api.ChiseledMeInterface;
-import dev.necauqua.mods.cm.asm.dsl.ASM;
 import dev.necauqua.mods.cm.cmd.GetSizeCommand;
 import dev.necauqua.mods.cm.cmd.SetSizeCommand;
-import dev.necauqua.mods.cm.item.CraftItem;
 import dev.necauqua.mods.cm.item.ItemMod;
 import dev.necauqua.mods.cm.item.ItemRecalibrator;
-import dev.necauqua.mods.cm.item.ItemRecalibrator.RecalibrationEffect;
+import dev.necauqua.mods.cm.size.EntitySizeManager;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.EnumHelper;
+import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.event.FMLFingerprintViolationEvent;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.discovery.ASMDataTable;
+import net.minecraftforge.fml.common.discovery.ASMDataTable.ASMData;
+import net.minecraftforge.fml.common.event.*;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import javax.annotation.Nonnull;
+import java.lang.annotation.Annotation;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static dev.necauqua.mods.cm.ChiseledMe.MODID;
+import static dev.necauqua.mods.cm.item.ItemRecalibrator.RecalibrationType.REDUCTION;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static java.util.stream.Collectors.toSet;
 
 @Mod(modid = MODID,
     version = "@VERSION@",
@@ -55,40 +67,70 @@ public final class ChiseledMe implements ChiseledMeInterface {
 
         @Override
         @Nonnull
-        public ItemStack getTabIconItem() {
-            return ItemRecalibrator.create(RecalibrationEffect.REDUCTION, (byte) 1);
+        public ItemStack createIcon() {
+            return ItemRecalibrator.create(REDUCTION, (byte) 1);
         }
     };
 
-    public static final Item BLUE_STAR = new CraftItem("blue_star").bindAchievement(12).setGlowing();
-    public static final Item PYM_CONTAINER = new CraftItem("pym_container").bindAchievement(0);
-    public static final Item PYM_CONTAINER_X = new CraftItem("pym_container_x").bindAchievement(8).setMaxStackSize(16);
-    public static final Item PYM_ESSENSE = new CraftItem("pym_essense").bindAchievement(1).setMaxStackSize(42);
-    public static final Item PYM_ESSENSE_X = new CraftItem("pym_essense_x").bindAchievement(9).setMaxStackSize(13);
-    public static final Item PYM_ESSENSE_B = new CraftItem("pym_essense_b").bindAchievement(15).setMaxStackSize(7);
-
     public static final ItemRecalibrator RECALIBRATOR = new ItemRecalibrator();
-
-    @EventHandler
-    public void preInit(FMLFingerprintViolationEvent e) {
-        Log.warn("FINGERPRINT VIOLATED: you're running some unauthorized modification of the mod, be warned");
-    }
+    public static final Item[] ITEMS = {
+        RECALIBRATOR,
+        new ItemMod("blue_star").setGlowing(),
+        new ItemMod("pym_container"),
+        new ItemMod("pym_container_x").setMaxStackSize(16),
+        new ItemMod("pym_essence").setMaxStackSize(42),
+        new ItemMod("pym_essence_x").setMaxStackSize(13),
+        new ItemMod("pym_essence_b").setMaxStackSize(7)
+    };
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent e) {
-        ASM.check();
         populateApi(this);
-        Config.init(e.getModConfigurationDirectory());
-        Network.init();
-        EntitySizeManager.init();
+
+        addHooks(preInits, e.getAsmData(), OnPreInit.class);
+        addHooks(inits, e.getAsmData(), OnInit.class);
+        addHooks(postInits, e.getAsmData(), OnPostInit.class);
+
+        preInits.forEach(Runnable::run);
+
+        // kinda could've been the default
+        // possibly with separate annotation just for main event bus, idk
+        e.getAsmData().getAll(SubscribeEvent.class.getName())
+            .stream()
+            .map(ASMData::getClassName)
+            .collect(toSet())
+            .forEach(className -> {
+                try {
+                    MinecraftForge.EVENT_BUS.register(Class.forName(className));
+                } catch (ClassNotFoundException ex) {
+                    throw new AssertionError("This should not happen", ex);
+                }
+            });
     }
 
     @EventHandler
     public void init(FMLInitializationEvent e) {
-        Utils.forEachStaticField(getClass(), ItemMod.class, ItemMod::init);
-        Handlers.init();
-        Achievements.init();
-        Recipes.init();
+        inits.forEach(Runnable::run);
+    }
+
+    @EventHandler
+    public void init(FMLPostInitializationEvent e) {
+        postInits.forEach(Runnable::run);
+    }
+
+    @EventHandler
+    public void onViolatedFingerprint(FMLFingerprintViolationEvent e) {
+        Log.warn("FINGERPRINT VIOLATED: you're running some unauthorized modification of the mod, be warned");
+    }
+
+    @SubscribeEvent
+    public static void registerItems(RegistryEvent.Register<Item> e) {
+        e.getRegistry().registerAll(ITEMS);
+    }
+
+    @SubscribeEvent
+    public static void registerItemModels(ModelRegistryEvent event) {
+        Arrays.stream(ITEMS).forEach(SidedHandler.instance::registerDefaultModel);
     }
 
     @EventHandler
@@ -112,6 +154,10 @@ public final class ChiseledMe implements ChiseledMeInterface {
         EntitySizeManager.setSizeAndSync(entity, size, interp);
     }
 
+    public static ResourceLocation ns(String id) {
+        return new ResourceLocation(MODID, id);
+    }
+
     private static void populateApi(ChiseledMeInterface api) {
         try {
             EnumHelper.setFailsafeFieldValue(ChiseledMeAPI.class.getField("interaction"), null, api);
@@ -119,4 +165,35 @@ public final class ChiseledMe implements ChiseledMeInterface {
             throw new AssertionError("This should not happen", e);
         }
     }
+
+    private static final List<Runnable> preInits = new ArrayList<>();
+    private static final List<Runnable> inits = new ArrayList<>();
+    private static final List<Runnable> postInits = new ArrayList<>();
+
+    private static void addHooks(List<Runnable> list, ASMDataTable asmDataTable, Class<? extends Annotation> annotationType) {
+        asmDataTable.getAll(annotationType.getName())
+            .forEach(asmData ->
+                list.add(() -> {
+                    try {
+                        String objectName = asmData.getObjectName();
+                        Class.forName(asmData.getClassName())
+                            .getMethod(objectName.substring(0, objectName.indexOf('(')))
+                            .invoke(null);
+                    } catch (ReflectiveOperationException ex) {
+                        throw new AssertionError("should not happen", ex);
+                    }
+                }));
+    }
+
+    @Target(METHOD)
+    @Retention(RUNTIME)
+    public @interface OnPreInit {}
+
+    @Target(METHOD)
+    @Retention(RUNTIME)
+    public @interface OnInit {}
+
+    @Target(METHOD)
+    @Retention(RUNTIME)
+    public @interface OnPostInit {}
 }

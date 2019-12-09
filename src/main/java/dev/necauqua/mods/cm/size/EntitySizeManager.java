@@ -14,23 +14,19 @@
  * limitations under the License.
  */
 
-package dev.necauqua.mods.cm;
+package dev.necauqua.mods.cm.size;
 
+import dev.necauqua.mods.cm.Network;
+import dev.necauqua.mods.cm.SidedHandler;
 import dev.necauqua.mods.cm.api.ISizedEntity;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.IntHashMap;
 import net.minecraft.world.WorldServer;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-
-import javax.annotation.Nullable;
 
 import static dev.necauqua.mods.cm.Network.setSizeOnClient;
 
@@ -42,10 +38,6 @@ public final class EntitySizeManager {
     private static final IntHashMap<SetSize> spawnSetSizeQueue = new IntHashMap<>();
 
     private EntitySizeManager() {}
-
-    public static void init() {
-        MinecraftForge.EVENT_BUS.register(new EntitySizeManager());
-    }
 
     public static double getSize(Entity entity) {
         return ((ISizedEntity) entity).getEntitySize();
@@ -76,24 +68,8 @@ public final class EntitySizeManager {
         setSizeOnTrackingClients(entity, size, interpolate);
     }
 
-    @SideOnly(Side.CLIENT)
-    private static class ClientOnly {
-        @Nullable
-        private static Entity getEntityById(int id) {
-            Minecraft mc = Minecraft.getMinecraft();
-            if (id == -1) {
-                return mc.player;
-            }
-            if (mc.world == null) {
-                return null;
-            }
-            return mc.world.getEntityByID(id);
-        }
-    }
-
-    @SideOnly(Side.CLIENT)
-    public static void setSizeClient(int entityId, double size, boolean interp) {
-        Entity entity = ClientOnly.getEntityById(entityId);
+    public static void setClientSize(int entityId, double size, boolean interp) {
+        Entity entity = SidedHandler.instance.getClientEntityById(entityId);
         if (entity != null) {
             setSize(entity, size, interp);
         } else {
@@ -121,7 +97,7 @@ public final class EntitySizeManager {
     }
 
     @SubscribeEvent
-    public void onEntityJoinWorld(EntityJoinWorldEvent e) {
+    public static void onEntityJoinWorld(EntityJoinWorldEvent e) {
         Entity entity = e.getEntity();
         if (entity.world.isRemote) {
             if (entity instanceof EntityPlayer) {
@@ -137,7 +113,7 @@ public final class EntitySizeManager {
     }
 
     @SubscribeEvent
-    public void onStartTracking(PlayerEvent.StartTracking e) {
+    public static void onStartTracking(PlayerEvent.StartTracking e) {
         Entity entity = e.getTarget();
         double size = getSize(entity);
         if (size != 1.0) {
@@ -146,7 +122,7 @@ public final class EntitySizeManager {
     }
 
     @SubscribeEvent
-    public void onPlayerCloned(PlayerEvent.Clone e) {
+    public static void onPlayerCloned(PlayerEvent.Clone e) {
         if (!e.isWasDeath()) {
             setSizeAndSync(e.getOriginal(), getSize(e.getEntity()), false);
         }

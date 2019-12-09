@@ -3,7 +3,7 @@ buildscript {
         maven { url = 'http://files.minecraftforge.net/maven' }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
     }
 }
 
@@ -14,20 +14,31 @@ plugins {
     id 'com.matthewprenger.cursegradle' version '1.3.0'
 }
 
-version = '1.1.4'
+ext.versions = [
+        base    : '2.0.0.0-beta1',
+        mc      : '1.12',
+        range   : '[1.12]',
+        forge   : '14.21.1.2387',
+//        forge   : '14.23.5.2847',
+        mappings: 'stable_39',
+]
+
+version = versions.mc + '-' + versions.base
 group = 'dev.necauqua.mods'
 
 sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
 
 minecraft {
-    version = '1.11.2-13.20.1.2386'
-    mappings = 'stable_32'
+    version = versions.mc + '-' + versions.forge
+    mappings = versions.mappings
     runDir = 'build/run'
     clientRunArgs += ['--username', 'dev'] // force the same username (not each time different PlayerXXX)
 
-    replace '@VERSION@', project.version
-    replace '@MC_VERSION_RANGE@', '[1.11,1.11.2]'
-    replace '@API_VERSION@', project.version.take(project.version.lastIndexOf('.'))
+    replace '@VERSION@', versions.base
+    replace '@MC_VERSION_RANGE@', versions.range
+
+    // here we strip the .minor.patch-detail suffix (meh, shut up, I love regex)
+    replace '@API_VERSION@', versions.base.replaceAll('\\.\\d+\\.\\d+(?:-.*?)?$', '')
 }
 
 // fix forgegradle runs being cached lol
@@ -48,11 +59,11 @@ idea {
 }
 
 processResources {
-    inputs.property 'version', project.version
+    inputs.property 'version', versions.base
     inputs.property 'mcversion', minecraft.version
     from(sourceSets.main.resources.srcDirs) {
         include 'mcmod.info'
-        expand 'version': project.version, 'mcversion': project.minecraft.version
+        expand 'version': versions.base, 'mcversion': project.minecraft.version
     }
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
@@ -79,7 +90,7 @@ if (project.hasProperty('githubToken')) {
     task makeReleaseGitTag(type: Exec) {
         def tag = "v${project.version}"
         commandLine 'bash', '-c',
-                "git tag -sa v${project.version} -m \"Release $tag\" " +
+                "git tag -sa $tag -m \"Release $tag\" " +
                         "&& script -qefc 'git push origin refs/tags/$tag' /dev/null"
         // git push requires interactive shell even when
         // ssh-agent knows the passphrase for the key
@@ -108,10 +119,11 @@ if (project.hasProperty('curseApiKey')) {
             id = curseID
             changelog = extractChangelog()
             changelogType = 'markdown'
-            releaseType = 'release'
-
-            addGameVersion '1.11'
-            addGameVersion '1.11.1'
+            releaseType = versions.base.matches(".*?-beta\\d+") ?
+                    'alpha' :
+                    versions.base.matches(".*?-rc\\d+") ?
+                            'beta' :
+                            'release'
         }
     }
     // move this task to our group too

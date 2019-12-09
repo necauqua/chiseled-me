@@ -16,7 +16,7 @@
 
 package dev.necauqua.mods.cm.cmd;
 
-import dev.necauqua.mods.cm.EntitySizeManager;
+import dev.necauqua.mods.cm.size.EntitySizeManager;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;

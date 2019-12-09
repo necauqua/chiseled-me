@@ -25,7 +25,10 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.LocalVariablesSorter;
 
-import java.util.*;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
@@ -40,6 +43,9 @@ public final class ClassPatchVisitor extends ClassVisitor {
     private final List<MethodPatcher> missedMethods = new ArrayList<>();
     private final List<Modifier> missedModifiers = new ArrayList<>();
 
+    @Nullable
+    private String visitingMethod = null;
+
     public ClassPatchVisitor(ClassVisitor parent, ClassPatcher patcher) {
         super(ASM5, parent);
         this.patcher = patcher;
@@ -51,6 +57,15 @@ public final class ClassPatchVisitor extends ClassVisitor {
 
     public List<Modifier> getMissedModifiers() {
         return missedModifiers;
+    }
+
+    @Nullable
+    public String getVisitingMethod() {
+        return visitingMethod;
+    }
+
+    public void setVisitingMethod(@Nullable String visitingMethod) {
+        this.visitingMethod = visitingMethod;
     }
 
     @Override
@@ -114,6 +129,7 @@ public final class ClassPatchVisitor extends ClassVisitor {
         if (modifiers.isEmpty()) {
             return visitor;
         }
+
         this.modifiers.addAll(modifiers);
 
         String className = patcher.getClassName();
@@ -129,7 +145,8 @@ public final class ClassPatchVisitor extends ClassVisitor {
         for (Modifier mod : modifiers) {
             patched = mod.apply(patched);
         }
-        MethodVisitor lineNumberReader = new LineNumberReader(patched, context);
-        return isDump ? MethodDumper.create(lineNumberReader, "original", className, name + desc) : lineNumberReader;
+
+        MethodVisitor debugInfoReader = new DebugInfoReader(patched, context, this, name + desc);
+        return isDump ? MethodDumper.create(debugInfoReader, "original", className, name + desc) : debugInfoReader;
     }
 }
