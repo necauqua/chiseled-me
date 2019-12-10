@@ -11,6 +11,7 @@ Also dates in this file are in [Holocene Calendar] because it is amazing, logica
 ### Changed
  - Increased the number of charges in 16 times for each recalibrator type (so the most powerful ones give you at least 16 uses now)
  - Proper implementation of recipes and advancements (to replace old achievements)
+ - /getsizeof and /setsizeof commands are replaced with /sizeof command, which is made more versatile and useful
  - Yet another version scheme - now using the [Forge Versioning], since [Semantic Versioning] works poorly in scenario when you are modding other versioned product
 ### Fixed
  - Any item ID or translation key containing 'essense' was fixed to 'essence' (**THIS WILL DELETE ANY ESSENCES IN YOUR SAVES ON UPDATE**)

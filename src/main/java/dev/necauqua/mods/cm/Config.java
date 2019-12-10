@@ -29,7 +29,6 @@ public final class Config {
     private Config() {}
 
     public static boolean changeBedAABB;
-    public static boolean changePortalAABB;
     public static boolean enableSupersmalls;
     public static boolean enableBigSizes;
     public static float recalibratorEntityReachDist;
@@ -39,10 +38,6 @@ public final class Config {
     private static void load(Configuration c) {
         changeBedAABB = c.getBoolean("bedBBox", "misc", true,
             "Override vanilla bed bounding box so if you're small enough you can walk under it");
-
-        changePortalAABB = c.getBoolean("portalBBox", "misc", true,
-            "By default you are starting to use portal if you collide with blockspace it takes. " +
-                "This option fixes that so if you're small you could walk on obsidian but not in portal");
 
         enableSupersmalls = c.getBoolean("enableSupersmalls", "main", true,
             "At these sizes (most noticeable at 1/4096) Minecraft starts to break a little so beware " +
