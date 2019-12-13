@@ -122,10 +122,11 @@ public final class EntitySizeInteractions {
     @SubscribeEvent
     public static void onLivingDrops(LivingDropsEvent e) {
         double size = getSize(e.getEntity());
-        if (size != 1.0) {
-            for (EntityItem item : e.getDrops()) {
-                EntitySizeManager.setSize(item, size, false);
-            }
+        if (size == 1.0) {
+            return;
+        }
+        for (EntityItem item : e.getDrops()) {
+            EntitySizeManager.setSize(item, size, false);
         }
     }
 
@@ -140,16 +141,20 @@ public final class EntitySizeInteractions {
     @SubscribeEvent
     public static void onPlayerBreak(BlockEvent.HarvestDropsEvent e) {
         EntityPlayer player = e.getHarvester();
-        double size;
-        if (player != null && (size = getSize(player)) < 1.0) {
-            for (ItemStack stack : e.getDrops()) {
-                NBTTagCompound nbt = stack.getTagCompound();
-                if (nbt == null) {
-                    nbt = new NBTTagCompound();
-                }
-                nbt.setDouble("chiseled_me:size", size);
-                stack.setTagCompound(nbt);
+        if (player == null) {
+            return;
+        }
+        double size = getSize(player);
+        if (size >= 1.0) {
+            return;
+        }
+        for (ItemStack stack : e.getDrops()) {
+            NBTTagCompound nbt = stack.getTagCompound();
+            if (nbt == null) {
+                nbt = new NBTTagCompound();
             }
+            nbt.setDouble("chiseled_me:size", size);
+            stack.setTagCompound(nbt);
         }
     }
 
@@ -180,11 +185,12 @@ public final class EntitySizeInteractions {
         } else {
             return;
         }
-        if (thrower != null) {
-            double size = getSize(thrower);
-            if (size != 1.0) {
-                setSize(entity, size, false);
-            }
+        if (thrower == null) {
+            return;
+        }
+        double size = getSize(thrower);
+        if (size != 1.0) {
+            setSize(entity, size, false);
         }
     }
 
