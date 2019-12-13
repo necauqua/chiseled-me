@@ -5,13 +5,19 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 
 Also dates in this file are in [Holocene Calendar] because it is amazing, logical and I want more people to know about it.
 
-## [1.12-2.0.0.0] 12019-12-09
+## [1.12-2.0.0.0-beta2] 12019-12-13
+### Fixed
+ - A really stupid regression which caused this mod to crash with almost any other mod (the ones who use `@SubscribeEvent` annotation and thats like all of them)
+### Changed
+ - /getsizeof and /setsizeof commands are replaced with /sizeof command, which is made more versatile and useful
+
+
+## [1.12-2.0.0.0-beta1] 12019-12-09
 ### Added
  - Any recalibrator can be made into a reset one by putting it in the crafting field
 ### Changed
  - Increased the number of charges in 16 times for each recalibrator type (so the most powerful ones give you at least 16 uses now)
  - Proper implementation of recipes and advancements (to replace old achievements)
- - /getsizeof and /setsizeof commands are replaced with /sizeof command, which is made more versatile and useful
  - Yet another version scheme - now using the [Forge Versioning], since [Semantic Versioning] works poorly in scenario when you are modding other versioned product
 ### Fixed
  - Any item ID or translation key containing 'essense' was fixed to 'essence' (**THIS WILL DELETE ANY ESSENCES IN YOUR SAVES ON UPDATE**)

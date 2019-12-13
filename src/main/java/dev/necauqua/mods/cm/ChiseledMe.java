@@ -34,7 +34,6 @@ import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.discovery.ASMDataTable;
-import net.minecraftforge.fml.common.discovery.ASMDataTable.ASMData;
 import net.minecraftforge.fml.common.event.*;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -42,6 +41,7 @@ import javax.annotation.Nonnull;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -96,11 +96,11 @@ public final class ChiseledMe implements ChiseledMeInterface {
         // possibly with separate annotation just for main event bus, idk
         e.getAsmData().getAll(SubscribeEvent.class.getName())
             .stream()
-            .map(ASMData::getClassName)
+            .filter(s -> s.getClassName().startsWith("dev.necauqua.mods.cm"))
             .collect(toSet())
-            .forEach(className -> {
+            .forEach(asmData -> {
                 try {
-                    MinecraftForge.EVENT_BUS.register(Class.forName(className));
+                    MinecraftForge.EVENT_BUS.register(Class.forName(asmData.getClassName()));
                 } catch (ClassNotFoundException ex) {
                     throw new AssertionError("This should not happen", ex);
                 }
@@ -113,7 +113,7 @@ public final class ChiseledMe implements ChiseledMeInterface {
     }
 
     @EventHandler
-    public void init(FMLPostInitializationEvent e) {
+    public void postInit(FMLPostInitializationEvent e) {
         postInits.forEach(Runnable::run);
     }
 
@@ -173,14 +173,27 @@ public final class ChiseledMe implements ChiseledMeInterface {
             .forEach(asmData ->
                 list.add(() -> {
                     try {
+                        String cls = asmData.getClassName();
+                        if (!cls.startsWith("dev.necauqua.mods.cm")) {
+                            // should not happen as nobody should use my annotations I guess lol
+                            return;
+                        }
                         String objectName = asmData.getObjectName();
-                        Class.forName(asmData.getClassName())
+                        Class.forName(cls)
                             .getMethod(objectName.substring(0, objectName.indexOf('(')))
                             .invoke(null);
-                    } catch (ReflectiveOperationException ex) {
-                        throw new AssertionError("should not happen", ex);
+                    } catch (InvocationTargetException e) {
+                        rethrow(e.getCause());
+                        e.printStackTrace();
+                    } catch (NoSuchMethodException | IllegalAccessException | ClassNotFoundException ex) {
+                        throw new AssertionError("This should not happen", ex);
                     }
                 }));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <E extends Throwable> void rethrow(Throwable exception) throws E {
+        throw (E) exception;
     }
 
     @Target(METHOD)
