@@ -1,6 +1,7 @@
 {
   "homepage": "https://minecraft.curseforge.com/projects/chiseled-me",
   "1.12": {
+    "2.0.0.0-beta2": "### Fixed\n - A really stupid regression which caused this mod to crash with almost any other mod (the ones who use `@SubscribeEvent` annotation and thats like all of them)\n### Changed\n - /getsizeof and /setsizeof commands are replaced with /sizeof command, which is made more versatile and useful\n",
     "2.0.0.0-beta1": "### Added\n - Any recalibrator can be made into a reset one by putting it in the crafting field\n### Changed\n - Increased the number of charges in 16 times for each recalibrator type (so the most powerful ones give you at least 16 uses now)\n - Proper implementation of recipes and advancements (to replace old achievements)\n - Yet another version scheme - now using the [Forge Versioning], since [Semantic Versioning] works poorly in scenario when you are modding other versioned product\n### Fixed\n - Any item ID or translation key containing 'essense' was fixed to 'essence' (**THIS WILL DELETE ANY ESSENCES IN YOUR SAVES ON UPDATE**)\n - Entering the nether portal on dedicated server when small now does not cause crashes\n### Removed\n - Due to the server-crash fix the bounding box of the nether portal is not altered and takes a full block as in vanilla"
   },
   "1.11.2": {
@@ -22,7 +23,7 @@
     "1.0": "Added:\n - The mod was released"
   },
   "promos": {
-    "1.12-latest": "2.0.0.0-beta1",
+    "1.12-latest": "2.0.0.0-beta2",
     "1.11.2-latest": "1.1.4",
     "1.11.2-recommended": "1.1.4",
     "1.11.1-latest": "1.1.4",
