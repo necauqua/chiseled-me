@@ -105,7 +105,8 @@ if (project.hasProperty('githubToken')) {
         tagName = "v${project.version}"
         name = tagName
         body = extractChangelog()
-        assets = jar.destinationDir.listFiles().findAll { it.name.endsWith(project.version + '.jar') }
+        assets = [jar.archivePath]
+        prerelease = versions.base.matches(".*?-(?:beta|rc)\\d+")
     }
     githubRelease.group = 'publishing'
     githubRelease.dependsOn build, makeReleaseGitTag
