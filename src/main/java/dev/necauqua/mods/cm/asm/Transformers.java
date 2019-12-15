@@ -32,6 +32,7 @@ import static org.objectweb.asm.Type.FLOAT_TYPE;
 // intellij sees to many random duplicates in the hooks
 @SuppressWarnings("Duplicates")
 public final class Transformers {
+
     private static final String SIZE_FIELD = "$cm_size";
     private static final String PROCESS_FIELD = "$cm_process";
 
@@ -212,11 +213,12 @@ public final class Transformers {
                 Label start = new Label();
                 mv.visitLabel(start);
 
-                mv.visitVarInsn(ALOAD, 0);
                 mv.visitVarInsn(ILOAD, 3);
 
                 mv.ifJump(IFEQ,
                     () -> {
+                        // this.PROCESS_FIELD = new PROCESS_CLASS(this.SIZE_FIELD, size);
+                        mv.visitVarInsn(ALOAD, 0);
                         mv.visitTypeInsn(NEW, PROCESS_CLASS);
                         mv.visitInsn(DUP);
                         mv.visitVarInsn(ALOAD, 0);
@@ -225,14 +227,38 @@ public final class Transformers {
                         mv.visitMethodInsn(INVOKESPECIAL, PROCESS_CLASS, "<init>", "(DD)V", false);
                         mv.visitFieldInsn(PUTFIELD, PROCESS_FIELD, PROCESS_TYPE);
                     }, () -> {
+                        // this.SIZE_FIELD = size;
+                        mv.visitVarInsn(ALOAD, 0);
                         mv.visitVarInsn(DLOAD, 1);
                         mv.visitFieldInsn(PUTFIELD, SIZE_FIELD, "D");
+
+                        // this.width = this.O_WIDTH_FIELD * (float) size;
                         mv.visitVarInsn(ALOAD, 0);
                         mv.visitInsn(DUP);
                         mv.visitFieldInsn(GETFIELD, O_WIDTH_FIELD, "F");
+                        mv.visitVarInsn(DLOAD, 1);
+                        mv.visitInsn(D2F);
+                        mv.visitInsn(FMUL);
+                        mv.visitFieldInsn(PUTFIELD, srg("width", "Entity"), "F");
+
+                        // this.height = this.O_HEIGHT_FIELD * (float) size;
                         mv.visitVarInsn(ALOAD, 0);
+                        mv.visitInsn(DUP);
                         mv.visitFieldInsn(GETFIELD, O_HEIGHT_FIELD, "F");
-                        mv.visitMethodInsn(INVOKEVIRTUAL, srg("setSize", "Entity"), "(FF)V");
+                        mv.visitVarInsn(DLOAD, 1);
+                        mv.visitInsn(D2F);
+                        mv.visitInsn(FMUL);
+                        mv.visitFieldInsn(PUTFIELD, srg("height", "Entity"), "F");
+
+                        // this.setPosition(this.posX, this.posY, this.posZ);
+                        mv.visitVarInsn(ALOAD, 0);
+                        mv.visitInsn(DUP);
+                        mv.visitFieldInsn(GETFIELD, srg("posX", "Entity"), "D");
+                        mv.visitVarInsn(ALOAD, 0);
+                        mv.visitFieldInsn(GETFIELD, srg("posY", "Entity"), "D");
+                        mv.visitVarInsn(ALOAD, 0);
+                        mv.visitFieldInsn(GETFIELD, srg("posZ", "Entity"), "D");
+                        mv.visitMethodInsn(INVOKEVIRTUAL, srg("setPosition", "Entity"), "(DDD)V");
                     });
 
                 mv.visitInsn(RETURN);
@@ -330,7 +356,7 @@ public final class Transformers {
                     mv.visitVarInsn(FSTORE, "size");
                     mv.visitInsn(FMUL);
                 });
-                p.insertBefore(varInsn(DSTORE, 12), mv -> { // local double d3
+                p.insertBefore(varInsn(DSTORE, 10), mv -> { // local double d3
                     mv.visitVarInsn(FLOAD, "size");
                     mv.visitInsn(F2D);
                     mv.visitInsn(DMUL);
@@ -482,54 +508,62 @@ public final class Transformers {
         inClass("net/minecraft/client/renderer/entity/Render")
             .patchMethod(srg("renderShadow", "Render"), "(Lnet/minecraft/entity/Entity;DDDFF)V")
             .with(p -> {
-                p.addLocal("size", FLOAT_TYPE);
+                p.addLocal("size", DOUBLE_TYPE);
                 p.insertAfter(methodBegin(), mv -> {
                     mv.visitVarInsn(ALOAD, 1); // param Entity entityIn
                     mv.visitVarInsn(FLOAD, 9); // param float partialTicks
                     mv.visitMethodInsn(INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getEntitySize", "(F)D", false);
-                    mv.visitInsn(D2F);
-                    mv.visitVarInsn(FSTORE, "size");
+                    mv.visitVarInsn(DSTORE, "size");
                 });
                 p.insertBefore(varInsn(FSTORE, 11), mv -> { // local float f
-                    mv.visitVarInsn(FLOAD, "size");
+                    mv.visitVarInsn(DLOAD, "size");
+                    mv.visitInsn(D2F);
                     mv.visitInsn(FMUL);
                 });
-                p.insertBefore(varInsn(DSTORE, 27), mv -> { // local double d3
-                    // code below is this: d3 -= size < 1.0f ? 0.015625f * (1.0f - size) : 0.0f
-                    mv.visitVarInsn(FLOAD, "size");
-                    mv.visitInsn(FCONST_1);
-                    mv.visitInsn(FCMPG);
-                    Label skipHook = new Label();
-                    mv.visitJumpInsn(IFGE, skipHook);
-                    mv.visitLdcInsn(0.015625f);
-                    mv.visitInsn(FCONST_1);
-                    mv.visitVarInsn(FLOAD, "size");
-                    mv.visitInsn(FSUB);
-                    mv.visitInsn(FMUL);
-                    mv.visitInsn(F2D);
-                    mv.visitInsn(DSUB);
-                    mv.visitLabel(skipHook);
+                p.debugDump();
+                p.insertBefore(varInsn(DSTORE, 26), mv -> { // local double d3
+                    // d = ... if (size >= 1.0) { } else { ... - 0.015625 * (1.0 - size) }
+                    mv.visitVarInsn(DLOAD, "size");
+                    mv.visitInsn(DCONST_1);
+                    mv.visitInsn(DCMPG);
+
+                    mv.ifJump(IFGE, () -> {
+                        mv.visitLdcInsn(0.015625);
+                        mv.visitInsn(DCONST_1);
+                        mv.visitVarInsn(DLOAD, "size");
+                        mv.visitInsn(DSUB);
+                        mv.visitInsn(DMUL);
+                        mv.visitInsn(DSUB);
+                    });
                 });
                 p.insertAfter(varInsn(FLOAD, 8), mv -> { // local float shadowAlpha
                     //  replace shadowAlpha in renderShadowSingle call with
-                    //  shadowAlpha - (y - (blockpos.getY() + d3)) / 2.0 * (1.0f / size - 1.0f)
+
+                    //  ... - (float) ((y - (blockpos.getY() + d3)) / 2.0 * (1.0f / size - 1.0f))
+
                     mv.visitVarInsn(DLOAD, 4);
-                    mv.visitVarInsn(ALOAD, 34);
+
+                    mv.visitVarInsn(ALOAD, 33); // local BlockPos blockpos
                     mv.visitMethodInsn(INVOKEVIRTUAL, "net/minecraft/util/math/BlockPos", srg("getY", "Vec3i"), "()I", false);
                     mv.visitInsn(I2D);
-                    mv.visitVarInsn(DLOAD, 27);
+                    mv.visitVarInsn(DLOAD, 26); // local double 26
                     mv.visitInsn(DADD);
+
                     mv.visitInsn(DSUB);
+
                     mv.visitLdcInsn(2.0);
                     mv.visitInsn(DDIV);
-                    mv.visitInsn(D2F);
 
-                    mv.visitInsn(FCONST_1);
-                    mv.visitVarInsn(FLOAD, "size");
-                    mv.visitInsn(FDIV);
-                    mv.visitInsn(FCONST_1);
-                    mv.visitInsn(FSUB);
-                    mv.visitInsn(FMUL);
+                    mv.visitInsn(DCONST_1);
+                    mv.visitVarInsn(DLOAD, "size");
+                    mv.visitInsn(DDIV);
+
+                    mv.visitInsn(DCONST_1);
+                    mv.visitInsn(DSUB);
+
+                    mv.visitInsn(DMUL);
+
+                    mv.visitInsn(D2F);
 
                     mv.visitInsn(FSUB);
                 });
@@ -777,7 +811,7 @@ public final class Transformers {
 
         inClass("net/minecraft/entity/Entity")
             .patchMethod(srg("setSize", "Entity"), "(FF)V")
-            .with(p ->
+            .with(p -> {
                 p.insertAfter(methodBegin(), mv -> {
                     mv.visitVarInsn(ALOAD, 0);
                     mv.visitVarInsn(FLOAD, 1);
@@ -799,7 +833,14 @@ public final class Transformers {
                     mv.visitInsn(D2F);
                     mv.visitInsn(FMUL);
                     mv.visitVarInsn(FSTORE, 2);
-                }))
+                });
+                p.insertAfter(insn(F2D), mv -> {
+                    if (mv.getPass() >= 6) {
+                        mv.visitFieldInsn(GETFIELD, SIZE_FIELD, "D");
+                        mv.visitInsn(DDIV);
+                    }
+                });
+            })
 
             .patchMethod(srg("isEntityInsideOpaqueBlock", "Entity"), "()Z")
             .with(p -> p.insertAfter(ldcInsn(0.1f), mv -> {
@@ -889,7 +930,7 @@ public final class Transformers {
         inClass("net/minecraft/world/World") // when reach distance <= 1 this one null return screws up raytracing a bit so here's a fix
             .patchMethod(srg("rayTraceBlocks", "World", "(Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Vec3d;ZZZ)Lnet/minecraft/util/math/RayTraceResult;"),
                 "(Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Vec3d;ZZZ)Lnet/minecraft/util/math/RayTraceResult;")
-            .with(p -> p.replace(insn(ACONST_NULL), 2, mv -> {
+            .with(p -> p.replace(insn(ACONST_NULL), mv -> {
                 mv.visitTypeInsn(NEW, "net/minecraft/util/math/RayTraceResult");
                 mv.visitInsn(DUP);
                 mv.visitFieldInsn(GETSTATIC, "net/minecraft/util/math/RayTraceResult$Type", srg("MISS"),

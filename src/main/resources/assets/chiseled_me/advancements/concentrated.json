@@ -2,11 +2,7 @@
   "parent": "chiseled_me:advancements",
   "display": {
     "icon": {
-      "item": "chiseled_me:pym_essence_x",
-      "nbt": {
-        "type": -1,
-        "tier": 4
-      }
+      "item": "chiseled_me:pym_essence_x"
     },
     "title": {
       "translate": "advancement.chiseled_me:concentrated"

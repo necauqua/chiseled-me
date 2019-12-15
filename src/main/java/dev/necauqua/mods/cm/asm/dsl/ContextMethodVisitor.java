@@ -101,21 +101,21 @@ public class ContextMethodVisitor extends MethodVisitor {
         root.visitIincInsn(getLocal(assocName), increment);
     }
 
-    public void ifJump(int opcode, Runnable body) {
+    public void ifJump(int opcode, Runnable skippedIfTrue) {
         Label skip = new Label();
         visitJumpInsn(opcode, skip);
-        body.run();
+        skippedIfTrue.run();
         visitLabel(skip);
     }
 
-    public void ifJump(int opcode, Runnable body, Runnable or) {
+    public void ifJump(int opcode, Runnable skippedIfTrue, Runnable calledIfTrue) {
         Label then = new Label();
         Label skip = new Label();
         visitJumpInsn(opcode, then);
-        body.run();
+        skippedIfTrue.run();
         visitJumpInsn(GOTO, skip);
         visitLabel(then);
-        or.run();
+        calledIfTrue.run();
         visitLabel(skip);
     }
 }

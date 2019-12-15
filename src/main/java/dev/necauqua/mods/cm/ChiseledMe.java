@@ -18,7 +18,6 @@ package dev.necauqua.mods.cm;
 
 import dev.necauqua.mods.cm.api.ChiseledMeAPI;
 import dev.necauqua.mods.cm.api.ChiseledMeInterface;
-import dev.necauqua.mods.cm.cmd.SizeCommand;
 import dev.necauqua.mods.cm.item.ItemMod;
 import dev.necauqua.mods.cm.item.ItemRecalibrator;
 import dev.necauqua.mods.cm.size.EntitySizeManager;
@@ -36,6 +35,7 @@ import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.discovery.ASMDataTable;
 import net.minecraftforge.fml.common.event.*;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nonnull;
 import java.lang.annotation.Annotation;
@@ -125,6 +125,9 @@ public final class ChiseledMe implements ChiseledMeInterface {
     @SubscribeEvent
     public static void registerItems(RegistryEvent.Register<Item> e) {
         e.getRegistry().registerAll(ITEMS);
+
+        // heh
+        OreDictionary.registerOre("netherStar", ITEMS[1]);
     }
 
     @SubscribeEvent
@@ -134,7 +137,7 @@ public final class ChiseledMe implements ChiseledMeInterface {
 
     @EventHandler
     public void onServerStarting(FMLServerStartingEvent e) {
-        e.registerServerCommand(new SizeCommand());
+        e.registerServerCommand(new SizeofCommand());
     }
 
     @Override

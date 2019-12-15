@@ -4,9 +4,10 @@ import dev.necauqua.mods.cm.item.ItemRecalibrator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.relauncher.Side;
@@ -25,10 +26,14 @@ public abstract class SidedHandler {
     public void registerDefaultModel(Item item) {}
 
     @Nullable
-    public Entity getClientEntityById(int id) {
+    public World getClientWorld() {
         return null;
     }
 
+    @Nullable
+    public EntityPlayer getClientPlayer() {
+        return null;
+    }
 
     public String getLocalization(String key, Object... format) {
         return "";
@@ -53,22 +58,21 @@ public abstract class SidedHandler {
             }
         }
 
-        @Nullable
-        @Override
-        public Entity getClientEntityById(int id) {
-            Minecraft mc = Minecraft.getMinecraft();
-            if (id == -1) {
-                return mc.player;
-            }
-            if (mc.world == null) {
-                return null;
-            }
-            return mc.world.getEntityByID(id);
-        }
-
         @Override
         public String getLocalization(String key, Object... parameters) {
             return I18n.format(key, parameters);
+        }
+
+        @Nullable
+        @Override
+        public World getClientWorld() {
+            return Minecraft.getMinecraft().world;
+        }
+
+        @Nullable
+        @Override
+        public EntityPlayer getClientPlayer() {
+            return Minecraft.getMinecraft().player;
         }
     }
 

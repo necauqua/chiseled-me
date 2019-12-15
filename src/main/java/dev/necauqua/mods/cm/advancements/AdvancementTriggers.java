@@ -14,6 +14,7 @@ public final class AdvancementTriggers {
     public static final SizeTrigger SIZE = new SizeTrigger();
     public static final StatelessTrigger RECALIBRATOR_RESET = new StatelessTrigger(ns("recalibrator_reset"));
     public static final StatelessTrigger BLUE_STAR_DECRAFT = new StatelessTrigger(ns("blue_star_decraft"));
+    public static final StatelessTrigger WEIRD_BEACON_CRAFT = new StatelessTrigger(ns("weird_beacon_craft"));
 
     private static final Method registerCriterion;
     static {
@@ -34,5 +35,6 @@ public final class AdvancementTriggers {
         register(SIZE);
         register(RECALIBRATOR_RESET);
         register(BLUE_STAR_DECRAFT);
+        register(WEIRD_BEACON_CRAFT);
     }
 }

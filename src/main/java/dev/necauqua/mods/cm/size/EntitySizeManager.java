@@ -23,6 +23,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.IntHashMap;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -69,7 +70,16 @@ public final class EntitySizeManager {
     }
 
     public static void setClientSize(int entityId, double size, boolean interp) {
-        Entity entity = SidedHandler.instance.getClientEntityById(entityId);
+        Entity entity = null;
+        if (entityId == -1) {
+            entity = SidedHandler.instance.getClientPlayer();
+        } else {
+            World world = SidedHandler.instance.getClientWorld();
+            if (world != null) {
+                entity = world.getEntityByID(entityId);
+            }
+        }
+
         if (entity != null) {
             setSize(entity, size, interp);
         } else {

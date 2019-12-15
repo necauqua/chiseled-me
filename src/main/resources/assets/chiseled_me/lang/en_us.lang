@@ -4,7 +4,7 @@ itemGroup.chiseled_me=Chiseled Me
 chiseled_me.bed.too_small=You are too small to sleep in bed!
 chiseled_me.bed.too_big=You are too big to sleep in bed!
 
-commands.chiseled_me:sizeof.usage=/sizeof entity get|{<set|add|subtract|multiply|divide> size [animate]}
+commands.chiseled_me:sizeof.usage=/sizeof entity [<set|add|subtract|multiply|divide> size [animate]]
 commands.chiseled_me:sizeof.get=Relative size of %s is %s!
 commands.chiseled_me:sizeof.set=Set size of %s to %s!
 
