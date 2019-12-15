@@ -15,16 +15,7 @@
   },
   "criteria": {
     "stuff": {
-      "trigger": "minecraft:inventory_changed",
-      "conditions": {
-        "items": [
-          {
-            "type": "minecraft:item_nbt",
-            "item": "minecraft:beacon",
-            "nbt": "{BlockEntityTag:{\"chiseled_me:color\": 3}}"
-          }
-        ]
-      }
+      "trigger": "chiseled_me:weird_beacon_craft"
     }
   }
 }

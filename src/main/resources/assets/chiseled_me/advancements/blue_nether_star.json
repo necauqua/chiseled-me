@@ -1,5 +1,5 @@
 {
-  "parent": "chiseled_me:concentrated",
+  "parent": "chiseled_me:root",
   "display": {
     "icon": {
       "item": "chiseled_me:blue_star"

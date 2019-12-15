@@ -1,9 +1,23 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog], and this project adheres to [Semantic Versioning].
+The format is based on [Keep a Changelog], and this project uses [Forge versioning scheme].
 
 Also dates in this file are in [Holocene Calendar] because it is amazing, logical and I want more people to know about it.
+
+## [1.12-2.0.0.0] 12019-12-16
+### Added
+ - Size is shown in F3 debug output when its not 1
+### Changed
+ - Changed the size command to be `/sizeof entity` instead of `/sizeof entity get`
+### Fixed
+ - Entity position shifts on resize
+ - (possibly) player model limbs missing after some resizes
+ - Resize command output when resulting size is out of limits
+ - `Null returned as 'hitResult', this shouldn't happen!` console spam when reach distance is lesser than 1
+ - Config for fall damage was reverted this whole time and defaulted to scale damage by size when big (which is unusable lol)
+ - Disabled supersmalls or bigs in config broke the advancemetns (actual Forge/Vanilla bug)
+
 
 ## [1.12-2.0.0.0-beta2] 12019-12-13
 ### Fixed
@@ -96,7 +110,7 @@ Also dates in this file are in [Holocene Calendar] because it is amazing, logica
 ### Added
  - The 2016 version of the mod, when it was first released
 
-[Forge Versioning]: https://mcforge.readthedocs.io/en/latest/conventions/versioning/ "Forge Versioning"
+[Forge versioning scheme]: https://mcforge.readthedocs.io/en/latest/conventions/versioning/ "Forge versioning scheme"
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html "Semantic Versioning"
 [Keep a Changelog]: https://keepachangelog.com/en/1.0.0/ "Keep a Changelog"
 [Holocene Calendar]: https://en.wikipedia.org/wiki/Holocene_calendar "Holocene Calendar"

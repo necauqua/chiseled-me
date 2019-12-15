@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-package dev.necauqua.mods.cm.cmd;
+package dev.necauqua.mods.cm;
 
 import dev.necauqua.mods.cm.size.EntitySizeManager;
-import net.minecraft.command.CommandBase;
-import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.command.WrongUsageException;
+import net.minecraft.command.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
@@ -31,8 +28,9 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 import static dev.necauqua.mods.cm.size.EntitySizeManager.*;
+import static java.lang.String.format;
 
-public final class SizeCommand extends CommandBase {
+public final class SizeofCommand extends CommandBase {
 
     @Override
     @Nonnull
@@ -48,14 +46,11 @@ public final class SizeCommand extends CommandBase {
 
     @Override
     public void execute(@Nonnull MinecraftServer server, @Nonnull ICommandSender sender, @Nonnull String[] args) throws CommandException {
-        if (args.length < 2 || args.length > 4) {
+        if (args.length < 1 || args.length > 4) {
             throw new WrongUsageException(getUsage(sender));
         }
         Entity entity = getEntity(server, sender, args[0]);
-        if (args.length == 2) {
-            if (!"get".equals(args[1])) {
-                throw new WrongUsageException(getUsage(sender));
-            }
+        if (args.length == 1) {
             sender.sendMessage(new TextComponentTranslation("commands.chiseled_me:sizeof.get", entity.getDisplayName(), getSize(entity)));
             return;
         }
@@ -65,22 +60,28 @@ public final class SizeCommand extends CommandBase {
 
         switch (args[1]) {
             case "set":
-                size = parseDouble(args[2], LOWER_LIMIT, UPPER_LIMIT);
+                size = parseDouble(args[2]);
                 break;
             case "add":
-                size += parseDouble(args[2], LOWER_LIMIT, UPPER_LIMIT);
+                size += parseDouble(args[2]);
                 break;
             case "subtract":
-                size -= parseDouble(args[2], LOWER_LIMIT, UPPER_LIMIT);
+                size -= parseDouble(args[2]);
                 break;
             case "multiply":
-                size *= parseDouble(args[2], LOWER_LIMIT, UPPER_LIMIT);
+                size *= parseDouble(args[2]);
                 break;
             case "divide":
-                size /= parseDouble(args[2], LOWER_LIMIT, UPPER_LIMIT);
+                size /= parseDouble(args[2]);
                 break;
             default:
                 throw new WrongUsageException(getUsage(sender));
+        }
+
+        if (size < LOWER_LIMIT) {
+            throw new NumberInvalidException("commands.generic.num.tooSmall", format("%.2f", size), format("%.2f", LOWER_LIMIT));
+        } else if (size > UPPER_LIMIT) {
+            throw new NumberInvalidException("commands.generic.num.tooBig", format("%.2f", size), format("%.2f", UPPER_LIMIT));
         }
 
         EntitySizeManager.setSizeAndSync(entity, size, animate);
@@ -93,13 +94,13 @@ public final class SizeCommand extends CommandBase {
         String[] completions;
         switch (args.length) {
             case 1:
-                completions =  server.getOnlinePlayerNames();
+                completions = server.getOnlinePlayerNames();
                 break;
             case 2:
-                completions = new String[]{ "get", "set", "add", "subtract", "multiply", "divide" };
+                completions = new String[]{"set", "add", "subtract", "multiply", "divide"};
                 break;
             case 4:
-                completions = "get".equals(args[2]) ? new String[0] : new String[]{"true", "false"};
+                completions = new String[]{"true", "false"};
                 break;
             default:
                 completions = new String[0];
