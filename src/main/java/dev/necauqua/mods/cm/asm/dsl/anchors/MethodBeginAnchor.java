@@ -43,7 +43,7 @@ public final class MethodBeginAnchor extends Anchor {
                 if (type == INSERT_AFTER) {
                     super.visitCode();
                 }
-                modifier.match(context, 1);
+                modifier.tryRun(context, 1);
                 if (type == INSERT_BEFORE) {
                     super.visitCode();
                 }

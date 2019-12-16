@@ -382,14 +382,6 @@ public final class Transformers {
                     mv.visitInsn(D2F);
                     mv.visitVarInsn(FSTORE, "size");
                 });
-                p.insertAfter(insn(I2F), mv -> { // far plane decrease (closer fog)
-                    mv.visitVarInsn(FLOAD, "size");
-                    mv.visitHook(cutBiggerThanOne);
-                    mv.visitInsn(F2D);
-                    mv.visitMethodInsn(INVOKESTATIC, "java/lang/Math", "sqrt", "(D)D", false);
-                    mv.visitInsn(D2F);
-                    mv.visitInsn(FMUL);
-                });
                 p.insertAfter(ldcInsn(0.05f), mv -> { // another clipping fix
                     mv.visitVarInsn(FLOAD, "size");
                     mv.visitInsn(FMUL);
@@ -405,6 +397,17 @@ public final class Transformers {
                         mv.visitInsn(ICONST_0);
                         mv.visitFieldInsn(PUTFIELD, BOBBING_FIELD, "Z");
                     });
+            })
+            .patchMethod(srg("setupFog"), "(IF)V")
+            .with(p -> { // scale fog distance by player size
+                p.insertBeforeAll(varInsn(FSTORE, 6), mv -> {
+                    mv.visitVarInsn(ALOAD, 3); // local Entity entity
+                    mv.visitVarInsn(FLOAD, 2); // local float partialTick
+                    mv.visitMethodInsn(INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getEntitySize", "(F)D", false);
+                    mv.visitMethodInsn(INVOKESTATIC, "java/lang/Math", "sqrt", "(D)D", false);
+                    mv.visitInsn(D2F);
+                    mv.visitInsn(FMUL);
+                });
             })
             .patchMethod(srg("applyBobbing"), "(F)V") // bobbing fix (-_-)
             .with(p -> {

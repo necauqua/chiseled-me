@@ -34,7 +34,7 @@ public abstract class Anchor {
         if (type == INSERT_AFTER) {
             original.run();
         }
-        if (!(matches.getAsBoolean() && modifier.match(context, pass.getAsInt()))) {
+        if (!(matches.getAsBoolean() && modifier.tryRun(context, pass.getAsInt()))) {
             if (type == REPLACE) {
                 original.run();
             }
