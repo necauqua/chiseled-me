@@ -1,5 +1,7 @@
 package dev.necauqua.mods.cm.recipes;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import dev.necauqua.mods.cm.Log;
@@ -36,6 +38,8 @@ public final class DumbRecipe extends IForgeRegistryEntry.Impl<IRecipe> implemen
 
         JsonContext ctx = new JsonContext(MODID);
 
+        Gson recipesLikeGson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+
         // @see CraftingHelper#loadRecipes(ModContainer)
         CraftingHelper.findFiles(mod, "assets/" + MODID + "/recipes", null,
             (root, file) -> {
@@ -47,11 +51,11 @@ public final class DumbRecipe extends IForgeRegistryEntry.Impl<IRecipe> implemen
                 String name = FilenameUtils.removeExtension(relative).replaceAll("\\\\", "/");
 
                 try (BufferedReader reader = Files.newBufferedReader(file)) {
-                    JsonObject json = JsonUtils.fromJson(CraftingHelper.GSON, reader, JsonObject.class);
+                    JsonObject json = JsonUtils.fromJson(recipesLikeGson, reader, JsonObject.class);
                     if (json == null) {
                         return true;
                     }
-                    if (!CraftingHelper.processConditions(json, "conditions", ctx)) {
+                    if (!CraftingHelper.processConditions(JsonUtils.getJsonArray(json, "conditions"), ctx)) {
                         ForgeRegistries.RECIPES.register(new DumbRecipe(name));
                         Log.trace("Registered a dumb recipe " + name);
                     }
@@ -59,8 +63,7 @@ public final class DumbRecipe extends IForgeRegistryEntry.Impl<IRecipe> implemen
                     return false;
                 }
                 return true;
-            },
-            true, true
+            }
         );
     }
 
