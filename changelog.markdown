@@ -5,6 +5,15 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 
 Also dates in this file are in [Holocene Calendar] because it is amazing, logical and I want more people to know about it.
 
+## [1.1.5-final] 12019-12-16
+All of the below fixes were backported from 1.12 beta
+### Fixed
+ - Sun clipping when size of player is around 1/8-1/16
+ - Resizing process was broken - it was twice as fast, had glitches line disappearing limbs and falling through blocks (this was due to the size being negative for a tick or two)
+ - Small but noticeable position shifts on resizes (might've also caused collision glitches)
+### Changed
+ - /getsizeof and /setsizeof commands are replaced with /sizeof command, which is made more versatile and useful
+
 ## [1.1.4] 12019-12-06
 ### Fixed
  - Server-side entity bounding box not being properly set on logging in with non-standard size

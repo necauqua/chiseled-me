@@ -1,15 +1,18 @@
 {
   "homepage": "https://minecraft.curseforge.com/projects/chiseled-me",
   "1.11.2": {
+    "1.1.5-final": "All of the below fixes were backported from 1.12 beta\n### Fixed\n - Sun clipping when size of player is around 1/8-1/16\n - Resizing process was broken - it was twice as fast, had glitches line disappearing limbs and falling through blocks (this was due to the size being negative for a tick or two)\n - Small but noticeable position shifts on resizes (might've also caused collision glitches)\n### Changed\n - /getsizeof and /setsizeof commands are replaced with /sizeof command, which is made more versatile and useful\n",
     "1.1.4": "### Fixed\n - Server-side entity bounding box not being properly set on logging in with non-standard size",
     "1.1.3": "### Changed\n - The whole core was rewritten to use an actual field for the size in Entity class, not a Forge capability, which is a huge optimization\n - This also means that all sizes in your worlds will be reset since they are now stored directly in entity NBT and not in a forgecap one\n - This version of the mod works with 1.11, 1.11.1 and 1.11.2 Minecraft versions\n### Fixed\n - Clipping distance not being changed with size when clouds were enabled (fixes #15)\n - Pistons, shulker and other players now move resized player properly\n - Teleports to enormous negative y values when becoming big (fixes #2)\n - Little jumpy bounce when falling on block when small (caused by #2)\n - Wall-climbing-like behavior when small (caused by #2)\n - Network code was revised and the de-syncs should be gone now (fixes #17)",
     "1.1.2": "### Changed\n - Updated the mod to work with minecraft version 1.11.2"
   },
   "1.11.1": {
+    "1.1.5-final": "All of the below fixes were backported from 1.12 beta\n### Fixed\n - Sun clipping when size of player is around 1/8-1/16\n - Resizing process was broken - it was twice as fast, had glitches line disappearing limbs and falling through blocks (this was due to the size being negative for a tick or two)\n - Small but noticeable position shifts on resizes (might've also caused collision glitches)\n### Changed\n - /getsizeof and /setsizeof commands are replaced with /sizeof command, which is made more versatile and useful\n",
     "1.1.4": "### Fixed\n - Server-side entity bounding box not being properly set on logging in with non-standard size",
     "1.1.3": "### Changed\n - The whole core was rewritten to use an actual field for the size in Entity class, not a Forge capability, which is a huge optimization\n - This also means that all sizes in your worlds will be reset since they are now stored directly in entity NBT and not in a forgecap one\n - This version of the mod works with 1.11, 1.11.1 and 1.11.2 Minecraft versions\n### Fixed\n - Clipping distance not being changed with size when clouds were enabled (fixes #15)\n - Pistons, shulker and other players now move resized player properly\n - Teleports to enormous negative y values when becoming big (fixes #2)\n - Little jumpy bounce when falling on block when small (caused by #2)\n - Wall-climbing-like behavior when small (caused by #2)\n - Network code was revised and the de-syncs should be gone now (fixes #17)"
   },
   "1.11": {
+    "1.1.5-final": "All of the below fixes were backported from 1.12 beta\n### Fixed\n - Sun clipping when size of player is around 1/8-1/16\n - Resizing process was broken - it was twice as fast, had glitches line disappearing limbs and falling through blocks (this was due to the size being negative for a tick or two)\n - Small but noticeable position shifts on resizes (might've also caused collision glitches)\n### Changed\n - /getsizeof and /setsizeof commands are replaced with /sizeof command, which is made more versatile and useful\n",
     "1.1.4": "### Fixed\n - Server-side entity bounding box not being properly set on logging in with non-standard size",
     "1.1.3": "### Changed\n - The whole core was rewritten to use an actual field for the size in Entity class, not a Forge capability, which is a huge optimization\n - This also means that all sizes in your worlds will be reset since they are now stored directly in entity NBT and not in a forgecap one\n - This version of the mod works with 1.11, 1.11.1 and 1.11.2 Minecraft versions\n### Fixed\n - Clipping distance not being changed with size when clouds were enabled (fixes #15)\n - Pistons, shulker and other players now move resized player properly\n - Teleports to enormous negative y values when becoming big (fixes #2)\n - Little jumpy bounce when falling on block when small (caused by #2)\n - Wall-climbing-like behavior when small (caused by #2)\n - Network code was revised and the de-syncs should be gone now (fixes #17)",
     "1.1.1": "### Changed\n - Updated the mod to work with minecraft version 1.11"
@@ -19,12 +22,12 @@
     "1.0": "Added:\n - The mod was released"
   },
   "promos": {
-    "1.11.2-latest": "1.1.4",
-    "1.11.2-recommended": "1.1.4",
-    "1.11.1-latest": "1.1.4",
-    "1.11.1-recommended": "1.1.4",
-    "1.11-latest": "1.1.4",
-    "1.11-recommended": "1.1.4",
+    "1.11.2-latest": "1.1.5-final",
+    "1.11.2-recommended": "1.1.5-final",
+    "1.11.1-latest": "1.1.5-final",
+    "1.11.1-recommended": "1.1.5-final",
+    "1.11-latest": "1.1.5-final",
+    "1.11-recommended": "1.1.5-final",
     "1.10.2-latest": "1.1.0",
     "1.10.2-recommended": "1.1.0"
   }
