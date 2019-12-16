@@ -4,10 +4,9 @@
 chiseled_me.bed.too_small=你太小了，不能睡在床上！
 chiseled_me.bed.too_big=你太大了，不能睡在床上！
 
-commands.chiseled_me:getsizeof.usage=/getsizeof <实体名>
-commands.chiseled_me:getsizeof.message=%s的相对尺寸为%s！
-commands.chiseled_me:setsizeof.usage=/setsizeof <实体名> <尺寸数值> [interp]
-commands.chiseled_me:setsizeof.message=已将%s的尺寸设定为%s!
+commands.chiseled_me:sizeof.usage=/sizeof entity [<set|add|subtract|multiply|divide> size [animate]]
+commands.chiseled_me:sizeof.get=%s的相对尺寸为%s！
+commands.chiseled_me:sizeof.set=已将%s的尺寸设定为%s!
 
 item.chiseled_me:recalibrator.charges=  §8能量剩余：§7%s
 item.chiseled_me:recalibrator.reset.name=物质体积再校准仪 [ 1.0 ]

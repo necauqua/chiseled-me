@@ -4,10 +4,9 @@ itemGroup.chiseled_me=Chiseled Me
 chiseled_me.bed.too_small=Ваш размер слишком мал чтобы спать в кровати!
 chiseled_me.bed.too_big=Ваш размер слишком велик чтобы спать в кровати!
 
-commands.chiseled_me:getsizeof.usage=/getsizeof <сущность>
-commands.chiseled_me:getsizeof.message=Относительный размер %s - %s!
-commands.chiseled_me:setsizeof.usage=/setsizeof <сущность> <число> [плавное]
-commands.chiseled_me:setsizeof.message=Изменён размер %s на %s!
+commands.chiseled_me:sizeof.usage=/sizeof entity [<set|add|subtract|multiply|divide> size [animate]]
+commands.chiseled_me:sizeof.get=Относительный размер %s - %s!
+commands.chiseled_me:sizeof.set=Размер %s изменён на %s!
 
 item.chiseled_me:recalibrator.charges=  §8Осталось зарядов: §7%s
 item.chiseled_me:recalibrator.reset.name=Материально-Объёмный Перераспределитель [ 1.0 ]

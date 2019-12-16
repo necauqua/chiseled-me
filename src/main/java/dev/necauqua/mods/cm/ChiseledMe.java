@@ -19,8 +19,6 @@ package dev.necauqua.mods.cm;
 import dev.necauqua.mods.cm.api.ChiseledMeAPI;
 import dev.necauqua.mods.cm.api.ChiseledMeInterface;
 import dev.necauqua.mods.cm.asm.dsl.ASM;
-import dev.necauqua.mods.cm.cmd.GetSizeCommand;
-import dev.necauqua.mods.cm.cmd.SetSizeCommand;
 import dev.necauqua.mods.cm.item.CraftItem;
 import dev.necauqua.mods.cm.item.ItemMod;
 import dev.necauqua.mods.cm.item.ItemRecalibrator;
@@ -93,8 +91,7 @@ public final class ChiseledMe implements ChiseledMeInterface {
 
     @EventHandler
     public void onServerStarting(FMLServerStartingEvent e) {
-        e.registerServerCommand(new GetSizeCommand());
-        e.registerServerCommand(new SetSizeCommand());
+        e.registerServerCommand(new SizeofCommand());
     }
 
     @Override
