@@ -356,7 +356,7 @@ public final class Transformers {
                     mv.visitVarInsn(FSTORE, "size");
                     mv.visitInsn(FMUL);
                 });
-                p.insertBefore(varInsn(DSTORE, 10), mv -> { // local double d3
+                p.insertBefore(varInsn(DSTORE, 12), mv -> { // local double d3
                     mv.visitVarInsn(FLOAD, "size");
                     mv.visitInsn(F2D);
                     mv.visitInsn(DMUL);
@@ -520,8 +520,7 @@ public final class Transformers {
                     mv.visitInsn(D2F);
                     mv.visitInsn(FMUL);
                 });
-                p.debugDump();
-                p.insertBefore(varInsn(DSTORE, 26), mv -> { // local double d3
+                p.insertBefore(varInsn(DSTORE, 27), mv -> { // local double d3
                     // d = ... if (size >= 1.0) { } else { ... - 0.015625 * (1.0 - size) }
                     mv.visitVarInsn(DLOAD, "size");
                     mv.visitInsn(DCONST_1);
@@ -543,10 +542,10 @@ public final class Transformers {
 
                     mv.visitVarInsn(DLOAD, 4);
 
-                    mv.visitVarInsn(ALOAD, 33); // local BlockPos blockpos
+                    mv.visitVarInsn(ALOAD, 34); // local BlockPos blockpos
                     mv.visitMethodInsn(INVOKEVIRTUAL, "net/minecraft/util/math/BlockPos", srg("getY", "Vec3i"), "()I", false);
                     mv.visitInsn(I2D);
-                    mv.visitVarInsn(DLOAD, 26); // local double 26
+                    mv.visitVarInsn(DLOAD, 27); // local double d3
                     mv.visitInsn(DADD);
 
                     mv.visitInsn(DSUB);

@@ -2,29 +2,20 @@ package dev.necauqua.mods.cm.recipes;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
-import net.minecraft.advancements.critereon.EnchantmentPredicate;
-import net.minecraft.advancements.critereon.ItemPredicate;
-import net.minecraft.advancements.critereon.MinMaxBounds;
-import net.minecraft.advancements.critereon.NBTPredicate;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.potion.PotionType;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.util.JsonUtils;
-import net.minecraftforge.advancements.critereon.ItemPredicates;
 import net.minecraftforge.common.crafting.IIngredientFactory;
 import net.minecraftforge.common.crafting.JsonContext;
-import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
-import static dev.necauqua.mods.cm.ChiseledMe.ns;
 import static net.minecraft.init.Items.*;
 
 @SuppressWarnings("unused") // referred from json
@@ -68,21 +59,5 @@ public final class PotionIngredientFactory implements IIngredientFactory {
                 return stack != null && stack.getItem() == item && PotionUtils.getPotionFromItem(stack) == potion;
             }
         };
-    }
-
-    @SubscribeEvent
-    public static void itemPredicateHack(RegistryEvent.Register<IRecipe> e) {
-        ItemPredicates.register(ns("potion"), json -> {
-            Item item = getPotionItem(json);
-            PotionType potion = getPotion(null, json);
-            return new ItemPredicate(
-                item,
-                null,
-                MinMaxBounds.UNBOUNDED,
-                MinMaxBounds.UNBOUNDED,
-                new EnchantmentPredicate[0],
-                potion,
-                NBTPredicate.ANY);
-        });
     }
 }
