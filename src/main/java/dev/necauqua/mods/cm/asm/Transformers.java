@@ -95,14 +95,17 @@ public final class Transformers {
                 p.addLocal("process", Type.getType(PROCESS_TYPE));
                 p.insertAfter(methodBegin(), mv -> {
 
+                    // var _p = this.PROCESS_FIELD
                     mv.visitVarInsn(ALOAD, 0);
                     mv.visitFieldInsn(GETFIELD, PROCESS_FIELD, PROCESS_TYPE);
                     mv.visitInsn(DUP);
                     mv.visitVarInsn(ASTORE, "process");
 
+                    // if (_p == null) { skip everything }
                     Label skip = new Label();
                     mv.visitJumpInsn(IFNULL, skip);
 
+                    // _p.interpTicks++;
                     mv.visitVarInsn(ALOAD, "process");
                     mv.visitInsn(DUP);
                     mv.visitFieldInsn(GETFIELD, PROCESS_CLASS, "interpTicks", "I");
@@ -113,17 +116,14 @@ public final class Transformers {
                     mv.visitVarInsn(ALOAD, "process");
                     mv.visitFieldInsn(GETFIELD, PROCESS_CLASS, "interpInterval", "I");
 
+                    // if (_p.interpTicks < _p.interpInterval) {
                     mv.ifJump(IF_ICMPGE, () -> {
-                        mv.visitVarInsn(ALOAD, "process");
-                        mv.visitInsn(DUP);
-                        mv.visitFieldInsn(GETFIELD, PROCESS_CLASS, "interpTicks", "I");
-                        mv.visitInsn(ICONST_1);
-                        mv.visitInsn(IADD);
-                        mv.visitFieldInsn(PUTFIELD, PROCESS_CLASS, "interpTicks", "I");
+                        // _p.prevTickSize = this.SIZE_FIELD
                         mv.visitVarInsn(ALOAD, "process");
                         mv.visitVarInsn(ALOAD, 0);
                         mv.visitFieldInsn(GETFIELD, SIZE_FIELD, "D");
                         mv.visitFieldInsn(PUTFIELD, PROCESS_CLASS, "prevTickSize", "D");
+                        // this.setEntitySize(_p.fromSize + (_p.toSize - _p.fromSize) / (double) _p.interpInterval * (double) _.interpTicks)
                         mv.visitVarInsn(ALOAD, 0);
                         mv.visitVarInsn(ALOAD, "process");
                         mv.visitFieldInsn(GETFIELD, PROCESS_CLASS, "fromSize", "D");
@@ -144,6 +144,10 @@ public final class Transformers {
                         mv.visitMethodInsn(INVOKEVIRTUAL, "setEntitySize", "(D)V");
                         mv.visitJumpInsn(GOTO, skip);
                     });
+                    // } else {
+                    //    this.setEntitySize(_p.toSize)
+                    //    this.PROCESS_FIELD = null
+                    // }
                     mv.visitVarInsn(ALOAD, 0);
                     mv.visitInsn(DUP);
                     mv.visitVarInsn(ALOAD, "process");
