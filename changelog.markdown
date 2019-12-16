@@ -25,7 +25,6 @@ Also dates in this file are in [Holocene Calendar] because it is amazing, logica
 ### Changed
  - /getsizeof and /setsizeof commands are replaced with /sizeof command, which is made more versatile and useful
 
-
 ## [1.12-2.0.0.0-beta1] 12019-12-09
 ### Added
  - Any recalibrator can be made into a reset one by putting it in the crafting field
@@ -38,6 +37,15 @@ Also dates in this file are in [Holocene Calendar] because it is amazing, logica
  - Entering the nether portal on dedicated server when small now does not cause crashes
 ### Removed
  - Due to the server-crash fix the bounding box of the nether portal is not altered and takes a full block as in vanilla
+
+## [1.1.5-final] 12019-12-16
+All of the below fixes were backported from 1.12 beta
+### Fixed
+ - Sun clipping when size of player is around 1/8-1/16
+ - Resizing process was broken - it was twice as fast, had glitches line disappearing limbs and falling through blocks (this was due to the size being negative for a tick or two)
+ - Small but noticeable position shifts on resizes (might've also caused collision glitches)
+### Changed
+ - /getsizeof and /setsizeof commands are replaced with /sizeof command, which is made more versatile and useful
 
 ## [1.1.4] 12019-12-06
 ### Fixed
