@@ -60,7 +60,7 @@ public final class Modifier {
         return anchor.apply(parent, this);
     }
 
-    public boolean match(ContextMethodVisitor context, int pass) {
+    public boolean tryRun(ContextMethodVisitor context, int pass) {
         if (index != 0 && index != pass) {
             return false;
         }
