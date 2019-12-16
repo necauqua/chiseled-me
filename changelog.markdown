@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog], and this project uses [Forge versioni
 Also dates in this file are in [Holocene Calendar] because it is amazing, logical and I want more people to know about it.
 
 ## [1.12.2-2.0.0.1] 12019-12-16
-### Changed
+### Fixed
  - Fixed startup crashes
  
 ## [1.12.2-2.0.0.0] 12019-12-16

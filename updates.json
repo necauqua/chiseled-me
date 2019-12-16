@@ -1,6 +1,7 @@
 {
   "homepage": "https://minecraft.curseforge.com/projects/chiseled-me",
   "1.12.2": {
+    "2.0.0.1": "### Fixed\n - Fixed startup crashes",
     "2.0.0.0": "### Changed\n - Updated this mod to work with Minecraft 1.12.2"
   },
   "1.12.1": {
@@ -33,6 +34,8 @@
     "1.0": "Added:\n - The mod was released"
   },
   "promos": {
+    "1.12.2-latest": "2.0.0.1",
+    "1.12.2-recommended": "2.0.0.1",
     "1.12.2-latest": "2.0.0.0",
     "1.12.2-recommended": "2.0.0.0",
     "1.12.1-latest": "2.0.0.0",
