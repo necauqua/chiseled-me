@@ -63,7 +63,8 @@ public final class DumbRecipe extends IForgeRegistryEntry.Impl<IRecipe> implemen
                     return false;
                 }
                 return true;
-            }
+            },
+            true, true
         );
     }
 
