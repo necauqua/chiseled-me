@@ -4,10 +4,9 @@ itemGroup.chiseled_me=Chiseled Me
 chiseled_me.bed.too_small=Du bist zu klein, um in einem Bett zu schlafen!
 chiseled_me.bed.too_big=Du bist zu groß, um in einem bett zu schlafen!
 
-commands.chiseled_me:getsizeof.usage=/getsizeof <Entity>
-commands.chiseled_me:getsizeof.message=%s: Relative Größe ist %s!
-commands.chiseled_me:setsizeof.usage=/setsizeof <Entity> <Zahl> [interp]
-commands.chiseled_me:setsizeof.message=%s: Größe verändert zu %s!
+commands.chiseled_me:sizeof.usage=/sizeof entity [<set|add|subtract|multiply|divide> size [animate]]
+commands.chiseled_me:sizeof.get=%s: Relative Größe ist %s!
+commands.chiseled_me:sizeof.set=%s: Größe verändert zu %s!
 
 item.chiseled_me:recalibrator.charges=  §8Ladung: §7%s
 item.chiseled_me:recalibrator.reset.name=Masse-Volumen-Rekalibrierer [ 1.0 ]
