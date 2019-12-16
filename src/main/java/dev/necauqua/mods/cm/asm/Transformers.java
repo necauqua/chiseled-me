@@ -114,12 +114,6 @@ public final class Transformers {
 
                     mv.ifJump(IF_ICMPGE, () -> {
                         mv.visitVarInsn(ALOAD, "process");
-                        mv.visitInsn(DUP);
-                        mv.visitFieldInsn(GETFIELD, PROCESS_CLASS, "interpTicks", "I");
-                        mv.visitInsn(ICONST_1);
-                        mv.visitInsn(IADD);
-                        mv.visitFieldInsn(PUTFIELD, PROCESS_CLASS, "interpTicks", "I");
-                        mv.visitVarInsn(ALOAD, "process");
                         mv.visitVarInsn(ALOAD, 0);
                         mv.visitFieldInsn(GETFIELD, SIZE_FIELD, "D");
                         mv.visitFieldInsn(PUTFIELD, PROCESS_CLASS, "prevTickSize", "D");
@@ -212,11 +206,12 @@ public final class Transformers {
                 Label start = new Label();
                 mv.visitLabel(start);
 
-                mv.visitVarInsn(ALOAD, 0);
                 mv.visitVarInsn(ILOAD, 3);
 
                 mv.ifJump(IFEQ,
                     () -> {
+                        // this.PROCESS_FIELD = new PROCESS_CLASS(this.SIZE_FIELD, size);
+                        mv.visitVarInsn(ALOAD, 0);
                         mv.visitTypeInsn(NEW, PROCESS_CLASS);
                         mv.visitInsn(DUP);
                         mv.visitVarInsn(ALOAD, 0);
@@ -225,14 +220,38 @@ public final class Transformers {
                         mv.visitMethodInsn(INVOKESPECIAL, PROCESS_CLASS, "<init>", "(DD)V", false);
                         mv.visitFieldInsn(PUTFIELD, PROCESS_FIELD, PROCESS_TYPE);
                     }, () -> {
+                        // this.SIZE_FIELD = size;
+                        mv.visitVarInsn(ALOAD, 0);
                         mv.visitVarInsn(DLOAD, 1);
                         mv.visitFieldInsn(PUTFIELD, SIZE_FIELD, "D");
+
+                        // this.width = this.O_WIDTH_FIELD * (float) size;
                         mv.visitVarInsn(ALOAD, 0);
                         mv.visitInsn(DUP);
                         mv.visitFieldInsn(GETFIELD, O_WIDTH_FIELD, "F");
+                        mv.visitVarInsn(DLOAD, 1);
+                        mv.visitInsn(D2F);
+                        mv.visitInsn(FMUL);
+                        mv.visitFieldInsn(PUTFIELD, srg("width", "Entity"), "F");
+
+                        // this.height = this.O_HEIGHT_FIELD * (float) size;
                         mv.visitVarInsn(ALOAD, 0);
+                        mv.visitInsn(DUP);
                         mv.visitFieldInsn(GETFIELD, O_HEIGHT_FIELD, "F");
-                        mv.visitMethodInsn(INVOKEVIRTUAL, srg("setSize", "Entity"), "(FF)V");
+                        mv.visitVarInsn(DLOAD, 1);
+                        mv.visitInsn(D2F);
+                        mv.visitInsn(FMUL);
+                        mv.visitFieldInsn(PUTFIELD, srg("height", "Entity"), "F");
+
+                        // this.setPosition(this.posX, this.posY, this.posZ);
+                        mv.visitVarInsn(ALOAD, 0);
+                        mv.visitInsn(DUP);
+                        mv.visitFieldInsn(GETFIELD, srg("posX", "Entity"), "D");
+                        mv.visitVarInsn(ALOAD, 0);
+                        mv.visitFieldInsn(GETFIELD, srg("posY", "Entity"), "D");
+                        mv.visitVarInsn(ALOAD, 0);
+                        mv.visitFieldInsn(GETFIELD, srg("posZ", "Entity"), "D");
+                        mv.visitMethodInsn(INVOKEVIRTUAL, srg("setPosition", "Entity"), "(DDD)V");
                     });
 
                 mv.visitInsn(RETURN);
@@ -356,14 +375,6 @@ public final class Transformers {
                     mv.visitInsn(D2F);
                     mv.visitVarInsn(FSTORE, "size");
                 });
-                p.insertAfter(insn(I2F), mv -> { // far plane decrease (closer fog)
-                    mv.visitVarInsn(FLOAD, "size");
-                    mv.visitHook(cutBiggerThanOne);
-                    mv.visitInsn(F2D);
-                    mv.visitMethodInsn(INVOKESTATIC, "java/lang/Math", "sqrt", "(D)D", false);
-                    mv.visitInsn(D2F);
-                    mv.visitInsn(FMUL);
-                });
                 p.insertAfter(ldcInsn(0.05f), mv -> { // another clipping fix
                     mv.visitVarInsn(FLOAD, "size");
                     mv.visitInsn(FMUL);
@@ -379,6 +390,17 @@ public final class Transformers {
                         mv.visitInsn(ICONST_0);
                         mv.visitFieldInsn(PUTFIELD, BOBBING_FIELD, "Z");
                     });
+            })
+            .patchMethod(srg("setupFog"), "(IF)V")
+            .with(p -> { // scale fog distance by player size
+                p.insertBeforeAll(varInsn(FSTORE, 6), mv -> {
+                    mv.visitVarInsn(ALOAD, 3); // local Entity entity
+                    mv.visitVarInsn(FLOAD, 2); // local float partialTick
+                    mv.visitMethodInsn(INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getEntitySize", "(F)D", false);
+                    mv.visitMethodInsn(INVOKESTATIC, "java/lang/Math", "sqrt", "(D)D", false);
+                    mv.visitInsn(D2F);
+                    mv.visitInsn(FMUL);
+                });
             })
             .patchMethod(srg("applyBobbing"), "(F)V") // bobbing fix (-_-)
             .with(p -> {
@@ -777,7 +799,7 @@ public final class Transformers {
 
         inClass("net/minecraft/entity/Entity")
             .patchMethod(srg("setSize", "Entity"), "(FF)V")
-            .with(p ->
+            .with(p -> {
                 p.insertAfter(methodBegin(), mv -> {
                     mv.visitVarInsn(ALOAD, 0);
                     mv.visitVarInsn(FLOAD, 1);
@@ -799,7 +821,14 @@ public final class Transformers {
                     mv.visitInsn(D2F);
                     mv.visitInsn(FMUL);
                     mv.visitVarInsn(FSTORE, 2);
-                }))
+                });
+                p.insertAfter(insn(F2D), mv -> {
+                    if (mv.getPass() >= 6) {
+                        mv.visitFieldInsn(GETFIELD, SIZE_FIELD, "D");
+                        mv.visitInsn(DDIV);
+                    }
+                });
+            })
 
             .patchMethod(srg("isEntityInsideOpaqueBlock", "Entity"), "()Z")
             .with(p -> p.insertAfter(ldcInsn(0.1f), mv -> {
