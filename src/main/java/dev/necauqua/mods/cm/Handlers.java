@@ -47,7 +47,8 @@ import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import java.lang.reflect.Field;
 
 import static dev.necauqua.mods.cm.ChiseledMe.MODID;
-import static dev.necauqua.mods.cm.EntitySizeManager.*;
+import static dev.necauqua.mods.cm.EntitySizeManager.getSize;
+import static dev.necauqua.mods.cm.EntitySizeManager.setSize;
 import static dev.necauqua.mods.cm.asm.dsl.ASM.srg;
 
 /** This class holds misc event handlers. **/
@@ -81,11 +82,11 @@ public final class Handlers {
             return;
         }
         if (size < 1.0 && Config.scaleSmall) {
-            event.setDamageMultiplier((float) (event.getDamageMultiplier() * size));
+            event.setDistance((float) (event.getDistance() / size));
             return;
         }
         if (size > 1.0 && Config.scaleBig) {
-            event.setDamageMultiplier((float) (event.getDamageMultiplier() * size));
+            event.setDistance((float) (event.getDistance() / size));
         }
     }
 
