@@ -1,0 +1,16 @@
+---
+name: Crash report
+about: A game crash caused by the mod
+title: ''
+labels: crash
+assignees: necauqua
+
+---
+
+When I try to use this mod with mod *X* (and/or by doing some set of actions), the game crashes. 
+
+If you know exactly with what mod *X* this mod crashed, please check that it was not already reported.
+
+**Additional information:**
+- crashlog file or gist: *required*
+- `fml-latest.log` file: *highly recommended to provide*
