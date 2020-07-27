@@ -1008,6 +1008,11 @@ public final class Transformers {
     @Transformer
     public void beaconBaseColor() { // this is the coolest thing i did with asm so far :V
         String WHITE = srg("WHITE", "EnumDyeColor");
+        Patch baseColorPatch = p -> p
+            .replace(fieldInsn(GETSTATIC, "net/minecraft/item/EnumDyeColor", WHITE, "Lnet/minecraft/item/EnumDyeColor;"), mv -> {
+                mv.visitVarInsn(ALOAD, 0); // TileEntityBeacon this
+                mv.visitFieldInsn(GETFIELD, "$cm_baseColor", "Lnet/minecraft/item/EnumDyeColor;");
+            });
         inClass("net/minecraft/tileentity/TileEntityBeacon")
             .addField(ACC_PRIVATE, "$cm_baseColor", "Lnet/minecraft/item/EnumDyeColor;")
             .patchConstructor("()V")
@@ -1017,12 +1022,10 @@ public final class Transformers {
                     mv.visitFieldInsn(GETSTATIC, "net/minecraft/item/EnumDyeColor", WHITE, "Lnet/minecraft/item/EnumDyeColor;");
                     mv.visitFieldInsn(PUTFIELD, "$cm_baseColor", "Lnet/minecraft/item/EnumDyeColor;");
                 }))
-            .patchMethod(srg("updateSegmentColors"), "()V")
-            .with(p -> p
-                .replace(fieldInsn(GETSTATIC, "net/minecraft/item/EnumDyeColor", WHITE, "Lnet/minecraft/item/EnumDyeColor;"), mv -> {
-                    mv.visitVarInsn(ALOAD, 0); // TileEntityBeacon this
-                    mv.visitFieldInsn(GETFIELD, "$cm_baseColor", "Lnet/minecraft/item/EnumDyeColor;");
-                }))
+            .patchMethodOptionally(srg("updateSegmentColors"), "()V") // TODO check if patched this method OR the next one (or better rewrite this to check if BetterFps is present)
+            .with(baseColorPatch)
+            .patchMethodOptionally("updateGlassLayers", "(III)V") // for the BetterFPS mod
+            .with(baseColorPatch)
             .patchMethod(srg("readFromNBT", "TileEntityBeacon"), "(Lnet/minecraft/nbt/NBTTagCompound;)V")
             .with(p -> p
                 .insertAfter(methodBegin(), mv -> {
