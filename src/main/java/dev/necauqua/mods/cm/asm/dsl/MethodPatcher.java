@@ -18,8 +18,8 @@ package dev.necauqua.mods.cm.asm.dsl;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public final class MethodPatcher implements MethodPatcherDsl {
@@ -28,9 +28,9 @@ public final class MethodPatcher implements MethodPatcherDsl {
     private final String transformerName;
     private final boolean optional;
 
-    private int matched = 0;
+    private final Set<Pair<String, String>> methodsToPatch = new HashSet<>();
+    private final Set<Pair<String, String>> patched = new HashSet<>();
 
-    private final List<Pair<String, String>> methodsToPatch = new ArrayList<>();
     private Patch patch = p -> {}; // empty stub
 
     public MethodPatcher(ClassPatcher parent, String transformerName, String name, String desc, boolean optional) {
@@ -48,7 +48,7 @@ public final class MethodPatcher implements MethodPatcherDsl {
         return transformerName;
     }
 
-    public List<Pair<String, String>> getMethodsToPatch() {
+    public Set<Pair<String, String>> getMethodsToPatch() {
         return methodsToPatch;
     }
 
@@ -57,11 +57,11 @@ public final class MethodPatcher implements MethodPatcherDsl {
     }
 
     public boolean didMatch() {
-        return matched == methodsToPatch.size();
+        return patched.equals(methodsToPatch);
     }
 
-    public void apply(PatchContextDsl context) {
-        ++matched;
+    public void apply(PatchContextDsl context, String name, String desc) {
+        patched.add(Pair.of(name, desc));
         patch.accept(context);
     }
 
@@ -79,7 +79,7 @@ public final class MethodPatcher implements MethodPatcherDsl {
 
     public String getMethodNames() {
         if (methodsToPatch.size() == 1) {
-            Pair<String, String> method = methodsToPatch.get(0);
+            Pair<String, String> method = methodsToPatch.iterator().next();
             return method.getLeft() + method.getRight();
         }
         return methodsToPatch.stream()
