@@ -38,7 +38,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.minecraftforge.common.IRarity;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -160,9 +159,9 @@ public final class ItemRecalibrator extends ItemMod {
         }
     }
 
+    @SuppressWarnings("deprecation") // dont want to hard-depend on new forge (yet)
     @Override
-    @Nonnull
-    public IRarity getForgeRarity(ItemStack stack) {
+    public EnumRarity getRarity(ItemStack stack) {
         RecalibrationEffect effect = getEffectFromStack(stack);
         return effect.type == RESET ?
             EnumRarity.UNCOMMON :
