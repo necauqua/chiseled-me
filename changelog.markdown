@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog], and this project uses [Forge versioni
 
 Also dates in this file are in [Holocene Calendar] because it is amazing, logical and I want more people to know about it.
 
+## Unreleased
+### Fixed
+ - Fix the borked recipe that any two items without a recipe together made `Antipolarized Concentrated Pym essence` (#28)
+ 
 ## [1.12.2-2.0.0.1] 12019-12-16
 ### Fixed
  - Fixed startup crashes
