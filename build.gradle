@@ -51,7 +51,7 @@ runServer.outputs.upToDateWhen { false }
 
 jar {
     manifest {
-        attributes('FMLCorePlugin': 'dev.necauqua.mods.cm.asm.Plugin', 'FMLCorePluginContainsFMLMod': 'true')
+        attributes('FMLCorePlugin': 'dev.necauqua.mods.cm.asm.ChiseledMePlugin', 'FMLCorePluginContainsFMLMod': 'true')
     }
     from 'LICENSE'
 }

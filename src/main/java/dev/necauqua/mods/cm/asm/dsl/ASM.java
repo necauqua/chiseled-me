@@ -179,6 +179,7 @@ public final class ASM {
                     });
         }
         if (message.length() > 0) {
+            System.err.println(message);
             throw new IllegalStateException("Coremod failed!\n" + message);
         }
     }
