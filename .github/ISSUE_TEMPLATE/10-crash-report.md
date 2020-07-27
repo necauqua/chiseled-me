@@ -13,4 +13,4 @@ If you know exactly with what mod *X* this mod crashed, please check that it was
 
 **Additional information:**
 - crashlog file or gist: *required*
-- `fml-latest.log` file: *highly recommended to provide*
+- `minecraft_profile_folder/logs/debug.log` file: *highly recommended to provide*
