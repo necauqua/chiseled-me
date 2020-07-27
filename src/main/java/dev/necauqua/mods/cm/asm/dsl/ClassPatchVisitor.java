@@ -22,17 +22,12 @@ import dev.necauqua.mods.cm.asm.dsl.ClassPatcher.MethodDesc;
 import org.apache.commons.lang3.tuple.Pair;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.commons.LocalVariablesSorter;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyMap;
-import static java.util.stream.Collectors.toMap;
 import static org.objectweb.asm.Opcodes.ASM5;
 
 public final class ClassPatchVisitor extends ClassVisitor {
@@ -86,7 +81,7 @@ public final class ClassPatchVisitor extends ClassVisitor {
             Log.debug("  - Adding method: " + m.getName() + m.getDesc());
             MethodVisitor mv = cv.visitMethod(m.getAcc(), m.getName(), m.getDesc(), m.getSign(), m.getExceptions());
             mv.visitCode();
-            m.getCode().accept(new ContextMethodVisitor(name, emptyMap(), mv, mv));
+            m.getCode().accept(new ContextMethodVisitor(name, mv));
             mv.visitEnd();
         }
     }
@@ -105,7 +100,6 @@ public final class ClassPatchVisitor extends ClassVisitor {
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         List<Modifier> modifiers = new ArrayList<>();
-        List<Pair<String, Type>> locals = new ArrayList<>();
 
         boolean isDump = false;
 
@@ -116,11 +110,10 @@ public final class ClassPatchVisitor extends ClassVisitor {
                 }
                 PatchContext context = new PatchContext(methodPatcher);
 
-                methodPatcher.apply(context);
+                methodPatcher.apply(context, name, desc);
 
                 isDump |= context.isDump();
                 modifiers.addAll(context.getModifiers());
-                locals.addAll(context.getLocals());
             }
         }
 
@@ -137,9 +130,7 @@ public final class ClassPatchVisitor extends ClassVisitor {
             visitor = MethodDumper.create(visitor, "patched", className, name + desc);
         }
 
-        LocalVariablesSorter lvs = new LocalVariablesSorter(access, desc, visitor);
-        Map<String, Integer> localIndices = locals.stream().collect(toMap(Pair::getLeft, p -> lvs.newLocal(p.getRight())));
-        ContextMethodVisitor context = new ContextMethodVisitor(className, localIndices, lvs, visitor);
+        ContextMethodVisitor context = new ContextMethodVisitor(className, visitor);
         ContextMethodVisitor patched = context;
 
         for (Modifier mod : modifiers) {
