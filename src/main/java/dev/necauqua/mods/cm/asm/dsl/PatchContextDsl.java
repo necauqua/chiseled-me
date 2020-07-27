@@ -17,11 +17,8 @@
 package dev.necauqua.mods.cm.asm.dsl;
 
 import dev.necauqua.mods.cm.asm.dsl.anchors.Anchor;
-import org.objectweb.asm.Type;
 
 public interface PatchContextDsl {
-
-    void addLocal(String name, Type type);
 
     void modify(ModifierType type, Anchor anchor, int nth, Hook hook);
 

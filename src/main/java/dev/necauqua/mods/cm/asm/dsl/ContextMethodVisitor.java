@@ -20,32 +20,24 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
-import java.util.Map;
-
 import static org.objectweb.asm.Opcodes.GOTO;
 
 public class ContextMethodVisitor extends MethodVisitor {
 
     private final String className;
-    private final Map<String, Integer> locals;
-    private final MethodVisitor root;
 
     private int pass = 1; // used in `code` lambdas here and there
     private final int[] currentLineNumber; // used for debug
 
-    public ContextMethodVisitor(String className, Map<String, Integer> locals, MethodVisitor parent, MethodVisitor root) {
+    public ContextMethodVisitor(String className, MethodVisitor parent) {
         super(Opcodes.ASM5, parent);
         this.className = className.replace('.', '/');
-        this.locals = locals;
-        this.root = root;
         this.currentLineNumber = new int[]{0};
     }
 
     public ContextMethodVisitor(ContextMethodVisitor mv) {
         super(Opcodes.ASM5, mv);
         className = mv.className;
-        locals = mv.locals;
-        root = mv.root;
         currentLineNumber = mv.currentLineNumber;
     }
 
@@ -81,24 +73,6 @@ public class ContextMethodVisitor extends MethodVisitor {
 
     public void visitMethodInsn(int opcode, String name, String desc) {
         visitMethodInsn(opcode, className, name, desc, false);
-    }
-
-    private int getLocal(String assocName) {
-        Integer var = locals.get(assocName);
-        if (var == null) {
-            throw new IllegalArgumentException("Local with assoc name '" + assocName + "' was never created!");
-        }
-        return var;
-    }
-
-    // for SOME REASON just calling super with the created locals does not work and
-    // I have to keep a reference to the original MethodWriter
-    public void visitVarInsn(int opcode, String assocName) {
-        root.visitVarInsn(opcode, getLocal(assocName));
-    }
-
-    public void visitIincInsn(String assocName, int increment) {
-        root.visitIincInsn(getLocal(assocName), increment);
     }
 
     public void ifJump(int opcode, Runnable skippedIfTrue) {

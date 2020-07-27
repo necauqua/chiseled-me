@@ -32,7 +32,7 @@ public final class ChiseledMePlugin implements IFMLLoadingPlugin, IClassTransfor
 
     @Override
     public void injectData(Map<String, Object> data) {
-        ASM.init(new Transformers());
+        ASM.init(new Transformers((Boolean) data.get("runtimeDeobfuscationEnabled")));
     }
 
     @Override
