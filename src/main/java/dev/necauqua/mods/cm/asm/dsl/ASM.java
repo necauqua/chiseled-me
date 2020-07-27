@@ -225,7 +225,7 @@ public final class ASM {
         if (currentTransformer == null) {
             throw new IllegalStateException("Can't use 'inClass' outside transformer method!");
         }
-        return patchers.computeIfAbsent(className.replaceAll("/", "."), ClassPatcher::new);
+        return patchers.computeIfAbsent(className, ClassPatcher::new);
     }
 
     public static Anchor methodBegin() {

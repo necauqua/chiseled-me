@@ -76,14 +76,14 @@ public final class Transformers {
 
     @Transformer
     public void entityFields() {
-        inClass("net/minecraft/entity/Entity")
+        inClass("net.minecraft.entity.Entity")
 
             .addField(ACC_PUBLIC, SIZE_FIELD, "D")
             .addField(ACC_PUBLIC, PROCESS_FIELD, PROCESS_TYPE)
             .addField(ACC_PUBLIC, O_WIDTH_FIELD, "F")
             .addField(ACC_PUBLIC, O_HEIGHT_FIELD, "F")
 
-            .addInterface("dev/necauqua/mods/cm/api/ISizedEntity")
+            .addInterface("dev.necauqua.mods.cm.api.ISizedEntity")
 
             .patchConstructor("(Lnet/minecraft/world/World;)V")
             .with(p -> p.insertAfter(methodBegin(), mv -> {
@@ -337,7 +337,7 @@ public final class Transformers {
 
     @Transformer
     public void cameraView() {
-        inClass("net/minecraft/client/renderer/EntityRenderer")
+        inClass("net.minecraft.client.renderer.EntityRenderer")
             .addField(ACC_PRIVATE, BOBBING_FIELD, "Z")
             .patchMethod(srg("orientCamera"), "(F)V") // camera height & shift
             .with(p -> {
@@ -443,7 +443,7 @@ public final class Transformers {
 
     @Transformer
     public void entityRender() {
-        inClass("net/minecraft/client/renderer/entity/RenderManager")
+        inClass("net.minecraft.client.renderer.entity.RenderManager")
             .patchMethod(srg("renderEntity"), "(Lnet/minecraft/entity/Entity;DDDFFZ)V")
             .with(p -> {
                 Hook getEntitySize = mv -> {
@@ -495,7 +495,7 @@ public final class Transformers {
                     mv.visitInsn(DMUL);
                 });
             });
-        inClass("net/minecraft/client/renderer/entity/Render")
+        inClass("net.minecraft.client.renderer.entity.Render")
             .patchMethod(srg("renderShadow", "Render"), "(Lnet/minecraft/entity/Entity;DDDFF)V")
             .with(p -> {
                 Hook getEntitySize = mv -> {
@@ -586,13 +586,13 @@ public final class Transformers {
             mv.visitInsn(F2D);
             mv.visitInsn(DDIV);
         });
-        inClass("net/minecraft/entity/Entity")
+        inClass("net.minecraft.entity.Entity")
             .patchMethodOptionally(srg("isInRangeToRenderDist", "EntityOtherPlayerMP"), "(D)Z")
             .with(renderDistPatch);
-        inClass("net/minecraft/client/entity/EntityOtherPlayerMP") // because stupid EntityOtherPlayerMP
+        inClass("net.minecraft.client.entity.EntityOtherPlayerMP") // because stupid EntityOtherPlayerMP
             .patchMethod(srg("isInRangeToRenderDist", "EntityOtherPlayerMP"), "(D)Z")
             .with(renderDistPatch);
-        inClass("net/minecraft/client/gui/inventory/GuiInventory")
+        inClass("net.minecraft.client.gui.inventory.GuiInventory")
             .patchMethod(srg("drawEntityOnScreen"), "(IIIFFLnet/minecraft/entity/EntityLivingBase;)V")
             .with(p -> p
                 .insertAfter(varInsn(FSTORE, 10), mv -> { // local float f4
@@ -609,7 +609,7 @@ public final class Transformers {
 
     @Transformer
     public void entityMotion() {
-        inClass("net/minecraft/entity/Entity")
+        inClass("net.minecraft.entity.Entity")
             .patchMethod(srg("move", "Entity"), "(Lnet/minecraft/entity/MoverType;DDD)V")
             .with(p -> {
                 Hook getEntitySize = mv -> {
@@ -668,13 +668,13 @@ public final class Transformers {
                 mv.visitInsn(D2F);
                 mv.visitInsn(FDIV);
             });
-        inClass("net/minecraft/entity/EntityLivingBase")
+        inClass("net.minecraft.entity.EntityLivingBase")
             .patchMethod(srg("travel", "EntityLivingBase"), "(FFF)V")
             .with(libmSwingAnimation);
-        inClass("net/minecraft/client/entity/EntityOtherPlayerMP") // because stupid EntityOtherPlayerMP x 2
+        inClass("net.minecraft.client.entity.EntityOtherPlayerMP") // because stupid EntityOtherPlayerMP x 2
             .patchMethod(srg("onUpdate", "EntityOtherPlayerMP"), "()V")
             .with(libmSwingAnimation);
-        inClass("net/minecraft/client/entity/EntityPlayerSP")
+        inClass("net.minecraft.client.entity.EntityPlayerSP")
             .patchMethod(srg("updateAutoJump"), "(FF)V")
             .with(p -> {
                 Hook getPlayerSize = mv -> {
@@ -707,7 +707,7 @@ public final class Transformers {
 
     @Transformer
     public void serverMotionFixes() {
-        inClass("net/minecraft/client/entity/EntityPlayerSP")
+        inClass("net.minecraft.client.entity.EntityPlayerSP")
             .patchMethod(srg("onUpdateWalkingPlayer"), "()V")
             .with(p -> p
                 .insertAfter(ldcInsn(0.0009), mv -> {
@@ -717,7 +717,7 @@ public final class Transformers {
                     mv.visitInsn(DMUL);
                     mv.visitInsn(DMUL);
                 }));
-        inClass("net/minecraft/entity/EntityTrackerEntry")
+        inClass("net.minecraft.entity.EntityTrackerEntry")
             .patchMethod(srg("updatePlayerList", "EntityTrackerEntry"), "(Ljava/util/List;)V")
             .with(p -> p
                 .replace(ldcInsn(128L), mv -> {
@@ -731,7 +731,7 @@ public final class Transformers {
                     mv.visitInsn(FMUL);
                     mv.visitInsn(F2L);
                 }));
-        inClass("net/minecraft/network/NetHandlerPlayServer")
+        inClass("net.minecraft.network.NetHandlerPlayServer")
             .patchMethod(srg("processPlayer", "NetHandlerPlayServer"), "(Lnet/minecraft/network/play/client/CPacketPlayer;)V")
             .with(p -> {
                 Hook getPlayerSize = mv -> { // setup
@@ -754,7 +754,7 @@ public final class Transformers {
                     mv.visitInsn(DMUL);
                 });
             });
-        inClass("net/minecraft/entity/player/EntityPlayerMP")
+        inClass("net.minecraft.entity.player.EntityPlayerMP")
             .patchMethod(srg("handleFalling"), "(DZ)V")
             .with(p ->
                 p.insertAfter(ldcInsn(0.20000000298023224D), mv -> {
@@ -772,7 +772,7 @@ public final class Transformers {
             mv.visitInsn(DMUL);
         };
 
-        inClass("net/minecraft/entity/player/EntityPlayer")
+        inClass("net.minecraft.entity.player.EntityPlayer")
             .patchMethod(srg("onLivingUpdate", "EntityPlayer"), "()V") // fixes collideEntityWithPlayer aabb expansion
             .with(p -> {
                 p.replaceAll(insn(DCONST_1), mv -> {
@@ -784,14 +784,14 @@ public final class Transformers {
 
         Patch ignoreFirstCheck = p -> p.replace(insn(ICONST_1), mv -> mv.visitInsn(ICONST_0));
 
-        inClass("net/minecraft/entity/EntityAgeable")
+        inClass("net.minecraft.entity.EntityAgeable")
             .patchMethod(srg("setSize", "EntityAgeable"), "(FF)V")
             .with(ignoreFirstCheck);
-        inClass("net/minecraft/entity/monster/EntityZombie")
+        inClass("net.minecraft.entity.monster.EntityZombie")
             .patchMethod(srg("setSize", "EntityZombie"), "(FF)V")
             .with(ignoreFirstCheck);
 
-        inClass("net/minecraft/entity/Entity")
+        inClass("net.minecraft.entity.Entity")
             .patchMethod(srg("setSize", "Entity"), "(FF)V")
             .with(p -> {
                 p.insertAfter(methodBegin(), mv -> {
@@ -838,7 +838,7 @@ public final class Transformers {
                 p.insertAfter(ldcInsn(-0.4000000059604645), mulBySize); // vertical AABB extension
                 p.insertAfter(ldcInsn(0.001), mulBySize); // AABB shrink
             });
-        inClass("net/minecraft/client/renderer/ItemRenderer")
+        inClass("net.minecraft.client.renderer.ItemRenderer")
             .patchMethod(srg("renderOverlays"), "(F)V")
             .with(p -> p.insertAfter(ldcInsn(0.1f), mv -> {
                 mv.visitVarInsn(ALOAD, 4); // EntityPlayer entityplayer
@@ -850,7 +850,7 @@ public final class Transformers {
 
     @Transformer
     public void reachDistance() {
-        inClass("net/minecraft/client/renderer/EntityRenderer")
+        inClass("net.minecraft.client.renderer.EntityRenderer")
             .patchMethod(srg("getMouseOver"), "(F)V")
             .with(p -> {
                 Hook getEntitySize = mv -> {
@@ -870,7 +870,7 @@ public final class Transformers {
                 p.insertAfterAll(ldcInsn(3.0), mulBySize);
             });
 
-        inClass("net/minecraft/client/multiplayer/PlayerControllerMP") // on client
+        inClass("net.minecraft.client.multiplayer.PlayerControllerMP") // on client
             .patchMethod(srg("getBlockReachDistance", "PlayerControllerMP"), "()F")
             .with(p -> p
                 .insertBefore(insn(FRETURN), mv -> {
@@ -882,7 +882,7 @@ public final class Transformers {
                     mv.visitHook(cutSmallerThanOne);
                     mv.visitInsn(FMUL);
                 }));
-        inClass("net/minecraft/server/management/PlayerInteractionManager") // on server - only increase reach to match client
+        inClass("net.minecraft.server.management.PlayerInteractionManager") // on server - only increase reach to match client
             .patchMethod("getBlockReachDistance", "()D") // lol
             .with(p ->
                 p.insertBefore(insn(DRETURN), mv -> {
@@ -895,7 +895,7 @@ public final class Transformers {
                     mv.visitInsn(DMUL);
                 })
             );
-        inClass("net/minecraft/network/NetHandlerPlayServer") // entity server reach
+        inClass("net.minecraft.network.NetHandlerPlayServer") // entity server reach
             .patchMethod(srg("processUseEntity", "NetHandlerPlayServer"), "(Lnet/minecraft/network/play/client/CPacketUseEntity;)V")
             .with(p ->
                 p.insertAfter(varInsn(DLOAD, 5), mv -> { // local double d0
@@ -909,7 +909,7 @@ public final class Transformers {
                     mv.visitInsn(DMUL);
                 })
             );
-        inClass("net/minecraft/world/World") // when reach distance <= 1 this one null return screws up raytracing a bit so here's a fix
+        inClass("net.minecraft.world.World") // when reach distance <= 1 this one null return screws up raytracing a bit so here's a fix
             .patchMethod(srg("rayTraceBlocks", "World", "(Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Vec3d;ZZZ)Lnet/minecraft/util/math/RayTraceResult;"),
                 "(Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Vec3d;ZZZ)Lnet/minecraft/util/math/RayTraceResult;")
             .with(p -> p.replace(insn(ACONST_NULL), mv -> {
@@ -939,28 +939,28 @@ public final class Transformers {
                 mv.visitInsn(D2F);
                 mv.visitInsn(FMUL);
             });
-        inClass("net/minecraft/entity/player/EntityPlayer")
+        inClass("net.minecraft.entity.player.EntityPlayer")
             .patchMethod(srg("getEyeHeight", "EntityPlayer"), "()F")
             .with(mulBySize);
 
         // those patches are for shooting mobs with hardcoded height, there is no way to make it universal currently
-        inClass("net/minecraft/entity/monster/AbstractSkeleton")
+        inClass("net.minecraft.entity.monster.AbstractSkeleton")
             .patchMethod(srg("getEyeHeight", "AbstractSkeleton"), "()F")
             .with(mulBySize);
-        inClass("net/minecraft/entity/monster/EntitySnowman")
+        inClass("net.minecraft.entity.monster.EntitySnowman")
             .patchMethod(srg("getEyeHeight", "EntitySnowman"), "()F")
             .with(mulBySize);
-        inClass("net/minecraft/entity/monster/EntityGhast")
+        inClass("net.minecraft.entity.monster.EntityGhast")
             .patchMethod(srg("getEyeHeight", "EntityGhast"), "()F")
             .with(mulBySize);
-        inClass("net/minecraft/entity/monster/EntityWitch")
+        inClass("net.minecraft.entity.monster.EntityWitch")
             .patchMethod(srg("getEyeHeight", "EntityWitch"), "()F")
             .with(mulBySize);
     }
 
     @Transformer
     public void itemFixes() {
-        inClass("net/minecraft/entity/item/EntityItem")
+        inClass("net.minecraft.entity.item.EntityItem")
             .patchMethodOptionally(srg("searchForOtherItemsNearby"), "()V") // TODO properly patch this for Spigot
             .with(p ->
                 p.insertAfterAll(ldcInsn(0.5), mv -> { // items stacking with each other
@@ -968,7 +968,7 @@ public final class Transformers {
                     mv.visitFieldInsn(GETFIELD, SIZE_FIELD, "D");
                     mv.visitInsn(DMUL);
                 }));
-        inClass("net/minecraft/client/particle/ParticleItemPickup")
+        inClass("net.minecraft.client.particle.ParticleItemPickup")
             .patchConstructor("(Lnet/minecraft/world/World;Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/Entity;F)V")
             .with(p -> p
                 .insertAfter(varInsn(FLOAD, 4), mv -> { // first person pickup render
@@ -977,7 +977,7 @@ public final class Transformers {
                     mv.visitInsn(D2F);
                     mv.visitInsn(FMUL);
                 }));
-        inClass("net/minecraft/entity/player/EntityPlayer")
+        inClass("net.minecraft.entity.player.EntityPlayer")
             .patchMethod(srg("dropItem", "EntityPlayer", "(Lnet/minecraft/item/ItemStack;ZZ)Lnet/minecraft/entity/item/EntityItem;"),
                 "(Lnet/minecraft/item/ItemStack;ZZ)Lnet/minecraft/entity/item/EntityItem;")
             .with(p -> p
@@ -986,7 +986,7 @@ public final class Transformers {
                     mv.visitFieldInsn(GETFIELD, SIZE_FIELD, "D");
                     mv.visitInsn(DMUL);
                 }));
-        inClass("net/minecraft/entity/Entity")
+        inClass("net.minecraft.entity.Entity")
             .patchMethod(srg("entityDropItem", "Entity"), "(Lnet/minecraft/item/ItemStack;F)Lnet/minecraft/entity/item/EntityItem;")
             .with(p -> {
                 p.insertAfter(varInsn(FLOAD, 2), mv -> {
@@ -1013,7 +1013,7 @@ public final class Transformers {
                 mv.visitVarInsn(ALOAD, 0); // TileEntityBeacon this
                 mv.visitFieldInsn(GETFIELD, "$cm_baseColor", "Lnet/minecraft/item/EnumDyeColor;");
             });
-        inClass("net/minecraft/tileentity/TileEntityBeacon")
+        inClass("net.minecraft.tileentity.TileEntityBeacon")
             .addField(ACC_PRIVATE, "$cm_baseColor", "Lnet/minecraft/item/EnumDyeColor;")
             .patchConstructor("()V")
             .with(p -> p
@@ -1087,7 +1087,7 @@ public final class Transformers {
             p.insertAfterAll(ldcInsn(0.30000001192092896D), mulBySize);
         };
         Patch sizeFieldPatch = p -> p.insertAfterAll(ldcInsn(0.25D), mulBySize);
-        inClass("net/minecraft/entity/projectile/EntityThrowable")
+        inClass("net.minecraft.entity.projectile.EntityThrowable")
             .patchConstructor("(Lnet/minecraft/world/World;Lnet/minecraft/entity/EntityLivingBase;)V")
             .with(heightPatch)
             .patchMethod(srg("onUpdate", "EntityThrowable"), "()V")
@@ -1097,7 +1097,7 @@ public final class Transformers {
                     pass -> (pass >= 2 && pass <= 5) || pass == 9 || pass == 10,
                     pass -> (pass >= 2 && pass <= 5) || pass == 7 || pass == 8)));
 
-        inClass("net/minecraft/entity/projectile/EntityArrow")
+        inClass("net.minecraft.entity.projectile.EntityArrow")
             .patchConstructor("(Lnet/minecraft/world/World;Lnet/minecraft/entity/EntityLivingBase;)V")
             .with(heightPatch)
             .patchMethod(srg("onUpdate", "EntityArrow"), "()V")

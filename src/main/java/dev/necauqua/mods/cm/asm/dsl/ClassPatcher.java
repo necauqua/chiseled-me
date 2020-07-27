@@ -69,12 +69,12 @@ public final class ClassPatcher implements ClassPatcherDsl {
     }
 
     public ClassPatcherDsl addInterface(String iface) {
-        extraInterfaces.add(iface);
+        extraInterfaces.add(iface.replace('.', '/'));
         return this;
     }
 
     public ClassPatcherDsl stripInterface(String iface) {
-        strippedInterfaces.add(iface);
+        strippedInterfaces.add(iface.replace('.', '/'));
         return this;
     }
 
