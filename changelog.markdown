@@ -8,6 +8,7 @@ Also dates in this file are in [Holocene Calendar] because it is amazing, logica
 ## Unreleased
 ### Fixed
  - Improved general mod compatibility (fixed a ton of unreported mod compat crashes in advance)
+ - Fix the crash with Spigot (also Mohist, #52)
  - Fix mod compat crash with Quark (#32)
  - Fix mod compat crash with MalisisDoors and most other Mixin mods (#21)
  - Fix the borked recipe that any two items without a recipe together made `Antipolarized Concentrated Pym essence` (#28)

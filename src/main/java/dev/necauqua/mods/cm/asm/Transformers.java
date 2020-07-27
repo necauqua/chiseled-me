@@ -961,7 +961,7 @@ public final class Transformers {
     @Transformer
     public void itemFixes() {
         inClass("net/minecraft/entity/item/EntityItem")
-            .patchMethod(srg("searchForOtherItemsNearby"), "()V")
+            .patchMethodOptionally(srg("searchForOtherItemsNearby"), "()V") // TODO properly patch this for Spigot
             .with(p ->
                 p.insertAfterAll(ldcInsn(0.5), mv -> { // items stacking with each other
                     mv.visitVarInsn(ALOAD, 0); // EntityItem this
