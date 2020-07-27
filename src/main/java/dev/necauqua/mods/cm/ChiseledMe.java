@@ -54,6 +54,7 @@ import static java.util.stream.Collectors.toSet;
 
 @Mod(modid = MODID,
     version = "@VERSION@",
+//    dependencies = "required:forge@[@FORGE_VERSION@,);",
     acceptedMinecraftVersions = "@MC_VERSION_RANGE@",
     updateJSON = "https://raw.githubusercontent.com/necauqua/chiseled-me/master/updates.json",
     certificateFingerprint = "c677c954974252994736eb15e855e1e6fc5a2e62",
