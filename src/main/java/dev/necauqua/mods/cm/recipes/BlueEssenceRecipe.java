@@ -29,16 +29,16 @@ public final class BlueEssenceRecipe extends ShapelessRecipes {
     @ObjectHolder("chiseled_me:pym_essence_x")
     private static Item ESSENCE_X;
 
-    private static final NonNullList<Ingredient> INGREDIENTS = NonNullList.create();
-
-    static {
-        INGREDIENTS.add(Ingredient.fromItem(ESSENCE_X));
-        INGREDIENTS.add(Ingredient.fromItem(BLUE_STAR));
+    public BlueEssenceRecipe() {
+        super("", new ItemStack(ESSENCE_B), createIngredients());
+        setRegistryName(ns("pym_essence_b"));
     }
 
-    public BlueEssenceRecipe() {
-        super("", new ItemStack(ESSENCE_B), INGREDIENTS);
-        setRegistryName(ns("pym_essence_b"));
+    private static NonNullList<Ingredient> createIngredients() {
+        NonNullList<Ingredient> ingredients = NonNullList.create();
+        ingredients.add(Ingredient.fromItem(ESSENCE_X));
+        ingredients.add(Ingredient.fromItem(BLUE_STAR));
+        return ingredients;
     }
 
     @Override
