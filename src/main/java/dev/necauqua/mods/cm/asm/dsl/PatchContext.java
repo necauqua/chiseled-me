@@ -17,8 +17,6 @@
 package dev.necauqua.mods.cm.asm.dsl;
 
 import dev.necauqua.mods.cm.asm.dsl.anchors.Anchor;
-import org.apache.commons.lang3.tuple.Pair;
-import org.objectweb.asm.Type;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +24,6 @@ import java.util.List;
 public final class PatchContext implements PatchContextDsl {
 
     private final List<Modifier> modifiers = new ArrayList<>();
-    private final List<Pair<String, Type>> locals = new ArrayList<>();
     private final MethodPatcher parent;
 
     private boolean dump = false;
@@ -39,17 +36,8 @@ public final class PatchContext implements PatchContextDsl {
         return modifiers;
     }
 
-    public List<Pair<String, Type>> getLocals() {
-        return locals;
-    }
-
     public boolean isDump() {
         return dump;
-    }
-
-    @Override
-    public void addLocal(String name, Type type) {
-        locals.add(Pair.of(name, type));
     }
 
     @Override

@@ -39,6 +39,7 @@ minecraft {
 
     replace '@VERSION@', versions.base
     replace '@MC_VERSION_RANGE@', versions.range
+    replace '@FORGE_VERSION@', versions.forge
 
     // here we strip the .minor.patch-detail suffix (meh, shut up, I love regex)
     replace '@API_VERSION@', versions.base.replaceAll('\\.\\d+\\.\\d+(?:-.*?)?$', '')
@@ -50,7 +51,7 @@ runServer.outputs.upToDateWhen { false }
 
 jar {
     manifest {
-        attributes('FMLCorePlugin': 'dev.necauqua.mods.cm.asm.Plugin', 'FMLCorePluginContainsFMLMod': 'true')
+        attributes('FMLCorePlugin': 'dev.necauqua.mods.cm.asm.ChiseledMePlugin', 'FMLCorePluginContainsFMLMod': 'true')
     }
     from 'LICENSE'
 }

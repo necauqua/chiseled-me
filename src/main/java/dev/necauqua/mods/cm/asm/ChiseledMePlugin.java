@@ -28,11 +28,11 @@ import java.util.Map;
 @Name("Chiseled Me ASM")
 @SortingIndex(1001) // above 1000 so notch->srg deobfuscation would happen before us
 @TransformerExclusions("dev.necauqua.mods.cm")
-public final class Plugin implements IFMLLoadingPlugin, IClassTransformer {
+public final class ChiseledMePlugin implements IFMLLoadingPlugin, IClassTransformer {
 
     @Override
     public void injectData(Map<String, Object> data) {
-        ASM.init(new Transformers());
+        ASM.init(new Transformers((Boolean) data.get("runtimeDeobfuscationEnabled")));
     }
 
     @Override
@@ -42,7 +42,7 @@ public final class Plugin implements IFMLLoadingPlugin, IClassTransformer {
 
     @Override
     public String[] getASMTransformerClass() {
-        return new String[]{"dev.necauqua.mods.cm.asm.Plugin"};
+        return new String[]{"dev.necauqua.mods.cm.asm.ChiseledMePlugin"};
     }
 
     @Override
