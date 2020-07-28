@@ -265,7 +265,7 @@ public final class ASM {
         return new FieldInsnAnchor(opcode, owner, name, desc);
     }
 
-    public static Anchor methodInsn(int opcode, String owner, String name, String desc) {
-        return new MethodInsnAnchor(opcode, owner, name, desc);
+    public static Anchor invokeInsn(String owner, String name, String desc) {
+        return new InvokeInsnAnchor(owner, name, desc);
     }
 }

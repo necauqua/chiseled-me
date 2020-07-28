@@ -18,17 +18,14 @@ package dev.necauqua.mods.cm.asm.dsl.anchors;
 
 import dev.necauqua.mods.cm.asm.dsl.ContextMethodVisitor;
 import dev.necauqua.mods.cm.asm.dsl.Modifier;
-import org.objectweb.asm.util.Printer;
 
-public final class MethodInsnAnchor extends Anchor {
+public final class InvokeInsnAnchor extends Anchor {
 
-    private final int opcode;
     private final String owner;
     private final String name;
     private final String desc;
 
-    public MethodInsnAnchor(int opcode, String owner, String name, String desc) {
-        this.opcode = opcode;
+    public InvokeInsnAnchor(String owner, String name, String desc) {
         this.owner = owner;
         this.name = name;
         this.desc = desc;
@@ -43,7 +40,7 @@ public final class MethodInsnAnchor extends Anchor {
             public void visitMethodInsn(int op, String _owner, String _name, String _desc, boolean isInterface) {
                 visit(modifier, context,
                     () -> super.visitMethodInsn(op, _owner, _name, _desc, isInterface),
-                    () -> op == opcode && _owner.equals(owner) && _name.equals(name) && _desc.equals(desc),
+                    () -> _owner.equals(owner) && _name.equals(name) && _desc.equals(desc),
                     () -> ++n
                 );
             }
@@ -52,6 +49,6 @@ public final class MethodInsnAnchor extends Anchor {
 
     @Override
     public String toString() {
-        return Printer.OPCODES[opcode] + " " + owner + "." + name + desc;
+        return "INVOKE* " + owner + "." + name + desc;
     }
 }

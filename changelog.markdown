@@ -12,6 +12,7 @@ Also dates in this file are in [Holocene Calendar] because it is amazing, logica
  - Fix mod compat crash with Quark (#32)
  - Fix mod compat crash with MalisisDoors and most other Mixin mods (#21)
  - Fix mod compat crash with BetterFps (#48)
+ - Fix mod compat crash with mods that change visibility of certain methods with ATs (iChunUtil) (#31)
  - Fix the borked recipe that any two items without a recipe together made `Antipolarized Concentrated Pym essence` (#28)
  - Fix the crash with old Forge (the IRarity class not found error)
 
