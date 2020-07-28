@@ -389,7 +389,7 @@ public final class Transformers {
                     mv.visitHook(getPlayerSize);
                     mv.visitInsn(FMUL);
                 });
-                p.insertAround(methodInsn(INVOKESPECIAL, "net/minecraft/client/renderer/EntityRenderer", srg("applyBobbing"), "(F)V"),
+                p.insertAround(invokeInsn("net/minecraft/client/renderer/EntityRenderer", srg("applyBobbing"), "(F)V"),
                     mv -> {
                         mv.visitVarInsn(ALOAD, 0);
                         mv.visitInsn(ICONST_1);
@@ -635,10 +635,7 @@ public final class Transformers {
                         mv.visitVarInsn(DSTORE, 6); // param double z
                     });
                 });
-                Hook mulBySize = mv -> {
-                    mv.visitHook(getEntitySize);
-                    mv.visitInsn(DMUL);
-                };
+                Hook mulBySize = getEntitySize.and(mv -> mv.visitInsn(DMUL));
                 p.insertAfterAll(ldcInsn(0.05), mulBySize);  //
                 p.insertAfterAll(ldcInsn(-0.05), mulBySize); // shifting on edges of aabb's
                 p.insertBefore(varInsn(DSTORE, 4), 4, mulBySize); // stepHeight
@@ -651,7 +648,8 @@ public final class Transformers {
                     mv.visitInsn(D2F);
                     mv.visitInsn(FDIV);
                 });
-                p.insertAfter(ldcInsn(0.20000000298023224), mulBySize); // block step collision
+                p.insertAfterAll(ldcInsn(0.20000000298023224), mulBySize); // block step collision
+                p.insertAfterAll(ldcInsn(0.001), mulBySize); // flammable collision
             })
             .patchMethod(srg("createRunningParticles"), "()V")
             .with(p -> p
@@ -1125,7 +1123,7 @@ public final class Transformers {
                     pass -> (pass >= 5 && pass <= 9) || pass == 13 || pass == 14,
                     pass -> (pass >= 3 && pass <= 7) || pass == 9 || pass == 10))
                 .and(p ->
-                    p.insertAfter(methodInsn(INVOKEVIRTUAL, "net/minecraft/entity/projectile/EntityArrow", srg("getIsCritical"), "()Z"),
+                    p.insertAfter(invokeInsn("net/minecraft/entity/projectile/EntityArrow", srg("getIsCritical"), "()Z"),
                         mv -> mv.ifJump(IFEQ,
                             () -> {
                                 mv.visitVarInsn(ALOAD, 0);

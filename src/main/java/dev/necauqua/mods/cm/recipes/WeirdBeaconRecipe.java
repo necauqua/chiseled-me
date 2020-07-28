@@ -31,30 +31,32 @@ public final class WeirdBeaconRecipe extends ShapedRecipes {
     private static Item BLUE_STAR;
 
     private static final ItemStack RESULT = new ItemStack(BEACON);
-    private static final NonNullList<Ingredient> INGREDIENTS = NonNullList.create();
 
-    static {
+    private static NonNullList<Ingredient> createIngredients() {
+        NonNullList<Ingredient> ingredients = NonNullList.create();
+
         NBTTagCompound nbt = new NBTTagCompound();
         NBTTagCompound blockTag = new NBTTagCompound();
         blockTag.setByte("chiseled_me:color", (byte) 3);
-        nbt.setTag("BlockEntityData", blockTag);
+        nbt.setTag("BlockEntityTag", blockTag);
         RESULT.setTagCompound(nbt);
 
         Ingredient glass = Ingredient.fromItem(Item.getItemFromBlock(GLASS));
         Ingredient obsidian = Ingredient.fromItem(Item.getItemFromBlock(OBSIDIAN));
-        INGREDIENTS.add(glass);
-        INGREDIENTS.add(glass);
-        INGREDIENTS.add(glass);
-        INGREDIENTS.add(glass);
-        INGREDIENTS.add(Ingredient.fromItem(BLUE_STAR));
-        INGREDIENTS.add(glass);
-        INGREDIENTS.add(obsidian);
-        INGREDIENTS.add(obsidian);
-        INGREDIENTS.add(obsidian);
+        ingredients.add(glass);
+        ingredients.add(glass);
+        ingredients.add(glass);
+        ingredients.add(glass);
+        ingredients.add(Ingredient.fromItem(BLUE_STAR));
+        ingredients.add(glass);
+        ingredients.add(obsidian);
+        ingredients.add(obsidian);
+        ingredients.add(obsidian);
+        return ingredients;
     }
 
     public WeirdBeaconRecipe() {
-        super("", 9, 9, INGREDIENTS, RESULT);
+        super("", 3, 3, createIngredients(), RESULT);
         setRegistryName(ns("weird_beacon"));
     }
 
