@@ -19,6 +19,7 @@ package dev.necauqua.mods.cm.asm;
 import dev.necauqua.mods.cm.asm.dsl.Hook;
 import dev.necauqua.mods.cm.asm.dsl.Patch;
 import dev.necauqua.mods.cm.asm.dsl.Transformer;
+import net.minecraft.launchwrapper.Launch;
 import org.objectweb.asm.Label;
 
 import java.util.function.IntPredicate;
@@ -1007,25 +1008,32 @@ public final class Transformers {
 
     @Transformer
     public void beaconBaseColor() { // this is the coolest thing i did with asm so far :V
-        String WHITE = srg("WHITE", "EnumDyeColor");
         Patch baseColorPatch = p -> p
-            .replace(fieldInsn(GETSTATIC, "net/minecraft/item/EnumDyeColor", WHITE, "Lnet/minecraft/item/EnumDyeColor;"), mv -> {
+            .replace(fieldInsn(GETSTATIC, "net/minecraft/item/EnumDyeColor", srg("WHITE", "EnumDyeColor"), "Lnet/minecraft/item/EnumDyeColor;"), mv -> {
                 mv.visitVarInsn(ALOAD, 0); // TileEntityBeacon this
                 mv.visitFieldInsn(GETFIELD, "$cm_baseColor", "Lnet/minecraft/item/EnumDyeColor;");
             });
+
+        // workaround for BetterFps beacon optimisation
+        if (Launch.blackboard.containsKey("BetterFpsVersion")) {
+            inClass("net.minecraft.tileentity.TileEntityBeacon")
+                .patchMethod("updateGlassLayers", "(III)V")
+                .with(baseColorPatch);
+        } else {
+            inClass("net.minecraft.tileentity.TileEntityBeacon")
+                .patchMethod(srg("updateSegmentColors"), "()V")
+                .with(baseColorPatch);
+        }
+
         inClass("net.minecraft.tileentity.TileEntityBeacon")
             .addField(ACC_PRIVATE, "$cm_baseColor", "Lnet/minecraft/item/EnumDyeColor;")
             .patchConstructor("()V")
             .with(p -> p
                 .insertAfter(varInsn(ALOAD, 0), 2, mv -> {
                     mv.visitInsn(DUP);
-                    mv.visitFieldInsn(GETSTATIC, "net/minecraft/item/EnumDyeColor", WHITE, "Lnet/minecraft/item/EnumDyeColor;");
+                    mv.visitFieldInsn(GETSTATIC, "net/minecraft/item/EnumDyeColor", srg("WHITE", "EnumDyeColor"), "Lnet/minecraft/item/EnumDyeColor;");
                     mv.visitFieldInsn(PUTFIELD, "$cm_baseColor", "Lnet/minecraft/item/EnumDyeColor;");
                 }))
-            .patchMethodOptionally(srg("updateSegmentColors"), "()V") // TODO check if patched this method OR the next one (or better rewrite this to check if BetterFps is present)
-            .with(baseColorPatch)
-            .patchMethodOptionally("updateGlassLayers", "(III)V") // for the BetterFPS mod
-            .with(baseColorPatch)
             .patchMethod(srg("readFromNBT", "TileEntityBeacon"), "(Lnet/minecraft/nbt/NBTTagCompound;)V")
             .with(p -> p
                 .insertAfter(methodBegin(), mv -> {

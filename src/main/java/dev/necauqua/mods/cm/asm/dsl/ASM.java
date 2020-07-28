@@ -189,7 +189,6 @@ public final class ASM {
     /**
      * Calls to this method are transformed with a smart Gradle task
      */
-    @SuppressWarnings("unused")
     public static String srg(String mcpName) {
         // funky hack that allows you to run this without preprocessing from Intellij IDEA
         if (System.getProperty("java.class.path").contains("idea_rt")) {
@@ -202,7 +201,6 @@ public final class ASM {
     /**
      * Calls to this method are transformed with a smart Gradle task
      */
-    @SuppressWarnings("unused")
     public static String srg(String mcpName, String className) {
         if (System.getProperty("java.class.path").contains("idea_rt")) {
             return mcpName;
@@ -213,7 +211,6 @@ public final class ASM {
     /**
      * Calls to this method are transformed with a smart Gradle task
      */
-    @SuppressWarnings("unused")
     public static String srg(String mcpName, String className, String methodDesc) {
         if (System.getProperty("java.class.path").contains("idea_rt")) {
             return mcpName;
