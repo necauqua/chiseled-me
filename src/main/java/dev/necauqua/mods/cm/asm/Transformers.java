@@ -959,16 +959,27 @@ public final class Transformers {
             .with(mulBySize);
     }
 
+    private static boolean isInSpigot() {
+        try {
+            Class.forName("org.bukkit.entity.Player$Spigot");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
     @Transformer
     public void itemFixes() {
         inClass("net.minecraft.entity.item.EntityItem")
-            .patchMethodOptionally(srg("searchForOtherItemsNearby"), "()V") // TODO properly patch this for Spigot
+            .patchMethod(srg("searchForOtherItemsNearby"), "()V")
             .with(p ->
-                p.insertAfterAll(ldcInsn(0.5), mv -> { // items stacking with each other
-                    mv.visitVarInsn(ALOAD, 0); // EntityItem this
-                    mv.visitFieldInsn(GETFIELD, SIZE_FIELD, "D");
-                    mv.visitInsn(DMUL);
-                }));
+                p.insertAfterAll(isInSpigot() ? varInsn(DLOAD, 1) : ldcInsn(0.5),
+                    mv -> { // items stacking with each other
+                        mv.visitVarInsn(ALOAD, 0); // EntityItem this
+                        mv.visitFieldInsn(GETFIELD, SIZE_FIELD, "D");
+                        mv.visitInsn(DMUL);
+                    }));
+
         inClass("net.minecraft.client.particle.ParticleItemPickup")
             .patchConstructor("(Lnet/minecraft/world/World;Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/Entity;F)V")
             .with(p -> p
