@@ -30,7 +30,9 @@ public interface ChiseledMeInterface {
      *
      * @param entity any minecraft entity which size might have been changed before
      * @return relative size of given entity
+     * @deprecated Use the {@link ISizedEntity} interface directly on your entities
      **/
+    @Deprecated
     float getSizeOf(Entity entity);
 
     /**
@@ -42,7 +44,9 @@ public interface ChiseledMeInterface {
      * @param entity      any minecraft entity which size might have been changed before
      * @param partialTick interpolation parameter in range between 0 and 1
      * @return interpolated relative size of given entity
+     * @deprecated Use the {@link ISizedEntity} interface directly on your entities
      */
+    @Deprecated
     float getRenderSizeOf(Entity entity, float partialTick);
 
     /**

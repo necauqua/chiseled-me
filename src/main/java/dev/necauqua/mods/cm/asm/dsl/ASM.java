@@ -191,7 +191,7 @@ public final class ASM {
      */
     public static String srg(String mcpName) {
         // funky hack that allows you to run this without preprocessing from Intellij IDEA
-        if (System.getProperty("java.class.path").contains("idea_rt")) {
+        if (System.getProperty("java.class.path").contains("idea_rt.jar")) {
             return mcpName;
         }
         // but still keep the check for incorrect compilation or whatever
@@ -202,7 +202,7 @@ public final class ASM {
      * Calls to this method are transformed with a smart Gradle task
      */
     public static String srg(String mcpName, String className) {
-        if (System.getProperty("java.class.path").contains("idea_rt")) {
+        if (System.getProperty("java.class.path").contains("idea_rt.jar")) {
             return mcpName;
         }
         throw new IllegalStateException("Gradle preprocessing was not applied! Macro: srg(\"" + mcpName + "\", \"" + className + "\")");
@@ -212,7 +212,7 @@ public final class ASM {
      * Calls to this method are transformed with a smart Gradle task
      */
     public static String srg(String mcpName, String className, String methodDesc) {
-        if (System.getProperty("java.class.path").contains("idea_rt")) {
+        if (System.getProperty("java.class.path").contains("idea_rt.jar")) {
             return mcpName;
         }
         throw new IllegalStateException("Gradle preprocessing was not applied! Macro: srg(\"" + mcpName + "\", \"" + className + "\", \"" + methodDesc + "\")");
