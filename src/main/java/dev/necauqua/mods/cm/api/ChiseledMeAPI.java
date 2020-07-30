@@ -29,7 +29,7 @@ import net.minecraft.entity.Entity;
  *     return 1.0f;
  * }
  *
- * {@literal @}Optional.Method(modid = "chiseled_me")
+ *{@literal @}Optional.Method(modid = "chiseled_me")
  * private float getSizeImpl(Entity entity) {
  *     return ChiseledMeAPI.interaction.getSizeOf(entity);
  * }

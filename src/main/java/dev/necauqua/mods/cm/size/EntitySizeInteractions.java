@@ -46,9 +46,7 @@ import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.IThrowableEntity;
-import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
-import java.lang.reflect.Field;
 import java.util.List;
 
 import static dev.necauqua.mods.cm.ChiseledMe.MODID;
@@ -58,6 +56,7 @@ import static dev.necauqua.mods.cm.size.EntitySizeManager.setSize;
 
 /** This class holds misc event handlers. **/
 public final class EntitySizeInteractions {
+
     private static final String NBT_KEY_SIZE = MODID + ":size";
 
     private EntitySizeInteractions() {}
@@ -68,9 +67,11 @@ public final class EntitySizeInteractions {
             return;
         }
         try {
-            Field f = ReflectionHelper.findField(BlockBed.class, "BED_AABB", srg("BED_AABB"));
-            AxisAlignedBB aabb = new AxisAlignedBB(0.0, 0.1875, 0.0, 1.0, 0.5625, 1.0);
-            EnumHelper.setFailsafeFieldValue(f, null, aabb); // this can set final non-primitive fields
+            EnumHelper.setFailsafeFieldValue(
+                BlockBed.class.getDeclaredField(srg("BED_AABB")),
+                null,
+                new AxisAlignedBB(0.0, 0.1875, 0.0, 1.0, 0.5625, 1.0)
+            ); // this can set final non-primitive fields
         } catch (Exception e) {
             Log.error("Failed to modify bed AABB!", e);
         }

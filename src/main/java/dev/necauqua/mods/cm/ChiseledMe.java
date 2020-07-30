@@ -33,6 +33,7 @@ import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.discovery.ASMDataTable;
+import net.minecraftforge.fml.common.discovery.ASMDataTable.ASMData;
 import net.minecraftforge.fml.common.event.*;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.oredict.OreDictionary;
@@ -42,6 +43,7 @@ import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -73,6 +75,7 @@ public final class ChiseledMe implements ChiseledMeInterface {
     };
 
     public static final ItemRecalibrator RECALIBRATOR = new ItemRecalibrator();
+
     public static final Item[] ITEMS = {
         RECALIBRATOR,
         new ItemMod("blue_star").setGlowing(),
@@ -82,6 +85,10 @@ public final class ChiseledMe implements ChiseledMeInterface {
         new ItemMod("pym_essence_x").setMaxStackSize(13),
         new ItemMod("pym_essence_b").setMaxStackSize(7)
     };
+
+    private static final List<Runnable> preInits = new ArrayList<>();
+    private static final List<Runnable> inits = new ArrayList<>();
+    private static final List<Runnable> postInits = new ArrayList<>();
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent e) {
@@ -98,10 +105,11 @@ public final class ChiseledMe implements ChiseledMeInterface {
         e.getAsmData().getAll(SubscribeEvent.class.getName())
             .stream()
             .filter(s -> s.getClassName().startsWith("dev.necauqua.mods.cm"))
+            .map(ASMData::getClassName)
             .collect(toSet())
-            .forEach(asmData -> {
+            .forEach(cls -> {
                 try {
-                    MinecraftForge.EVENT_BUS.register(Class.forName(asmData.getClassName()));
+                    MinecraftForge.EVENT_BUS.register(Class.forName(cls));
                 } catch (ClassNotFoundException ex) {
                     throw new AssertionError("This should not happen", ex);
                 }
@@ -168,31 +176,33 @@ public final class ChiseledMe implements ChiseledMeInterface {
         }
     }
 
-    private static final List<Runnable> preInits = new ArrayList<>();
-    private static final List<Runnable> inits = new ArrayList<>();
-    private static final List<Runnable> postInits = new ArrayList<>();
-
     private static void addHooks(List<Runnable> list, ASMDataTable asmDataTable, Class<? extends Annotation> annotationType) {
         asmDataTable.getAll(annotationType.getName())
-            .forEach(asmData ->
+            .forEach(asmData -> {
+                String cls = asmData.getClassName();
+                if (!cls.startsWith("dev.necauqua.mods.cm")) {
+                    // should not happen as nobody should use my annotations I guess lol
+                    return;
+                }
+                String objectName = asmData.getObjectName();
+                Method method;
+                try {
+                    method = Class.forName(cls)
+                        .getMethod(objectName.substring(0, objectName.indexOf('(')));
+                    method.setAccessible(true);
+                } catch (NoSuchMethodException | ClassNotFoundException e) {
+                    throw new AssertionError("This should not happen", e);
+                }
                 list.add(() -> {
                     try {
-                        String cls = asmData.getClassName();
-                        if (!cls.startsWith("dev.necauqua.mods.cm")) {
-                            // should not happen as nobody should use my annotations I guess lol
-                            return;
-                        }
-                        String objectName = asmData.getObjectName();
-                        Class.forName(cls)
-                            .getMethod(objectName.substring(0, objectName.indexOf('(')))
-                            .invoke(null);
+                        method.invoke(null);
                     } catch (InvocationTargetException e) {
                         rethrow(e.getCause());
-                        e.printStackTrace();
-                    } catch (NoSuchMethodException | IllegalAccessException | ClassNotFoundException ex) {
-                        throw new AssertionError("This should not happen", ex);
+                    } catch (IllegalAccessException e) {
+                        throw new AssertionError("This should not happen", e);
                     }
-                }));
+                });
+            });
     }
 
     @SuppressWarnings("unchecked")

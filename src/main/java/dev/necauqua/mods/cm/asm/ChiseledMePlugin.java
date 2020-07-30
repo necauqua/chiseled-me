@@ -23,16 +23,48 @@ import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.Name;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.SortingIndex;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.TransformerExclusions;
 
+import java.lang.reflect.Field;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import static java.util.stream.Collectors.toSet;
 
 @Name("Chiseled Me ASM")
 @SortingIndex(1001) // above 1000 so notch->srg deobfuscation would happen before us
 @TransformerExclusions("dev.necauqua.mods.cm")
 public final class ChiseledMePlugin implements IFMLLoadingPlugin, IClassTransformer {
 
+    /**
+     * Because Forge is dumb and FMLPluginWrapper class is private
+     * even though it gives you a list of those.
+     */
+    @SuppressWarnings("unchecked")
+    private static Set<String> getLoadedCoremods(Map<String, Object> data) {
+        try {
+            Field field;
+            Class<?> cls = Class.forName("net.minecraftforge.fml.relauncher.CoreModManager$FMLPluginWrapper");
+            field = cls.getField("name");
+            field.setAccessible(true);
+            return ((List<Object>) data.get("coremodList")).stream()
+                .map(wrapper -> {
+                    try {
+                        return (String) field.get(wrapper);
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .collect(toSet());
+        } catch (ClassNotFoundException | NoSuchFieldException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     public void injectData(Map<String, Object> data) {
-        ASM.init(new Transformers((Boolean) data.get("runtimeDeobfuscationEnabled")));
+        Set<String> loadedCoremods = getLoadedCoremods(data);
+        Boolean obfuscated = (Boolean) data.get("runtimeDeobfuscationEnabled");
+        ASM.init(new Transformers(obfuscated, loadedCoremods));
     }
 
     @Override

@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog], and this project uses [Forge versioning scheme].
 
-Also dates in this file are in [Holocene Calendar] because it is amazing, logical and I want more people to know about it.
+Dates in this file are in [Holocene Calendar] because it is amazing, logical and I want more people to know about it.
 
 ## Unreleased
 ### Fixed
@@ -13,6 +13,9 @@ Also dates in this file are in [Holocene Calendar] because it is amazing, logica
  - Fix mod compat crash with MalisisDoors and most other Mixin mods (#21)
  - Fix mod compat crash with BetterFps (#48)
  - Fix mod compat crash with mods that change visibility of certain methods with ATs (iChunUtil) (#31)
+ - Fix mod compat crash with AstralSorcery
+ - Fix standing near lava when small setting you on fire
+ - Fix getting pushed away when being under a block
  - Fix the borked recipe that any two items without a recipe together made `Antipolarized Concentrated Pym essence` (#28)
  - Fix the crash with old Forge (the IRarity class not found error)
 
@@ -30,7 +33,7 @@ Also dates in this file are in [Holocene Calendar] because it is amazing, logica
 
 ## [1.12-2.0.0.0] 12019-12-16
 ### Added
- - Size is shown in F3 debug output when its not 1
+ - Size is shown in F3 debug output when it's not 1
 ### Changed
  - Changed the size command to be `/sizeof entity` instead of `/sizeof entity get`
 ### Fixed
@@ -44,7 +47,7 @@ Also dates in this file are in [Holocene Calendar] because it is amazing, logica
 
 ## [1.12-2.0.0.0-beta2] 12019-12-13
 ### Fixed
- - A really stupid regression which caused this mod to crash with almost any other mod (the ones who use `@SubscribeEvent` annotation and thats like all of them)
+ - A really stupid regression which caused this mod to crash with almost any other mod (the ones who use `@SubscribeEvent` annotation and that's like all of them)
 ### Changed
  - /getsizeof and /setsizeof commands are replaced with /sizeof command, which is made more versatile and useful
 
@@ -54,15 +57,15 @@ Also dates in this file are in [Holocene Calendar] because it is amazing, logica
 ### Changed
  - Increased the number of charges in 16 times for each recalibrator type (so the most powerful ones give you at least 16 uses now)
  - Proper implementation of recipes and advancements (to replace old achievements)
- - Yet another version scheme - now using the [Forge Versioning], since [Semantic Versioning] works poorly in scenario when you are modding other versioned product
+ - Yet another version scheme - now using the [Forge Versioning], since [Semantic Versioning] works poorly in a scenario when you are modding other versioned product
 ### Fixed
  - Any item ID or translation key containing 'essense' was fixed to 'essence' (**THIS WILL DELETE ANY ESSENCES IN YOUR SAVES ON UPDATE**)
- - Entering the nether portal on dedicated server when small now does not cause crashes
+ - Entering the nether portal on a dedicated server when small now does not cause crashes
 ### Removed
  - Due to the server-crash fix the bounding box of the nether portal is not altered and takes a full block as in vanilla
 
 ## [1.1.5-final] 12019-12-16
-All of the below fixes were backported from 1.12 beta
+All the below fixes were backported from 1.12 beta
 ### Fixed
  - Sun clipping when size of player is around 1/8-1/16
  - Resizing process was broken - it was twice as fast, had glitches line disappearing limbs and falling through blocks (this was due to the size being negative for a tick or two)
@@ -81,11 +84,11 @@ All of the below fixes were backported from 1.12 beta
  - This version of the mod works with 1.11, 1.11.1 and 1.11.2 Minecraft versions
 ### Fixed
  - Clipping distance not being changed with size when clouds were enabled (fixes #15)
- - Pistons, shulker and other players now move resized player properly
+ - Pistons, shulker and other players now move a resized player properly
  - Teleports to enormous negative y values when becoming big (fixes #2)
- - Little jumpy bounce when falling on block when small (caused by #2)
+ - Little jumpy bounce when falling on a block when small (caused by #2)
  - Wall-climbing-like behavior when small (caused by #2)
- - Network code was revised and the de-syncs should be gone now (fixes #17)
+ - Network code was revised, and the de-syncs should be gone now (fixes #17)
 
 ## [1.1.2] 12019-04-22
 ### Changed
@@ -127,15 +130,15 @@ All of the below fixes were backported from 1.12 beta
  - The speed of the size change process, now it is consistently
    `2*|log2(prev) - log2(new)|` ticks (each scale up/down by a factor 2 adds up
    to time linearly)
- - Changed incorrect portal bbox config entry name
+ - Changed an incorrect portal bbox config entry name
 ### Changed
  - This project now adheres to [Semantic Versioning] starting with
    version 1.1.0
  - Mod package is changed from `necauqua.mods.cm` to `dev.necauqua.mods.cm` to
    comply with the [maven naming conventions] since I own the domain
    `necauqua.dev`. This is a huge API change (and a commit touching all source
-   files sadly) but the project follows [semver][Semantic Versioning] only starting
-   from this version and the actual API is minimal so it's fine.
+   files sadly), but the project follows [semver][Semantic Versioning] only starting
+   from this version, and the actual API is minimal, so it's fine.
 
 ## [1.0] - 12016-06-20
 ### Added

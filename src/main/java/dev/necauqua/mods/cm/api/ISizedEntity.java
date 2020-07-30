@@ -16,8 +16,11 @@
 
 package dev.necauqua.mods.cm.api;
 
+import net.minecraft.entity.Entity;
+
 /**
- * Entity class is modified to implement this interface if the mod is loaded.
+ * The {@link Entity} class is modified by the coremod
+ * to implement this interface if it was loaded successfully.
  */
 public interface ISizedEntity {
 
@@ -42,8 +45,15 @@ public interface ISizedEntity {
     }
 
     /**
-     * Sets the entity size field, with no network synchronization or
-     * @param size the size to set
+     * Sets the entity size field or starts/changes a resizing process,
+     * depending on the provided boolean, with no network synchronization -
+     * that is, only on one side.
+     * <p>
+     * Also it does not change entity mounting (the )
+     entity.dismountRidingEntity();
+     entity.removePassengers();
+     *
+     * @param size        the size to set
      * @param interpolate <code>true</code to start a resize animation or
      *                    <code>false</code> set the size immediately
      */
