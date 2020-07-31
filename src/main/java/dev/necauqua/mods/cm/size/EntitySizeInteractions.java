@@ -37,6 +37,7 @@ import net.minecraftforge.common.util.EnumHelper;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
+import net.minecraftforge.event.entity.living.BabyEntitySpawnEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -128,7 +129,7 @@ public final class EntitySizeInteractions {
             return;
         }
         for (EntityItem item : e.getDrops()) {
-            EntitySizeManager.setSize(item, size, false);
+            setSize(item, size, false);
         }
     }
 
@@ -136,7 +137,7 @@ public final class EntitySizeInteractions {
     public static void on(ItemTossEvent e) {
         double size = getSize(e.getPlayer());
         if (size != 1.0) {
-            EntitySizeManager.setSize(e.getEntityItem(), size, false);
+            setSize(e.getEntityItem(), size, false);
         }
     }
 
@@ -147,9 +148,6 @@ public final class EntitySizeInteractions {
             return;
         }
         double size = getSize(player);
-        if (size >= 1.0) {
-            return;
-        }
         for (ItemStack stack : e.getDrops()) {
             NBTTagCompound nbt = stack.getTagCompound();
             if (nbt == null) {
@@ -202,17 +200,25 @@ public final class EntitySizeInteractions {
     }
 
     @SubscribeEvent
-    public static void on(RenderGameOverlayEvent.Text text) {
+    public static void on(RenderGameOverlayEvent.Text e) {
         EntityPlayer player = SidedHandler.instance.getClientPlayer();
         if (player == null) {
             return;
         }
         double size = getSize(player);
         if (size != 1.0) {
-            List<String> list = text.getLeft();
+            List<String> list = e.getLeft();
             if (list.size() >= 3) {
                 list.add(list.size() - 3, String.format("Size: %f", size));
             }
+        }
+    }
+
+    @SubscribeEvent
+    public static void on(BabyEntitySpawnEvent e) {
+        double size = getSize(e.getParentA());
+        if (size != 1.0) {
+            setSize(e.getChild(), size, false);
         }
     }
 }

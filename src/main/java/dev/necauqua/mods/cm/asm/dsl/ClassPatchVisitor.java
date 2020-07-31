@@ -127,7 +127,7 @@ public final class ClassPatchVisitor extends ClassVisitor {
 
         String className = patcher.getClassName();
         if (isDump) {
-            visitor = MethodDumper.create(visitor, "patched", className, name + desc);
+            visitor = MethodDumper.create(visitor, "patched", className, name);
         }
 
         ContextMethodVisitor context = new ContextMethodVisitor(className, visitor);
@@ -138,6 +138,6 @@ public final class ClassPatchVisitor extends ClassVisitor {
         }
 
         MethodVisitor debugInfoReader = new DebugInfoReader(patched, context, this, name + desc);
-        return isDump ? MethodDumper.create(debugInfoReader, "original", className, name + desc) : debugInfoReader;
+        return isDump ? MethodDumper.create(debugInfoReader, "original", className, name) : debugInfoReader;
     }
 }
