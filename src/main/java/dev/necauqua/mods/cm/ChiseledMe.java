@@ -104,8 +104,8 @@ public final class ChiseledMe implements ChiseledMeInterface {
         // possibly with separate annotation just for main event bus, idk
         e.getAsmData().getAll(SubscribeEvent.class.getName())
             .stream()
-            .filter(s -> s.getClassName().startsWith("dev.necauqua.mods.cm"))
             .map(ASMData::getClassName)
+            .filter(cls -> cls.startsWith("dev.necauqua.mods.cm"))
             .collect(toSet())
             .forEach(cls -> {
                 try {

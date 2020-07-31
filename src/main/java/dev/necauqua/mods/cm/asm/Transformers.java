@@ -53,7 +53,7 @@ public final class Transformers {
 
     private static final Hook sizeOfThis = mv -> {
         mv.visitVarInsn(ALOAD, 0);  // Entity this
-        mv.visitFieldInsn(GETFIELD, "net/minecraft/entity/Entity", SIZE_FIELD, "D");
+        mv.visitFieldInsn(GETFIELD, SIZE_FIELD, "D");
     };
 
     private static final Hook cutBiggerThanOne = cut(FCMPL, IFLE);
@@ -1112,5 +1112,169 @@ public final class Transformers {
 //                });
                 p.insertAfterAll(ldcInsn(0.05000000074505806D), mulBySize);
             });
+    }
+
+    @Transformer
+    public void entityAI() {
+        Patch sizePredicate = p ->
+            p.replace(insn(ICONST_1), mv -> {
+                mv.visitVarInsn(ALOAD, 0);
+                mv.visitFieldInsn(GETFIELD, srg("animal"), "Lnet/minecraft/entity/passive/EntityAnimal;");
+                mv.visitFieldInsn(GETFIELD, "net/minecraft/entity/Entity", SIZE_FIELD, "D");
+                mv.visitVarInsn(ALOAD, 0);
+                mv.visitFieldInsn(GETFIELD, srg("targetMate"), "Lnet/minecraft/entity/passive/EntityAnimal;");
+                mv.visitFieldInsn(GETFIELD, "net/minecraft/entity/Entity", SIZE_FIELD, "D");
+                mv.visitInsn(DCMPL);
+                mv.ifJump(IFNE, () -> mv.visitInsn(ICONST_1), () -> mv.visitInsn(ICONST_0));
+            });
+        inClass("net.minecraft.entity.ai.EntityAIMate")
+            // change mating distance (disabled because pathfinding works in block positions :( )
+//            .patchMethod(srg("updateTask", "EntityAIMate"), "()V")
+//            .with(p ->
+//                p.insertAfter(ldcInsn(9.0), mv -> {
+//                    mv.visitVarInsn(ALOAD, 0);
+//                    mv.visitFieldInsn(GETFIELD, srg("animal"), "Lnet/minecraft/entity/passive/EntityAnimal;");
+//                    mv.visitFieldInsn(GETFIELD, "net/minecraft/entity/Entity", SIZE_FIELD, "D");
+//                    mv.visitInsn(DUP2);
+//                    mv.visitInsn(DMUL);
+//                    mv.visitInsn(DMUL);
+//                }))
+//            .patchMethod(srg("getNearbyMate"), "()Lnet/minecraft/entity/passive/EntityAnimal;")
+//            .with(p ->
+//                p.insertAfter(ldcInsn(8.0), mv -> {
+//                    mv.visitVarInsn(ALOAD, 0);
+//                    mv.visitFieldInsn(GETFIELD, srg("animal"), "Lnet/minecraft/entity/passive/EntityAnimal;");
+//                    mv.visitFieldInsn(GETFIELD, "net/minecraft/entity/Entity", SIZE_FIELD, "D");
+//                    mv.visitInsn(DMUL);
+//                }))
+
+            // disallow mating between differently sized entities
+            .patchMethod(srg("shouldExecute", "EntityAIMate"), "()Z")
+            .with(sizePredicate)
+            .patchMethod(srg("shouldContinueExecuting", "EntityAIMate"), "()Z")
+            .with(sizePredicate);
+
+        Hook sizeofTemptedEntity = mv -> {
+            mv.visitVarInsn(ALOAD, 0);
+            mv.visitFieldInsn(GETFIELD, srg("temptedEntity"), "Lnet/minecraft/entity/EntityCreature;");
+            mv.visitFieldInsn(GETFIELD, "net/minecraft/entity/Entity", SIZE_FIELD, "D");
+        };
+        Hook squareMul = sizeofTemptedEntity.and(mv -> {
+            mv.visitInsn(DUP2);
+            mv.visitInsn(DMUL);
+            mv.visitInsn(DMUL);
+        });
+
+        // scale area and closest distance for entities that follow you when you hold food
+        // still not the best at small sizes since entity AI works in block positions
+        inClass("net.minecraft.entity.ai.EntityAITempt")
+            .patchMethod(srg("shouldExecute", "EntityAITempt"), "()Z")
+            .with(p -> p.insertAfter(ldcInsn(10.0), sizeofTemptedEntity.and(mv -> mv.visitInsn(DMUL))))
+            .patchMethod(srg("shouldContinueExecuting", "EntityAITempt"), "()Z")
+            .with(p -> {
+                p.insertAfter(ldcInsn(36.0), squareMul);
+                p.insertAfter(ldcInsn(0.010000000000000002), squareMul);
+            })
+            .patchMethod(srg("updateTask", "EntityAITempt"), "()V")
+            .with(p -> p.insertAfter(ldcInsn(6.25), squareMul));
+    }
+
+    @Transformer
+    public void spawnEggFixes() {
+        inClass("net.minecraft.item.ItemMonsterPlacer")
+            .addField(ACC_PRIVATE | ACC_STATIC, SIZE_FIELD, "D")
+            .addField(ACC_PRIVATE | ACC_STATIC, "$cm_facing_hack", "Lnet/minecraft/util/EnumFacing;")
+            .patchConstructor("()V")
+            .with(p ->
+                p.insertAfter(methodBegin(), mv -> {
+                    mv.visitInsn(DCONST_1);
+                    mv.visitFieldInsn(PUTSTATIC, SIZE_FIELD, "D");
+                }))
+            .patchMethod(srg("onItemUse", "ItemMonsterPlacer"), "(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/EnumHand;Lnet/minecraft/util/EnumFacing;FFF)Lnet/minecraft/util/EnumActionResult;")
+            .with(p -> {
+                p.insertAfter(varInsn(DSTORE, obfuscated ? 14 : 13), mv -> {
+                    mv.visitVarInsn(ALOAD, 1);
+                    mv.visitFieldInsn(GETFIELD, "net/minecraft/entity/Entity", SIZE_FIELD, "D");
+                    mv.visitFieldInsn(PUTSTATIC, SIZE_FIELD, "D");
+                    mv.visitVarInsn(ALOAD, 5);
+                    mv.visitFieldInsn(PUTSTATIC, "$cm_facing_hack", "Lnet/minecraft/util/EnumFacing;");
+                });
+                p.insertBefore(varInsn(ASTORE, 12), 2, mv -> {
+                    mv.visitInsn(POP);
+                    mv.visitVarInsn(ALOAD, 3);
+                });
+                p.replace(ldcInsn(0.5), mv -> {
+                    mv.visitVarInsn(FLOAD, 6); // param float hitX
+                    mv.visitInsn(F2D);
+                });
+                p.replace(varInsn(DLOAD, obfuscated ? 14 : 13), mv -> {
+                    mv.visitVarInsn(FLOAD, 7); // param float hitY
+                    mv.visitInsn(F2D);
+                });
+                p.replace(ldcInsn(0.5), 2, mv -> {
+                    mv.visitVarInsn(FLOAD, 8); // param float hitZ
+                    mv.visitInsn(F2D);
+                    // z += facing.getZOffset() * entity.width / 2
+                });
+            })
+            .patchMethod(srg("onItemRightClick", "ItemMonsterPlacer"), "(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/EnumHand;)Lnet/minecraft/util/ActionResult;")
+            .with(p ->
+                p.insertBefore(varInsn(ALOAD, 1), 5, mv -> {
+                    mv.visitVarInsn(ALOAD, 2);
+                    mv.visitFieldInsn(GETFIELD, "net/minecraft/entity/Entity", SIZE_FIELD, "D");
+                    mv.visitFieldInsn(PUTSTATIC, SIZE_FIELD, "D");
+                }))
+            .patchMethod(srg("spawnCreature"), "(Lnet/minecraft/world/World;Lnet/minecraft/util/ResourceLocation;DDD)Lnet/minecraft/entity/Entity;")
+            .with(p ->
+                p.insertAfter(varInsn(ASTORE, 8), 2, mv -> {
+                    mv.visitVarInsn(ALOAD, 8);
+                    mv.visitFieldInsn(GETSTATIC, SIZE_FIELD, "D");
+                    mv.visitMethodInsn(INVOKEVIRTUAL, "net/minecraft/entity/Entity", "setEntitySize", "(D)V", false);
+                    mv.visitInsn(DCONST_1);
+                    mv.visitFieldInsn(PUTSTATIC, SIZE_FIELD, "D");
+
+                    mv.visitFieldInsn(GETSTATIC, "$cm_facing_hack", "Lnet/minecraft/util/EnumFacing;");
+                    // if $cm_facing_hack != null
+                    mv.ifJump(IFNULL, () -> {
+                        // x += ($cm_facing_hack.getXOffset() / 2.0) * entity.width
+                        mv.visitVarInsn(DLOAD, 2);
+                        mv.visitFieldInsn(GETSTATIC, "$cm_facing_hack", "Lnet/minecraft/util/EnumFacing;");
+                        mv.visitMethodInsn(INVOKEVIRTUAL, "net/minecraft/util/EnumFacing", srg("getXOffset", "EnumFacing"), "()I", false);
+                        mv.visitInsn(I2D);
+                        mv.visitLdcInsn(2.0);
+                        mv.visitInsn(DDIV);
+                        mv.visitVarInsn(ALOAD, 8);
+                        mv.visitFieldInsn(GETFIELD, "net/minecraft/entity/Entity", srg("width", "Entity"), "F");
+                        mv.visitInsn(F2D);
+                        mv.visitInsn(DMUL);
+                        mv.visitInsn(DADD);
+                        mv.visitVarInsn(DSTORE, 2);
+                        // z += ($cm_facing_hack.getZOffset() / 2.0) * entity.width
+                        mv.visitVarInsn(DLOAD, 6);
+                        mv.visitFieldInsn(GETSTATIC, "$cm_facing_hack", "Lnet/minecraft/util/EnumFacing;");
+                        mv.visitMethodInsn(INVOKEVIRTUAL, "net/minecraft/util/EnumFacing", srg("getZOffset", "EnumFacing"), "()I", false);
+                        mv.visitInsn(I2D);
+                        mv.visitLdcInsn(2.0);
+                        mv.visitInsn(DDIV);
+                        mv.visitVarInsn(ALOAD, 8);
+                        mv.visitFieldInsn(GETFIELD, "net/minecraft/entity/Entity", srg("width", "Entity"), "F");
+                        mv.visitInsn(F2D);
+                        mv.visitInsn(DMUL);
+                        mv.visitInsn(DADD);
+                        mv.visitVarInsn(DSTORE, 6);
+                        // $cm_facing_hack = null
+                        mv.visitInsn(ACONST_NULL);
+                        mv.visitFieldInsn(PUTSTATIC, "$cm_facing_hack", "Lnet/minecraft/util/EnumFacing;");
+                    });
+                }));
+        inClass("net.minecraft.entity.EntityAgeable")
+            .patchMethod(srg("processInteract", "EntityAgeable"), "(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/EnumHand;)Z")
+            .with(p ->
+                p.insertAfter(varInsn(ALOAD, 5), 4, mv -> {
+                    mv.visitInsn(DUP);
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitFieldInsn(GETFIELD, SIZE_FIELD, "D");
+                    mv.visitMethodInsn(INVOKEVIRTUAL, "net/minecraft/entity/Entity", "setEntitySize", "(D)V", false);
+                }));
     }
 }

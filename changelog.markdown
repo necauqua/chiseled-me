@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog], and this project uses [Forge versioni
 Dates in this file are in [Holocene Calendar] because it is amazing, logical and I want more people to know about it.
 
 ## Unreleased
+### Changed
+ - Baby animals spawn with the same size as parents, and only the same-size parents can mate
+ - Spawn egg spawns entities with the same size as you are
+ - Spawn egg used on an entity spawns a child with same size as the entity
+ - Breaking blocks when big will yield big drops (that already was the case with small sizes)
 ### Fixed
  - Improved general mod compatibility (fixed a ton of unreported mod compat crashes in advance)
  - Fix the crash with Spigot (also Mohist, #52)
