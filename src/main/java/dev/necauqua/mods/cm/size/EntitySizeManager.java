@@ -33,8 +33,8 @@ import static dev.necauqua.mods.cm.Network.setSizeOnClient;
 
 public final class EntitySizeManager {
 
-    public static final float LOWER_LIMIT = 0.000244140625f; // = 1/16/16/16 = 1/4096
-    public static final float UPPER_LIMIT = 16.0f;
+    public static final float LOWER_LIMIT = Float.NEGATIVE_INFINITY;
+    public static final float UPPER_LIMIT = Float.POSITIVE_INFINITY;
 
     private static final IntHashMap<SetSize> spawnSetSizeQueue = new IntHashMap<>();
 

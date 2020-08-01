@@ -1,0 +1,24 @@
+{
+  "parent": "chiseled_me:one_on_ttwobits",
+  "display": {
+    "icon": {
+      "item": "chiseled_me:recalibrator",
+      "data": 0
+    },
+    "title": {
+      "translate": "advancement.chiseled_me:the_limit4"
+    },
+    "description": {
+      "translate": "advancement.chiseled_me:the_limit4.desc"
+    },
+    "frame": "challenge"
+  },
+  "criteria": {
+    "stuff": {
+      "trigger": "chiseled_me:size",
+      "conditions": {
+        "size": 0.00000000000000000000000
+      }
+    }
+  }
+}

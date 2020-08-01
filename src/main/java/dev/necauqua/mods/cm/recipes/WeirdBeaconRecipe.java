@@ -54,7 +54,7 @@ public final class WeirdBeaconRecipe extends ShapedRecipes {
     }
 
     public WeirdBeaconRecipe() {
-        super("", 9, 9, INGREDIENTS, RESULT);
+        super("", 3, 3, INGREDIENTS, RESULT);
         setRegistryName(ns("weird_beacon"));
     }
 

@@ -16,11 +16,14 @@
 
 package dev.necauqua.mods.cm.asm;
 
+import dev.necauqua.mods.cm.Log;
 import dev.necauqua.mods.cm.asm.dsl.Hook;
 import dev.necauqua.mods.cm.asm.dsl.Patch;
 import dev.necauqua.mods.cm.asm.dsl.Transformer;
+import net.minecraft.launchwrapper.Launch;
 import org.objectweb.asm.Label;
 
+import java.io.IOException;
 import java.util.function.IntPredicate;
 
 import static dev.necauqua.mods.cm.asm.dsl.ASM.*;
@@ -754,6 +757,12 @@ public final class Transformers {
                     mv.visitInsn(DMUL);
                 });
             });
+//            .patchMethod(srg("isMovePlayerPacketInvalid"), "(Lnet/minecraft/network/play/client/CPacketPlayer;)B")
+//                .with(p -> {
+//                    p.replaceAll(varInsn(IRETURN, ICONST_1), mv -> {
+//                    });
+//                    p.debugDump();
+//                })
         inClass("net.minecraft.entity.player.EntityPlayerMP")
             .patchMethod(srg("handleFalling"), "(DZ)V")
             .with(p ->
@@ -928,6 +937,17 @@ public final class Transformers {
                 mv.visitMethodInsn(INVOKESPECIAL, "net/minecraft/util/math/RayTraceResult", "<init>",
                     "(Lnet/minecraft/util/math/RayTraceResult$Type;Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/EnumFacing;Lnet/minecraft/util/math/BlockPos;)V", false);
             }));
+    }
+
+    @Transformer
+    public void yes() {
+        inClass("net.minecraft.network.NetHandlerPlayServer")
+            .patchMethod(srg("isMovePlayerPacketInvalid"), "(Lnet/minecraft/network/play/client/CPacketPlayer;)B").
+            with(p -> p.insertBeforeAll(insn(IRETURN), mv -> {
+                mv.visitInsn(ICONST_1);
+                mv.visitInsn(IRETURN);
+            })
+        );
     }
 
     @Transformer

@@ -16,13 +16,16 @@
 
 package dev.necauqua.mods.cm.asm;
 
+import dev.necauqua.mods.cm.Log;
 import dev.necauqua.mods.cm.asm.dsl.ASM;
 import net.minecraft.launchwrapper.IClassTransformer;
+import net.minecraft.launchwrapper.Launch;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.Name;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.SortingIndex;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.TransformerExclusions;
 
+import java.io.IOException;
 import java.util.Map;
 
 @Name("Chiseled Me ASM")

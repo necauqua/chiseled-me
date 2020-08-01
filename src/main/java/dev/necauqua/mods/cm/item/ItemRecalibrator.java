@@ -16,6 +16,7 @@
 package dev.necauqua.mods.cm.item;
 
 import dev.necauqua.mods.cm.Config;
+import dev.necauqua.mods.cm.Log;
 import dev.necauqua.mods.cm.SidedHandler;
 import dev.necauqua.mods.cm.advancements.AdvancementTriggers;
 import net.minecraft.block.BlockDispenser;
@@ -69,6 +70,7 @@ public final class ItemRecalibrator extends ItemMod {
         super("recalibrator");
         BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(this, DISPENSER_BEHAVIOR);
         setMaxStackSize(1);
+        setGlowing();
 
         addPropertyOverride(ns("recalibrator_type"),
             (stack, worldIn, entityIn) -> {
@@ -78,7 +80,7 @@ public final class ItemRecalibrator extends ItemMod {
                 }
                 // this is so stupid, need that for advancement icons
                 int meta = stack.getMetadata();
-                return meta == 0 ? 0 : meta <= 12 ? -1 : 1;
+                return meta == 0 ? 0 : meta <= 32 ? -1 : 1;
             });
 
         // maybe someone someday will make some cool model/texture based on that
@@ -90,7 +92,7 @@ public final class ItemRecalibrator extends ItemMod {
                 }
                 // advancements should do it correctly here too
                 int meta = stack.getMetadata();
-                return meta == 0 ? 0 : meta <= 12 ? meta : meta - 12;
+                return meta == 0 ? 0 : meta <= 32 ? meta : meta - 32;
             });
     }
 
@@ -184,19 +186,19 @@ public final class ItemRecalibrator extends ItemMod {
     public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items) {
         super.getSubItems(tab, items); // reset one
         if (isInCreativeTab(tab)) {
-            for (byte i = 1; i <= 12; i++) {
+            for (byte i = 1; i <= REDUCTION.maxTier; i++) {
                 items.add(create(REDUCTION, i));
             }
-            for (byte i = 1; i <= 4; i++) {
+            for (byte i = 1; i <= AMPLIFICATION.maxTier; i++) {
                 items.add(create(AMPLIFICATION, i));
             }
         }
     }
 
     public enum RecalibrationType {
-        REDUCTION(-1, 12),
+        REDUCTION(-1, 31),
         RESET(0, 0),
-        AMPLIFICATION(1, 4);
+        AMPLIFICATION(1, 31);
 
         private final int factor;
         private final int maxTier;

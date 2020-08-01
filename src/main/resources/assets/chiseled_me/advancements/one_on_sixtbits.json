@@ -1,0 +1,24 @@
+{
+  "parent": "chiseled_me:the_limit",
+  "display": {
+    "icon": {
+      "item": "chiseled_me:recalibrator",
+      "data": 16
+    },
+    "title": {
+      "translate": "advancement.chiseled_me:the_limit2"
+    },
+    "description": {
+      "translate": "advancement.chiseled_me:the_limit2.desc"
+    },
+    "frame": "challenge"
+  },
+  "criteria": {
+    "stuff": {
+      "trigger": "chiseled_me:size",
+      "conditions": {
+        "size": 0.000015258789
+      }
+    }
+  }
+}

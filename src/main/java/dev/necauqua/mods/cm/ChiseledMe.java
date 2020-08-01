@@ -18,6 +18,7 @@ package dev.necauqua.mods.cm;
 
 import dev.necauqua.mods.cm.api.ChiseledMeAPI;
 import dev.necauqua.mods.cm.api.ChiseledMeInterface;
+import dev.necauqua.mods.cm.asm.ChiseledMePlugin;
 import dev.necauqua.mods.cm.item.ItemMod;
 import dev.necauqua.mods.cm.item.ItemRecalibrator;
 import dev.necauqua.mods.cm.size.EntitySizeManager;

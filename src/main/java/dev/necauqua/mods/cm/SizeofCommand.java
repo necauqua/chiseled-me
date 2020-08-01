@@ -77,7 +77,6 @@ public final class SizeofCommand extends CommandBase {
             default:
                 throw new WrongUsageException(getUsage(sender));
         }
-
         if (size < LOWER_LIMIT) {
             throw new NumberInvalidException("commands.generic.num.tooSmall", format("%.2f", size), format("%.2f", LOWER_LIMIT));
         } else if (size > UPPER_LIMIT) {
