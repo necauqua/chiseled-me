@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-@API(owner = "chiseled_me", provides = "chiseled_me_api", apiVersion = "@API_VERSION@")
+@API(owner = MODID, provides = "chiseled_me_api", apiVersion = "@API_VERSION@")
 package dev.necauqua.mods.cm.api;
 
 import net.minecraftforge.fml.common.API;
+
+import static dev.necauqua.mods.cm.ChiseledMe.MODID;

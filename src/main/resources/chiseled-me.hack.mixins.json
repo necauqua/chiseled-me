@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "dev.necauqua.mods.cm.mixin",
+  "refmap": "chiseled-me.mixins.refmap.json",
+  "target": "@env(INIT)",
+  "minVersion": "0.8",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": ["compat.ClassloadingHackMixin"],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

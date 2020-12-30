@@ -1,48 +1,19 @@
 # Chiseled-Me
 
-This is (obviously) a coremod.
-It adds some items, recipes to which you can see with JEI/NEI.
-These items are pretty self-explanatory, but to get the recalibrator that makes you normal size again,
-you need to deplete any other recalibrator(so the cheaper one you make - the more you click).
+The best resizing mod for Minecraft entities.
+Only 1.12.2 for now, game version updates are coming soon.
 
-Known issues:
- * Liquids are buggy
- * Ladders are buggy
- * Throwables are buggy
- * No riding (but will be in the future)
-
-About coremods:
-* They can corrupt worlds just like any other mod can (except that maybe they have just a bit more tools for that).
-My mod does no specific interactions with your saves (just regular NBT to store your size as a number - all mods do that kind of stuff).
-* They DO NOT EVER corrupt you jar-files, the whole point of them is not to modify
-the jar but still modify the program at the point of loading classes from jar-files into RAM.
-* They MAY not work just for you for unknown reasons, but most likely they will.
-
-If you have any issues, feel free to report them at issues page, ALWAYS including your *`minecraft_profile_folder/logs/debug.log`* file.
+It uses the [Mixin](https://github.com/SpongePowered/Mixin) library to heavily modify
+the game internals to allow entity (and particle) resizing which is the most realistic
+and as glitch-free as possible in this game given that other mods exist, and the universe is not perfect.
 
 ## Installation
-
-If you want to modify/compile, you can just run the following commands (assuming you are on Linux and have git installed):
-
-```
-git clone https://github.com/necauqua/chiseled-me.git
-cd chiseled-me
-```
-
-If you want to change anything, do this:
-```
-./gradlew setupDecompWorkspace
-```
-Then apply the changes.
-
-
-And if you want and compile it - you can with:
-```
-./gradlew build
-```
-The jars will be in build/libs folder.
+This mod uses ForgeGradle 3 so installation of the project it pretty straightforward:
+- clone this repository
+- import it into the IDE of your choice, or just modify the code with notepad or something
+- compile by running `gradlew build`, the resulting (unsigned) jar will be in the `build/libs` folder
 
 ## Contribution
-I'll accept pull requests if they fix small and obvious bugs, add localization or something like that.
-
-If you want to suggest a big idea - just create an issue about it or contact me in any other way.
+Localization PRs are welcome and accepted, same with obvious mini-bugs/typos, for anything greater
+than that feel free to open an [issue](https://github.com/necauqua/chiseled-me/issues) (search first for similar ones)
+or contact me (and other people who are enthusiastic about the mod) on my [Discord](https://discord.com/invite/pZrbJNb) server.

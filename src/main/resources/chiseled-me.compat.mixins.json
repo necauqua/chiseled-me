@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.necauqua.mods.cm.mixin",
+  "refmap": "chiseled-me.mixins.refmap.json",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [],
+  "client": [
+    "compat.GCEntityClientPlayerMPMixin",
+    "compat.NeatMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
