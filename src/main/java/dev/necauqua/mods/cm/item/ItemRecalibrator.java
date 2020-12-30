@@ -18,6 +18,8 @@ package dev.necauqua.mods.cm.item;
 import dev.necauqua.mods.cm.Config;
 import dev.necauqua.mods.cm.SidedHandler;
 import dev.necauqua.mods.cm.advancements.AdvancementTriggers;
+import dev.necauqua.mods.cm.advancements.SizeTrigger;
+import dev.necauqua.mods.cm.api.IRenderSized;
 import net.minecraft.block.BlockDispenser;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
@@ -30,7 +32,6 @@ import net.minecraft.item.EnumRarity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -38,16 +39,17 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.Loader;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-import static dev.necauqua.mods.cm.ChiseledMe.RECALIBRATOR;
 import static dev.necauqua.mods.cm.ChiseledMe.ns;
 import static dev.necauqua.mods.cm.item.ItemRecalibrator.RecalibrationType.*;
-import static dev.necauqua.mods.cm.size.EntitySizeManager.getSize;
-import static dev.necauqua.mods.cm.size.EntitySizeManager.setSizeAndSync;
+import static dev.necauqua.mods.cm.size.ChangingSizeProcess.log2LerpTime;
+import static net.minecraft.entity.player.EntityPlayer.REACH_DISTANCE;
+import static net.minecraft.util.EnumActionResult.SUCCESS;
 
 public final class ItemRecalibrator extends ItemMod {
 
@@ -65,41 +67,45 @@ public final class ItemRecalibrator extends ItemMod {
         return worked;
     };
 
+    private static boolean entityItemBBoxOffset = true;
+
     public ItemRecalibrator() {
         super("recalibrator");
         BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(this, DISPENSER_BEHAVIOR);
         setMaxStackSize(1);
 
+        entityItemBBoxOffset = !Loader.isModLoaded("itemphysic");
+
         addPropertyOverride(ns("recalibrator_type"),
-            (stack, worldIn, entityIn) -> {
-                int nbtFactor = getEffectFromStack(stack).type.getFactor();
-                if (nbtFactor != 0) {
-                    return nbtFactor;
-                }
-                // this is so stupid, need that for advancement icons
-                int meta = stack.getMetadata();
-                return meta == 0 ? 0 : meta <= 12 ? -1 : 1;
-            });
+                (stack, worldIn, entityIn) -> {
+                    int nbtFactor = getEffectFromStack(stack).type.getFactor();
+                    if (nbtFactor != 0) {
+                        return nbtFactor;
+                    }
+                    // this is so stupid, need that for advancement icons
+                    int meta = stack.getMetadata();
+                    return meta == 0 ? 0 : meta <= 12 ? -1 : 1;
+                });
 
         // maybe someone someday will make some cool model/texture based on that
         addPropertyOverride(ns("recalibrator_tier"),
-            (stack, worldIn, entityIn) -> {
-                int nbtTier = getEffectFromStack(stack).tier;
-                if (nbtTier != 0) {
-                    return nbtTier;
-                }
-                // advancements should do it correctly here too
-                int meta = stack.getMetadata();
-                return meta == 0 ? 0 : meta <= 12 ? meta : meta - 12;
-            });
+                (stack, worldIn, entityIn) -> {
+                    int nbtTier = getEffectFromStack(stack).tier;
+                    if (nbtTier != 0) {
+                        return nbtTier;
+                    }
+                    // advancements should do it correctly here too
+                    int meta = stack.getMetadata();
+                    return meta == 0 ? 0 : meta <= 12 ? meta : meta - 12;
+                });
     }
 
     public static RecalibrationEffect getEffectFromStack(ItemStack stack) {
         return RecalibrationEffect.fromNBT(stack.getTagCompound());
     }
 
-    public static ItemStack create(RecalibrationType type, byte tier) {
-        ItemStack stack = new ItemStack(RECALIBRATOR);
+    public ItemStack create(RecalibrationType type, byte tier) {
+        ItemStack stack = new ItemStack(this);
         NBTTagCompound nbt = new NBTTagCompound();
         nbt.setByte("type", (byte) type.getFactor());
         nbt.setByte("tier", tier);
@@ -112,35 +118,44 @@ public final class ItemRecalibrator extends ItemMod {
     @Nonnull
     public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, @Nonnull EnumHand hand) {
         ItemStack stack = player.getHeldItem(hand);
-        ItemStack ret = stack;
-        double dist = Config.recalibratorEntityReachDist;
-        if (dist > 0.0 && player.isSneaking()) {
-            Vec3d start = player.getPositionVector().add(0.0, player.getEyeHeight(), 0.0);
-            Vec3d end = start.add(player.getLook(1.0f).scale(dist));
-            AxisAlignedBB range = new AxisAlignedBB(player.posX - dist, player.posY - dist, player.posZ - dist, player.posX + dist, player.posY + dist, player.posZ + dist);
-            Entity target = null;
-            for (Entity entity : world.getEntitiesWithinAABBExcludingEntity(player, range)) {
-                AxisAlignedBB aabb = entity.getEntityBoundingBox();
-                if (Config.recalibratorItemEntityBBoxOffset && entity instanceof EntityItem) {
-                    double h = aabb.maxY - aabb.minY;
-                    aabb = new AxisAlignedBB(aabb.minX, aabb.minY + h, aabb.minZ, aabb.maxX, aabb.maxY + h, aabb.maxZ);
-                }
-                RayTraceResult result = aabb.calculateIntercept(start, end);
-                if (result != null) {
-                    double d = start.distanceTo(entity.getPositionVector());
-                    if (d < dist) {
-                        dist = d;
-                        target = entity;
-                    }
-                }
-            }
-            if (target != null && !target.isInvisible() && !(target instanceof EntityPlayer)) {
-                ret = getEffectFromStack(stack).apply(target, stack.copy());
-            }
-        } else {
-            ret = getEffectFromStack(stack).apply(player, stack.copy());
+
+        if (!Config.allowRecalibratingOtherEntities || !player.isSneaking()) {
+            ItemStack used = getEffectFromStack(stack).apply(player, stack.copy());
+            return new ActionResult<>(SUCCESS, player.isCreative() ? stack : used);
         }
-        return new ActionResult<>(EnumActionResult.SUCCESS, player.isCreative() ? stack : ret);
+
+        double reach = player.getEntityAttribute(REACH_DISTANCE).getAttributeValue();
+        Vec3d start = player.getPositionEyes(1.0f);
+        Vec3d dir = player.getLook(1.0f).scale(reach);
+        Vec3d end = start.add(dir);
+
+        Entity match = null;
+        double maxDistSq = reach * reach; // for square comparison
+
+        for (Entity entity : world.getEntitiesWithinAABBExcludingEntity(player, new AxisAlignedBB(start.x, start.y, start.z, end.x, end.y, end.z))) {
+            if (entity.isInvisible()) {
+                continue;
+            }
+            AxisAlignedBB aabb = entity.getEntityBoundingBox();
+            if (entityItemBBoxOffset && entity instanceof EntityItem) {
+                double h = aabb.maxY - aabb.minY;
+                aabb = new AxisAlignedBB(aabb.minX, aabb.minY + h, aabb.minZ, aabb.maxX, aabb.maxY + h, aabb.maxZ);
+            }
+            RayTraceResult result = aabb.calculateIntercept(start, end);
+            if (result == null) {
+                continue;
+            }
+            double distSq = start.squareDistanceTo(result.hitVec);
+            if (distSq < maxDistSq) {
+                maxDistSq = distSq;
+                match = entity;
+            }
+        }
+        if (match != null && (Config.allowRecalibratingOtherPlayers || !(match instanceof EntityPlayer))) {
+            ItemStack used = getEffectFromStack(stack).apply(match, stack.copy());
+            return new ActionResult<>(SUCCESS, player.isCreative() ? stack : used);
+        }
+        return new ActionResult<>(SUCCESS, stack);
     }
 
     @Override
@@ -164,10 +179,10 @@ public final class ItemRecalibrator extends ItemMod {
     public EnumRarity getRarity(ItemStack stack) {
         RecalibrationEffect effect = getEffectFromStack(stack);
         return effect.type == RESET ?
-            EnumRarity.UNCOMMON :
-            effect.tier <= (effect.type == REDUCTION ? 8 : 2) ?
-                EnumRarity.RARE :
-                EnumRarity.EPIC;
+                EnumRarity.UNCOMMON :
+                effect.tier <= (effect.type == REDUCTION ? 8 : 2) ?
+                        EnumRarity.RARE :
+                        EnumRarity.EPIC;
     }
 
     @Override
@@ -282,13 +297,14 @@ public final class ItemRecalibrator extends ItemMod {
         public ItemStack apply(Entity entity, ItemStack stack) {
             boolean isPlayer = entity instanceof EntityPlayer;
             int i = isPlayer ? 1 : 2;
-            double currentSize = getSize(entity);
+            IRenderSized sized = (IRenderSized) entity;
+            double currentSize = sized.getSizeCM();
             if (size != currentSize) {
                 if (!entity.world.isRemote) {
-                    setSizeAndSync(entity, size, true);
+                    sized.setSizeCM(size, log2LerpTime(currentSize, size));
                 }
                 if (isPlayer) {
-                    AdvancementTriggers.SIZE.trigger((EntityPlayer) entity, currentSize, size);
+                    SizeTrigger.INSTANCE.trigger((EntityPlayer) entity, currentSize, size);
                 } else {
                     i *= 4;
                 }

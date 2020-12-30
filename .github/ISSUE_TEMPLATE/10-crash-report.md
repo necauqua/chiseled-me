@@ -13,4 +13,6 @@ If you know exactly with what mod *X* this mod crashed, please check that it was
 
 **Additional information:**
 - crashlog file or gist: *required*
-- `minecraft_profile_folder/logs/debug.log` file: *highly recommended to provide*
+- `minecraft_profile_folder/logs/debug.log` file: *providing this is highly recommended*
+
+**PLEASE REFRAIN FROM POSTING GIANT WALLS OF TEXT, USE ANY KIND OF PASTEBIN, GIST OR JUST A PLAIN TEXT FILE**

@@ -23,10 +23,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ResourceLocation;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 
 import static java.util.Collections.emptySet;
@@ -34,7 +31,7 @@ import static java.util.stream.Collectors.toList;
 
 public abstract class AdvancementTrigger<T extends ICriterionInstance> implements ICriterionTrigger<T> {
     protected final ResourceLocation id;
-    private final Map<PlayerAdvancements, Set<Listener<T>>> listeners = new HashMap<>();
+    private final Map<PlayerAdvancements, Set<Listener<T>>> listeners = new WeakHashMap<>();
 
     public AdvancementTrigger(ResourceLocation id) {
         this.id = id;

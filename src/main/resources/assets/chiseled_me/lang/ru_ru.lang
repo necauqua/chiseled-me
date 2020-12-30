@@ -4,7 +4,7 @@ itemGroup.chiseled_me=Chiseled Me
 chiseled_me.bed.too_small=Ваш размер слишком мал чтобы спать в кровати!
 chiseled_me.bed.too_big=Ваш размер слишком велик чтобы спать в кровати!
 
-commands.chiseled_me:sizeof.usage=/sizeof entity [<set|add|subtract|multiply|divide> size [animate]]
+commands.chiseled_me:sizeof.usage=/sizeof <entity> [(set|add|subtract|multiply|divide) <size> [animate [<ticks>]]]
 commands.chiseled_me:sizeof.get=Относительный размер %s - %s!
 commands.chiseled_me:sizeof.set=Размер %s изменён на %s!
 
@@ -62,4 +62,4 @@ advancement.chiseled_me:quadruple.desc=Станьте вчетверо боль�
 advancement.chiseled_me:octuple=Восьмерной!
 advancement.chiseled_me:octuple.desc=Станьте в восемь раз больше
 advancement.chiseled_me:sexdecuple=Шестнадцатерной!!1!
-advancement.chiseled_me:sexdecuple.desc=Станьте в шестнадцать раз больше
+advancement.chiseled_me:sexdecuple.desc=Станьте в шестнадцать раз большеcommands.chiseled_me:sizeof.usage=/sizeof <entity> [(set|add|subtract|multiply|divide) <size> [default [<ticks>]]]commands.chiseled_me:sizeof.usage=/sizeof <entity> [(set|add|subtract|multiply|divide) <size> [default [<ticks>]]]commands.chiseled_me:sizeof.usage=/sizeof <entity> [(set|add|subtract|multiply|divide) <size> [default [<ticks>]]]commands.chiseled_me:sizeof.usage=/sizeof <entity> [(set|add|subtract|multiply|divide) <size> [default [<ticks>]]]

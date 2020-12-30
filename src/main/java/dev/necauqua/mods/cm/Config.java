@@ -16,8 +16,10 @@
 
 package dev.necauqua.mods.cm;
 
-import dev.necauqua.mods.cm.ChiseledMe.OnPreInit;
+import dev.necauqua.mods.cm.ChiseledMe.Init;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.fml.client.event.ConfigChangedEvent.OnConfigChangedEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.FMLInjectionData;
 
 import java.io.File;
@@ -28,17 +30,22 @@ public final class Config {
 
     private Config() {}
 
-    public static boolean changeBedAABB;
+    // main
     public static boolean enableSupersmalls;
     public static boolean enableBigSizes;
-    public static float recalibratorEntityReachDist;
-    public static boolean recalibratorItemEntityBBoxOffset;
-    public static boolean scaleSmall, scaleBig;
+    public static boolean allowRecalibratingOtherEntities;
+    public static boolean allowRecalibratingOtherPlayers;
 
-    private static void load(Configuration c) {
-        changeBedAABB = c.getBoolean("bedBBox", "misc", true,
-            "Override vanilla bed bounding box so if you're small enough you can walk under it");
+    // misc
+    public static boolean changeBedAABB;
+    public static boolean allowSleepingWhenSmall;
 
+    // compat
+    public static boolean enableNeatIntegration;
+
+    private static Configuration c;
+
+    private static void load() {
         enableSupersmalls = c.getBoolean("enableSupersmalls", "main", true,
             "At these sizes (most noticeable at 1/4096) Minecraft starts to break a little so beware " +
                 "of various (mostly visual, mob AI and colliding) glitches");
@@ -46,33 +53,42 @@ public final class Config {
         enableBigSizes = c.getBoolean("enableBigs", "main", true,
             "Big sizes are OP and bugged even more then small.");
 
-        recalibratorEntityReachDist = c.getFloat("recalibratorReach", "main", 64.0f, 0.0f, 256.0f,
-            "How far (in blocks) the recalibrator can reach to change entity size. Can set to 0 to disable changing entities at all");
+        allowRecalibratingOtherEntities = c.getBoolean("allowRecalibratingOtherEntities", "main", true,
+                "Allows to disable shift-click-recalibrating arbitrary entities");
 
-        recalibratorItemEntityBBoxOffset = c.getBoolean("recalibratorItemEntityBBoxOffset", "misc", true,
-            "Item entities have their bboxes exactly below their models. You can check this with F3+B. " +
-                "When this is true, recalibrator would take that into account and for item entities you would click " +
-                "on rendering item and not below it");
+        allowRecalibratingOtherPlayers = c.getBoolean("allowRecalibratingOtherPlayers", "main", false,
+                "Allows to shift-click-recalibrate other players against their will");
 
-        int fallEffect = c.getInt("fallEffect", "main", 1, 0, 3,
-            "Specifies how falling damage applies. It is in range 0-4, so it's two bits - " +
-                "first bit controls if fall damage is increased appropriately when you small, " +
-                "and second - if it's descreased when you're big. " +
-                "So 00=0 - realistic (when you small you can fall long, when you big your mass hurts you), " +
-                "01=1 - comfortable (default but unrealistic, you fall long when small and fall normal when big), " +
-                "10=2 - not really usable (small - normal, big - mass hurts), " +
-                "11=3 - just scale (so it always feels as you're of normal size).");
+        changeBedAABB = c.getBoolean("bedBBox", "misc", true,
+            "Override vanilla bed bounding box so if you're small enough you can walk under it");
 
-        scaleSmall = (fallEffect >> 1) == 1;
-        scaleBig = (fallEffect & 1) == 1;
+        allowSleepingWhenSmall = c.getBoolean("allowSleepingWhenSmall", "misc", false,
+                "Sleeping is not allowed when resized because the mod author was/is too lazy to fix sleeping model, " +
+                        "camera and entity positioning, this config can force the mod to allow sleeping for small players, " +
+                        "but everything that was mentioned will be still broken");
+
+        enableNeatIntegration = c.getBoolean("enableNeatIntegration", "compat", true,
+            "Enable or disable scaling of the mob health bars from Neat, which is a mod by Vazkii");
     }
 
-    @OnPreInit
-    public static void init() {
+    @Init
+    private static void init() {
         File file = new File(/* .minecraft dir */(File) FMLInjectionData.data()[6], "config/" + MODID + ".cfg");
-        Configuration c = new Configuration(file);
+        c = new Configuration(file);
         c.load();
-        load(c);
-        c.save();
+        load();
+        if (c.hasChanged()) {
+            c.save();
+        }
+    }
+
+    @SubscribeEvent
+    public static void onConfigChanged(OnConfigChangedEvent eventArgs) {
+        if (MODID.equals(eventArgs.getModID())) {
+            load();
+            if (c.hasChanged()) {
+                c.save();
+            }
+        }
     }
 }

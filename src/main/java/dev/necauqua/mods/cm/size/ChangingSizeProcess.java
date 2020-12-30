@@ -1,10 +1,8 @@
 package dev.necauqua.mods.cm.size;
 
-import dev.necauqua.mods.cm.asm.CalledFromASM;
+import static java.lang.Math.abs;
+import static java.lang.Math.log;
 
-import static java.lang.Math.*;
-
-@CalledFromASM
 public final class ChangingSizeProcess {
     private static final double TWO_OVER_LOG_TWO = 2.0 / log(2);
 
@@ -12,16 +10,13 @@ public final class ChangingSizeProcess {
     public final double toSize;
 
     public double prevTickSize;
-    public int interpTicks;
-    public int interpInterval;
+    public int lerpTime;
+    public int lerpedTicks;
 
-    public ChangingSizeProcess(double fromSize, double toSize) {
-        this.fromSize = fromSize;
+    public ChangingSizeProcess(double fromSize, double toSize, int lerpTime) {
+        this.fromSize = prevTickSize = fromSize;
         this.toSize = toSize;
-
-        prevTickSize = fromSize;
-        interpTicks = 0;
-        interpInterval = calculateInterpolationInterval(fromSize, toSize);
+        this.lerpTime = lerpTime;
     }
 
     @Override
@@ -29,10 +24,11 @@ public final class ChangingSizeProcess {
         return "ChangingSizeProcess{" +
             "fromSize=" + fromSize +
             ", toSize=" + toSize +
+            ", lerpTime=" + lerpTime +
             '}';
     }
 
-    public static int calculateInterpolationInterval(double fromSize, double toSize) {
+    public static int log2LerpTime(double fromSize, double toSize) {
         return (int) (abs(log(fromSize) - log(toSize)) * TWO_OVER_LOG_TWO);
     }
 }

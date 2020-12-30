@@ -18,29 +18,28 @@ package dev.necauqua.mods.cm.advancements;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
-import dev.necauqua.mods.cm.advancements.StatelessTrigger.StatelessInstance;
 import net.minecraft.advancements.ICriterionInstance;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 
-public final class StatelessTrigger extends AdvancementTrigger<StatelessInstance> {
+public final class StatelessTrigger extends AdvancementTrigger<StatelessTrigger.Instance> {
     public StatelessTrigger(ResourceLocation id) {
         super(id);
     }
 
     @Override
-    public StatelessInstance deserializeInstance(JsonObject json, JsonDeserializationContext context) {
-        return new StatelessInstance(id);
+    public StatelessTrigger.Instance deserializeInstance(JsonObject json, JsonDeserializationContext context) {
+        return new Instance(id);
     }
 
     public void trigger(EntityPlayer player) {
         trigger(player, $ -> true);
     }
 
-    public static final class StatelessInstance implements ICriterionInstance {
+    public static final class Instance implements ICriterionInstance {
         private final ResourceLocation id;
 
-        public StatelessInstance(ResourceLocation id) {
+        public Instance(ResourceLocation id) {
             this.id = id;
         }
 

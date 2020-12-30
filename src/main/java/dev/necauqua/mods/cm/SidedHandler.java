@@ -39,9 +39,13 @@ public abstract class SidedHandler {
         return "";
     }
 
+    public void scheduleClientMainLoopTask(Runnable task) {
+    }
+
     @SideOnly(Side.CLIENT)
-    @SuppressWarnings("unused") // the above @SidedProxy annotation uses it
     public static final class ClientProxy extends SidedHandler {
+
+        private static final Minecraft mc = Minecraft.getMinecraft();
 
         @Override
         public void registerDefaultModel(Item item) {
@@ -65,18 +69,22 @@ public abstract class SidedHandler {
 
         @Nullable
         @Override
-        public World getClientWorld() {
-            return Minecraft.getMinecraft().world;
+        public EntityPlayer getClientPlayer() {
+            return mc.player;
         }
 
         @Nullable
         @Override
-        public EntityPlayer getClientPlayer() {
-            return Minecraft.getMinecraft().player;
+        public World getClientWorld() {
+            return mc.world;
+        }
+
+        @Override
+        public void scheduleClientMainLoopTask(Runnable task) {
+            mc.addScheduledTask(task);
         }
     }
 
     @SideOnly(Side.SERVER)
-    @SuppressWarnings("unused") // the above @SidedProxy annotation uses it
     public static final class ServerProxy extends SidedHandler {}
 }
