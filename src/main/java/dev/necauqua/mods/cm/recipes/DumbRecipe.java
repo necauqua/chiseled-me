@@ -14,6 +14,7 @@ import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.JsonContext;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
@@ -27,6 +28,7 @@ import java.nio.file.Files;
 import static dev.necauqua.mods.cm.ChiseledMe.MODID;
 import static dev.necauqua.mods.cm.ChiseledMe.ns;
 
+@EventBusSubscriber(modid = MODID)
 public final class DumbRecipe extends IForgeRegistryEntry.Impl<IRecipe> implements IRecipe {
 
     @SubscribeEvent

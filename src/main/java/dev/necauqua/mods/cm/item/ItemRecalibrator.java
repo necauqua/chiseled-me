@@ -18,8 +18,7 @@ package dev.necauqua.mods.cm.item;
 import dev.necauqua.mods.cm.Config;
 import dev.necauqua.mods.cm.SidedHandler;
 import dev.necauqua.mods.cm.advancements.AdvancementTriggers;
-import dev.necauqua.mods.cm.advancements.SizeTrigger;
-import dev.necauqua.mods.cm.api.IRenderSized;
+import dev.necauqua.size.api.IRenderSized;
 import net.minecraft.block.BlockDispenser;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
@@ -47,7 +46,8 @@ import java.util.List;
 
 import static dev.necauqua.mods.cm.ChiseledMe.ns;
 import static dev.necauqua.mods.cm.item.ItemRecalibrator.RecalibrationType.*;
-import static dev.necauqua.mods.cm.size.ChangingSizeProcess.log2LerpTime;
+import static java.lang.Math.abs;
+import static java.lang.Math.log;
 import static net.minecraft.entity.player.EntityPlayer.REACH_DISTANCE;
 import static net.minecraft.util.EnumActionResult.SUCCESS;
 
@@ -298,14 +298,12 @@ public final class ItemRecalibrator extends ItemMod {
             boolean isPlayer = entity instanceof EntityPlayer;
             int i = isPlayer ? 1 : 2;
             IRenderSized sized = (IRenderSized) entity;
-            double currentSize = sized.getSizeCM();
+            double currentSize = sized.getSize();
             if (size != currentSize) {
                 if (!entity.world.isRemote) {
-                    sized.setSizeCM(size, log2LerpTime(currentSize, size));
+                    sized.setSize(size, log2LerpTime(currentSize, size));
                 }
-                if (isPlayer) {
-                    SizeTrigger.INSTANCE.trigger((EntityPlayer) entity, currentSize, size);
-                } else {
+                if (!isPlayer) {
                     i *= 4;
                 }
             }
@@ -330,5 +328,11 @@ public final class ItemRecalibrator extends ItemMod {
             }
             return stack;
         }
+    }
+
+    private static final double TWO_OVER_LOG_TWO = 2.0 / log(2);
+
+    public static int log2LerpTime(double fromSize, double toSize) {
+        return (int) (abs(log(fromSize) - log(toSize)) * TWO_OVER_LOG_TWO);
     }
 }

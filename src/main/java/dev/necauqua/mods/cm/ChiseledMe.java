@@ -16,63 +16,42 @@
 
 package dev.necauqua.mods.cm;
 
+import dev.necauqua.mods.cm.advancements.AdvancementTriggers;
 import dev.necauqua.mods.cm.item.ItemMod;
 import dev.necauqua.mods.cm.item.ItemRecalibrator;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.launchwrapper.Launch;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.GameRules;
 import net.minecraftforge.client.event.ModelRegistryEvent;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.discovery.ASMDataTable.ASMData;
 import net.minecraftforge.fml.common.event.FMLFingerprintViolationEvent;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.oredict.OreDictionary;
-import org.spongepowered.asm.mixin.transformer.ClassInfo;
 
 import javax.annotation.Nonnull;
-import java.io.IOException;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.UUID;
 
 import static dev.necauqua.mods.cm.ChiseledMe.MODID;
 import static dev.necauqua.mods.cm.item.ItemRecalibrator.RecalibrationType.REDUCTION;
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import static java.util.stream.Collectors.toSet;
-import static net.minecraft.world.GameRules.ValueType.ANY_VALUE;
-import static net.minecraft.world.GameRules.ValueType.BOOLEAN_VALUE;
 
 @Mod(modid = MODID,
         version = "@VERSION@",
+        dependencies = "required:size@[1.12-1.0.0.0,)",
         acceptedMinecraftVersions = "@MC_VERSION_RANGE@",
         updateJSON = "https://raw.githubusercontent.com/necauqua/chiseled-me.wiki/master/updates.json",
         certificateFingerprint = "c677c954974252994736eb15e855e1e6fc5a2e62",
         useMetadata = true)
+@EventBusSubscriber
 public final class ChiseledMe {
 
     public static final String MODID = "chiseled_me";
-
-    public static final float LOWER_LIMIT = 0.000244140625f; // = 1/16/16/16 = 1/4096
-    public static final float UPPER_LIMIT = 16.0f;
-    public static final String ENTITY_SIZE_RULE = MODID + ":defaultEntitySize";
-    public static final String PLAYER_SIZE_RULE = MODID + ":defaultPlayerSize";
-    public static final String KEEP_SIZE_RULE = MODID + ":keepSize";
 
     public static final CreativeTabs TAB = new CreativeTabs(MODID) {
 
@@ -98,53 +77,8 @@ public final class ChiseledMe {
 
     @EventHandler
     public void on(FMLPreInitializationEvent e) {
-        try {
-            for (ASMData asmData : e.getAsmData().getAll(Init.class.getName())) {
-                String objectName = asmData.getObjectName();
-                String name = objectName.substring(0, objectName.indexOf('('));
-                Method method = Class.forName(asmData.getClassName()).getDeclaredMethod(name);
-                Log.debug("Found init method " + method);
-                method.setAccessible(true);
-                method.invoke(null);
-            }
-        } catch (IllegalAccessException | NoSuchMethodException | ClassNotFoundException e1) {
-            throw new AssertionError("This should not happen", e1);
-        } catch (InvocationTargetException e1) {
-            rethrow(e1.getCause());
-        }
-
-        // kinda could've been the default
-        // possibly with separate annotation just for main event bus, idk
-        try {
-            for (String s : e.getAsmData().getAll(SubscribeEvent.class.getName())
-                    .stream()
-                    .map(ASMData::getClassName)
-                    .filter(cls -> cls.startsWith("dev.necauqua.mods.cm") && !cls.contains("mixin"))
-                    .collect(toSet())) {
-                MinecraftForge.EVENT_BUS.register(Class.forName(s));
-            }
-        } catch (ClassNotFoundException ex) {
-            throw new AssertionError("This should not happen", ex);
-        }
-    }
-
-    @EventHandler
-    public void on(FMLInitializationEvent e) {
-        try {
-            Class.forName("micdoodle8.mods.galacticraft.core.GalacticraftCore")
-                    .getField("isHeightConflictingModInstalled")
-                    .set(null, true); // IMC (or something) IS FOR LOOOOSEEERS
-
-            // (if you are reading this source and can't get the sarcasm, I am not stating that
-            // IMC is for losers and thats why I am mixing into their init, I am stating that they
-            // must think that IMC is for losers as they don't have any, and their management of
-            // `isHeightConflictingModInstalled` field is based on hardcode-detecting a couple of
-            // popular mods that they know have such issues)
-
-            Launch.classLoader.getClassBytes("micdoodle8.mods.galacticraft.core.entities.player.GCEntityClientPlayerMP");
-        } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException | IOException ignored) {
-            // no gc
-        }
+        AdvancementTriggers.init();
+        Config.init();
     }
 
     @EventHandler
@@ -175,25 +109,7 @@ public final class ChiseledMe {
         }
     }
 
-    @EventHandler
-    public void on(FMLServerStartingEvent e) {
-        e.registerServerCommand(new SizeofCommand());
-        GameRules gameRules = e.getServer().getWorld(0).getGameRules();
-        gameRules.addGameRule(ENTITY_SIZE_RULE, "1", ANY_VALUE);
-        gameRules.addGameRule(PLAYER_SIZE_RULE, "1", ANY_VALUE);
-        gameRules.addGameRule(KEEP_SIZE_RULE, "false", BOOLEAN_VALUE);
-    }
-
     public static ResourceLocation ns(String id) {
         return new ResourceLocation(MODID, id);
     }
-
-    @SuppressWarnings("unchecked")
-    private static <E extends Throwable> void rethrow(Throwable exception) throws E {
-        throw (E) exception;
-    }
-
-    @Target(METHOD)
-    @Retention(RUNTIME)
-    public @interface Init {}
 }

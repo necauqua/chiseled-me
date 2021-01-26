@@ -10,6 +10,7 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry.ObjectHolder;
 import net.minecraftforge.registries.IForgeRegistryEntry;
@@ -17,10 +18,12 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import javax.annotation.Nonnull;
 import java.util.stream.IntStream;
 
+import static dev.necauqua.mods.cm.ChiseledMe.MODID;
 import static dev.necauqua.mods.cm.ChiseledMe.ns;
 import static net.minecraft.init.Blocks.LAPIS_BLOCK;
 import static net.minecraft.init.Items.NETHER_STAR;
 
+@EventBusSubscriber(modid = MODID)
 public final class BlueStarDecraftRecipe extends IForgeRegistryEntry.Impl<IRecipe> implements IRecipe {
 
     @ObjectHolder("chiseled_me:blue_star")
@@ -67,8 +70,8 @@ public final class BlueStarDecraftRecipe extends IForgeRegistryEntry.Impl<IRecip
     public NonNullList<ItemStack> getRemainingItems(@Nonnull InventoryCrafting inv) {
         NonNullList<ItemStack> ret = NonNullList.withSize(inv.getSizeInventory(), ItemStack.EMPTY);
         IntStream.range(0, inv.getSizeInventory())
-            .filter(i -> inv.getStackInSlot(i).getItem() == BLUE_STAR)
-            .forEach(i -> ret.set(i, new ItemStack(NETHER_STAR)));
+                .filter(i -> inv.getStackInSlot(i).getItem() == BLUE_STAR)
+                .forEach(i -> ret.set(i, new ItemStack(NETHER_STAR)));
 
         AdvancementTriggers.BLUE_STAR_DECRAFT.trigger(ForgeHooks.getCraftingPlayer());
 

@@ -16,9 +16,10 @@
 
 package dev.necauqua.mods.cm;
 
-import dev.necauqua.mods.cm.ChiseledMe.Init;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent.OnConfigChangedEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.FMLInjectionData;
 
@@ -26,6 +27,7 @@ import java.io.File;
 
 import static dev.necauqua.mods.cm.ChiseledMe.MODID;
 
+@EventBusSubscriber(modid = MODID)
 public final class Config {
 
     private Config() {}
@@ -71,8 +73,7 @@ public final class Config {
             "Enable or disable scaling of the mob health bars from Neat, which is a mod by Vazkii");
     }
 
-    @Init
-    private static void init() {
+    public static void init() {
         File file = new File(/* .minecraft dir */(File) FMLInjectionData.data()[6], "config/" + MODID + ".cfg");
         c = new Configuration(file);
         c.load();

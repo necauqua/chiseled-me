@@ -17,6 +17,7 @@ import net.minecraftforge.advancements.critereon.ItemPredicates;
 import net.minecraftforge.common.crafting.IIngredientFactory;
 import net.minecraftforge.common.crafting.JsonContext;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import javax.annotation.Nonnull;
@@ -24,10 +25,11 @@ import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
+import static dev.necauqua.mods.cm.ChiseledMe.MODID;
 import static dev.necauqua.mods.cm.ChiseledMe.ns;
 import static net.minecraft.init.Items.*;
 
-@SuppressWarnings("unused") // referred from json
+@EventBusSubscriber(modid = MODID)
 public final class PotionIngredientFactory implements IIngredientFactory {
 
     private static final Map<String, Item> potionTypes = new HashMap<>();

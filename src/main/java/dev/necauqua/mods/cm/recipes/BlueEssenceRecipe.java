@@ -9,15 +9,18 @@ import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.item.crafting.ShapelessRecipes;
 import net.minecraft.util.NonNullList;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry.ObjectHolder;
 
 import javax.annotation.Nonnull;
 import java.util.stream.IntStream;
 
+import static dev.necauqua.mods.cm.ChiseledMe.MODID;
 import static dev.necauqua.mods.cm.ChiseledMe.ns;
 import static net.minecraft.init.Items.NETHER_STAR;
 
+@EventBusSubscriber(modid = MODID)
 public final class BlueEssenceRecipe extends ShapelessRecipes {
 
     @ObjectHolder("chiseled_me:blue_star")
@@ -45,18 +48,18 @@ public final class BlueEssenceRecipe extends ShapelessRecipes {
     @Nonnull
     public NonNullList<ItemStack> getRemainingItems(InventoryCrafting inv) {
         NonNullList<ItemStack> remaining = super.getRemainingItems(inv);
-        IntStream.range(0, inv.getSizeInventory())
-            .filter(i -> inv.getStackInSlot(i).getItem() == BLUE_STAR)
-            .forEach(i -> remaining.set(i, new ItemStack(NETHER_STAR)));
+        for (int i = 0; i < inv.getSizeInventory(); i++) {
+            if (inv.getStackInSlot(i).getItem() == BLUE_STAR) {
+                remaining.set(i, new ItemStack(NETHER_STAR));
+            }
+        }
         return remaining;
     }
-
-
 
     @SubscribeEvent
     public static void on(RegistryEvent.Register<IRecipe> e) {
         e.getRegistry().register(Config.enableBigSizes ?
-            new BlueEssenceRecipe() :
-            new DumbRecipe("pym_essence_b"));
+                new BlueEssenceRecipe() :
+                new DumbRecipe("pym_essence_b"));
     }
 }
