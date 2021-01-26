@@ -1,0 +1,126 @@
+/*
+ * Copyright (c) 2016-2019 Anton Bulakh <necauqua@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package dev.necauqua.size;
+
+import dev.necauqua.size.api.IRenderSized;
+import io.netty.buffer.Unpooled;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.network.FMLEventChannel;
+import net.minecraftforge.fml.common.network.FMLNetworkEvent.ClientCustomPacketEvent;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import org.jline.utils.Log;
+
+import java.util.function.Consumer;
+
+public final class Network {
+    private static final FMLEventChannel channel = NetworkRegistry.INSTANCE.newEventDrivenChannel(Size.ID);
+
+    private Network() {}
+
+    public static void init() {
+        channel.register(Network.class);
+    }
+
+    @SideOnly(Side.CLIENT)
+    @SubscribeEvent
+    public static void onClientReceive(ClientCustomPacketEvent e) {
+        PacketBuffer payload = new PacketBuffer(e.getPacket().payload());
+        byte id = payload.readByte();
+        Minecraft mc = Minecraft.getMinecraft();
+        switch (id) {
+            case 0: {
+                double size = payload.readDouble();
+                int lerpTime = payload.readInt();
+                mc.addScheduledTask(() -> {
+                    if (mc.player != null) {
+                        ((IRenderSized) mc.player).setSize(size, lerpTime);
+                    }
+                });
+                break;
+            }
+            case 1: {
+                int entityId = payload.readInt();
+                double size = payload.readDouble();
+                int lerpTime = payload.readInt();
+                mc.addScheduledTask(() -> {
+                    World world = mc.world;
+                    if (world == null) {
+                        return;
+                    }
+                    Entity entity = world.getEntityByID(entityId);
+                    if (entity != null) {
+                        ((IRenderSized) entity).setSize(size, lerpTime);
+                    }
+                });
+                break;
+            }
+            default:
+                invalidPacket(id, payload);
+        }
+    }
+
+    private static FMLProxyPacket packet(int id, Consumer<PacketBuffer> data) {
+        PacketBuffer payload = new PacketBuffer(Unpooled.buffer());
+        payload.writeByte(id);
+        data.accept(payload);
+        return new FMLProxyPacket(payload, Size.ID);
+    }
+
+    private static void invalidPacket(byte id, PacketBuffer payload) {
+        StringBuilder out = new StringBuilder("Invalid packet received, its content was: ").append(id);
+        int i = -1;
+        while (payload.isReadable() && i++ < 16) {
+            byte b = payload.readByte();
+            String hex = Integer.toHexString(b);
+            out.append(", ");
+            if (hex.length() < 2) {
+                out.append('0');
+            }
+            out.append(hex);
+        }
+        if (payload.isReadable()) {
+            out.append("and ").append(payload.readableBytes()).append(" bytes more...");
+        }
+        Log.error(out);
+    }
+
+    public static void sync(Entity entity, double size, int lerpTime) {
+        if (entity instanceof EntityPlayerMP) {
+            channel.sendTo(packet(0, p -> {
+                p.writeDouble(size);
+                p.writeInt(lerpTime);
+            }), (EntityPlayerMP) entity);
+        }
+        for (EntityPlayer entityPlayer : ((WorldServer) entity.world).getEntityTracker().getTrackingPlayers(entity)) {
+            channel.sendTo(packet(1, p -> {
+                p.writeInt(entity.getEntityId());
+                p.writeDouble(size);
+                p.writeInt(lerpTime);
+            }), (EntityPlayerMP) entityPlayer);
+        }
+    }
+}

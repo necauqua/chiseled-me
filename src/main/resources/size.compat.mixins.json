@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.necauqua.size.mixins",
+  "refmap": "SIZE.mixins.refmap.json",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [],
+  "client": [
+    "compat.Rfp2DummyPlayerMixin",
+    "compat.GCEntityClientPlayerMPMixin",
+    "compat.NeatMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
