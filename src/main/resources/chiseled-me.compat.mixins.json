@@ -7,8 +7,8 @@
   "mixins": [],
   "client": [
     "GCEntityClientPlayerMPMixin",
-    "Rfp2DummyPlayerMixin",
-    "NeatMixin"
+    "NeatMixin",
+    "Rfp2DummyPlayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -1,13 +1,18 @@
+/*
+ * Copyright (c) 2017-2021 Anton Bulakh <self@necauqua.dev>
+ * Licensed under MIT, see the LICENSE file for details.
+ */
+
 package dev.necauqua.mods.cm.mixin.client;
 
 import dev.necauqua.mods.cm.api.IRenderSized;
-import dev.necauqua.mods.cm.api.ISized;
 import net.minecraft.client.renderer.entity.RenderLiving;
 import net.minecraft.entity.EntityLiving;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.*;
-
-import static dev.necauqua.mods.cm.size.EntitySizeInteractions.getViewerSize;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Constant;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 @Mixin(RenderLiving.class)
 public abstract class RenderLivingMixin {

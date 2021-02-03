@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2017-2021 Anton Bulakh <self@necauqua.dev>
+ * Licensed under MIT, see the LICENSE file for details.
+ */
+
 package dev.necauqua.mods.cm.mixin.client;
 
 import dev.necauqua.mods.cm.api.ISized;
@@ -5,15 +10,11 @@ import dev.necauqua.mods.cm.size.EntitySizeInteractions;
 import net.minecraft.client.particle.IParticleFactory;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleManager;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(ParticleManager.class)
 public final class ParticleManagerMixin {
