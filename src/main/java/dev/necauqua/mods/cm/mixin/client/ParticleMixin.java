@@ -24,12 +24,12 @@ public abstract class ParticleMixin implements ISized {
     private float $cm$original_height;
 
     @Override
-    public final double getSizeCM() {
+    public double getSizeCM() {
         return $cm$size;
     }
 
     @Override
-    public final void setSizeCM(double size) {
+    public void setSizeCM(double size) {
         $cm$size = size;
 
         width = (float) ($cm$original_width * size);

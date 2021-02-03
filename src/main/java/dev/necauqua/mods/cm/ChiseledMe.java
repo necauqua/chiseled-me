@@ -61,7 +61,7 @@ import static net.minecraft.world.GameRules.ValueType.BOOLEAN_VALUE;
 @Mod(modid = MODID,
         version = "@VERSION@",
         acceptedMinecraftVersions = "@MC_VERSION_RANGE@",
-        updateJSON = "https://raw.githubusercontent.com/necauqua/chiseled-me.wiki/master/updates.json",
+        updateJSON = "https://raw.githubusercontent.com/wiki/necauqua/chiseled-me/updates.json",
         certificateFingerprint = "c677c954974252994736eb15e855e1e6fc5a2e62",
         useMetadata = true)
 public final class ChiseledMe {
@@ -140,9 +140,7 @@ public final class ChiseledMe {
             // must think that IMC is for losers as they don't have any, and their management of
             // `isHeightConflictingModInstalled` field is based on hardcode-detecting a couple of
             // popular mods that they know have such issues)
-
-            Launch.classLoader.getClassBytes("micdoodle8.mods.galacticraft.core.entities.player.GCEntityClientPlayerMP");
-        } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException | IOException ignored) {
+        } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException ignored) {
             // no gc
         }
     }

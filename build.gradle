@@ -3,7 +3,7 @@ buildscript {
         maven { url = 'https://maven.necauqua.dev' }
     }
     dependencies {
-        classpath 'dev.necauqua:necauqua-mod:0.5.5'
+        classpath 'dev.necauqua:necauqua-mod:0.6.0'
     }
 }
 
@@ -18,23 +18,9 @@ nmod {
     extraMixinConfigs += 'chiseled-me.hack.mixins.json'
 }
 
-repositories {
-    flatDir {
-        name 'test-mods'
-        dir file('test-mods')
-    }
-}
-
 dependencies {
-    // Locally sourced extra mods for runtime (i.e. testing)
-    for (extraModJar in fileTree(dir: 'test-mods', include: '*.jar')) {
-        def basename = extraModJar.name.substring(0, extraModJar.name.length() - ".jar".length())
-        def versionSep = basename.lastIndexOf('-')
-        assert versionSep != -1
-        def artifactId = basename.substring(0, versionSep)
-        def version = basename.substring(versionSep + 1)
-        runtimeOnly fg.deobf("test-mods:$artifactId:$version")
-    }
+    // shade in the mixin
+    packaged "org.spongepowered:mixin:${nmod.mixin}"
 }
 
 // fix dev env runner to immediately run compat mixins, this is part of the gross hack to mix into other mods in 1.12
@@ -53,9 +39,7 @@ afterEvaluate {
 }
 
 // another couple of things that are not needed in new Forge (>=1.15) as it comes with Mixin and knows about it
-dependencies.packaged "org.spongepowered:mixin:${nmod.mixin}"
 jar.manifest.attributes 'ForceLoadAsMod': 'true', 'TweakClass': 'org.spongepowered.asm.launch.MixinTweaker'
-
 
 // "fix" that duplicate mod issue (1.12 only I think)
 jar.manifest.attributes 'FMLCorePluginContainsFMLMod': 'true'

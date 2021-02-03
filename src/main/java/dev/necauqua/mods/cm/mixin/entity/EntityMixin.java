@@ -31,26 +31,26 @@ public abstract class EntityMixin implements IRenderSized {
     private static final String SIZE_NBT_TAG = "chiseled_me:size";
 
     public double $cm$size = 1.0;
-    private float $cm$originalWidth = 0.8F;
-    private float $cm$originalHeight = 1.8F;
+    private float $cm$originalWidth = 0.0F;
+    private float $cm$originalHeight = 0.0F;
 
     @Nullable
     private ChangingSizeProcess $cm$process = null;
 
     @Override
-    public final double getSizeCM() {
+    public double getSizeCM() {
         return $cm$size;
     }
 
     @Override
-    public final double getSizeCM(float partialTick) {
+    public double getSizeCM(float partialTick) {
         return $cm$process != null ?
                 $cm$process.prevTickSize + ($cm$size - $cm$process.prevTickSize) * partialTick :
                 $cm$size;
     }
 
     @Override
-    public final void setSizeCM(double size, int lerpTime) {
+    public void setSizeCM(double size, int lerpTime) {
         dismountRidingEntity();
         removePassengers();
 
@@ -80,10 +80,17 @@ public abstract class EntityMixin implements IRenderSized {
     }
 
     @Override
-    public final void setRawSizeCM(double size) {
+    public void setRawSizeCM(double size) {
         $cm$size = size;
         if ($cm$process == null) { // only force-set it when animation is done
             dataManager.set($CM$SIZE, size);
+        }
+
+        if ($cm$originalWidth == 0.0f) {
+            $cm$originalWidth = width;
+        }
+        if ($cm$originalHeight == 0.0f) {
+            $cm$originalHeight = height;
         }
 
         float w = (width = (float) ($cm$originalWidth * size)) / 2.0F;
@@ -253,6 +260,12 @@ public abstract class EntityMixin implements IRenderSized {
 
     @Inject(method = "readFromNBT", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;readEntityFromNBT(Lnet/minecraft/nbt/NBTTagCompound;)V"))
     void readFromNBT(NBTTagCompound nbt, CallbackInfo ci) {
+
+        // fix for when mods just set width/height in constructor
+        $cm$originalWidth = width;
+        $cm$originalHeight = height;
+        setRawSizeCM(1.0);
+
         double size = nbt.getDouble(SIZE_NBT_TAG);
         if (size != 0.0) {
             setSizeCM(size);

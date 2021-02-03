@@ -13,6 +13,7 @@
     "SPacketParticlesMixin",
     "TileEntityBeaconMixin",
     "WorldMixin",
+    "WorldServerMixin",
     "entity.EntityAgeableMixin",
     "entity.EntityAreaEffectCloudMixin",
     "entity.EntityCreatureMixin",
