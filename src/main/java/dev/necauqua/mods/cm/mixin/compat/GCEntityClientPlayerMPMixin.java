@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2017-2021 Anton Bulakh <self@necauqua.dev>
+ * Licensed under MIT, see the LICENSE file for details.
+ */
+
 package dev.necauqua.mods.cm.mixin.compat;
 
 import com.mojang.authlib.GameProfile;
@@ -14,6 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Pseudo
 @Mixin(targets = "micdoodle8.mods.galacticraft.core.entities.player.GCEntityClientPlayerMP")
+@SuppressWarnings("UnresolvedMixinReference") // plugin is confused about pseudo mixins
 public abstract class GCEntityClientPlayerMPMixin extends EntityPlayer implements ISized {
 
     public GCEntityClientPlayerMPMixin(World world, GameProfile gameProfile) {

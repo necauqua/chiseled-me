@@ -1,7 +1,12 @@
+/*
+ * Copyright (c) 2017-2021 Anton Bulakh <self@necauqua.dev>
+ * Licensed under MIT, see the LICENSE file for details.
+ */
+
 package dev.necauqua.mods.cm.mixin.client;
 
-import dev.necauqua.mods.cm.size.IPreciseEffectPacket;
 import dev.necauqua.mods.cm.api.IWorldPlayPreciseEvent;
+import dev.necauqua.mods.cm.size.IPreciseEffectPacket;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.network.play.server.SPacketEffect;

@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2017-2021 Anton Bulakh <self@necauqua.dev>
+ * Licensed under MIT, see the LICENSE file for details.
+ */
+
 package dev.necauqua.mods.cm.mixin.compat;
 
 import net.minecraftforge.fml.common.Loader;

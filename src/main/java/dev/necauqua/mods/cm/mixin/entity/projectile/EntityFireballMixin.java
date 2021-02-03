@@ -1,8 +1,12 @@
+/*
+ * Copyright (c) 2017-2021 Anton Bulakh <self@necauqua.dev>
+ * Licensed under MIT, see the LICENSE file for details.
+ */
+
 package dev.necauqua.mods.cm.mixin.entity.projectile;
 
 import dev.necauqua.mods.cm.mixin.entity.EntityMixin;
 import dev.necauqua.mods.cm.size.EntitySizeInteractions;
-import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.entity.projectile.EntityFireball;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
