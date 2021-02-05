@@ -1,0 +1,65 @@
+
+itemGroup.chiseled_me=Chiseled Me
+
+chiseled_me.bed.too_small=Vous êtes trop petit pour dormir dans un lit !
+chiseled_me.bed.too_big=Vous êtes trop petit pour dormir dans un lit !
+
+commands.chiseled_me:sizeof.usage=/sizeof <entity> [(set|add|subtract|multiply|divide) <size> [animate [<ticks>]]]
+commands.chiseled_me:sizeof.get=La taille relative de %s est %s!
+commands.chiseled_me:sizeof.set=Réglage de la taille de %s à %s!
+
+item.chiseled_me:recalibrator.charges=  §8Charges restantes: §7%s
+item.chiseled_me:recalibrator.reset.name=Recalibrateur Volumétrique de Masse [ 1.0 ]
+item.chiseled_me:recalibrator.reset.tooltip=§8§o-Clic droit pour rétablir votre taille normale.
+item.chiseled_me:recalibrator.reduction.name=Recalibrateur Volumétrique de Masse [ 1/%s ]
+item.chiseled_me:recalibrator.reduction.tooltip=§8§o-Clic droit pour être  1/%s ème de votre taille  normale.
+item.chiseled_me:recalibrator.amplification.name=Recalibrateur Volumétrique de Masse [ %s ]
+item.chiseled_me:recalibrator.amplification.tooltip=§8§o-Clic droit pour être %s fois plus grand que votre taille normale.
+
+item.chiseled_me:blue_star.name=Étoile du Nether Bleue
+item.chiseled_me:pym_container.name=Conteneur de Pym
+item.chiseled_me:pym_container_x.name=Conteneur de Pym Renforcé
+item.chiseled_me:pym_essence.name=Essence de Pym
+item.chiseled_me:pym_essence_x.name=Essence de Pym Concentrée
+item.chiseled_me:pym_essence_b.name=Essence de Pym Concentrée Antipolarisée
+
+advancement.chiseled_me:beginning=Le début
+advancement.chiseled_me:beginning.desc=Fabriquer un conteneur de pym
+advancement.chiseled_me:essence=Essence de pym
+advancement.chiseled_me:essence.desc=Truc rouge remuant dans un petit conteneur
+advancement.chiseled_me:depletion=À sec
+advancement.chiseled_me:depletion.desc=Heureusement cette chose vous rend votre taille normale gratuitement
+advancement.chiseled_me:cablework=Câblage facile !
+advancement.chiseled_me:cablework.desc=Devenir 1/2 de votre taille
+advancement.chiseled_me:big_stairs=Les escaliers sont trop grands maintenant
+advancement.chiseled_me:big_stairs.desc=Devenir 1/4 de votre taille
+advancement.chiseled_me:mouse_holes=Trous de souris accessibles
+advancement.chiseled_me:mouse_holes.desc=Devenir 1/8 de votre taille
+advancement.chiseled_me:c&b_galore=Vive Chisel & Bits !
+advancement.chiseled_me:c&b_galore.desc=Devenir 1/16 de votre taille
+advancement.chiseled_me:c&b_squared=J'ai besoin de C&B pour C&B maintenant !
+advancement.chiseled_me:c&b_squared.desc=Devenir 1/256 de votre taille
+advancement.chiseled_me:advancements=Avancements
+advancement.chiseled_me:advancements.desc=Fabriquer un conteneur de pym plus grand
+advancement.chiseled_me:concentrated=Essence pym concentrée
+advancement.chiseled_me:concentrated.desc=True remuant rouge dans un *gros* conteneur
+advancement.chiseled_me:supersmalls=Super petit
+advancement.chiseled_me:supersmalls.desc=Devenir 1/512 de votre taille
+advancement.chiseled_me:the_limit=Je Respecte Les Limites
+advancement.chiseled_me:the_limit.desc=Devenir 1/4096 of your size
+advancement.chiseled_me:blue_nether_star=Étoile du nether bleue ?
+advancement.chiseled_me:blue_nether_star.desc=Combiner une étoile du nether avec un bloc de lapis
+advancement.chiseled_me:weird_beacon=Une balise hors norme
+advancement.chiseled_me:weird_beacon.desc=Cette balise est étrange il semblerait. Utilisez-là ?
+advancement.chiseled_me:surprise=Surprise? :D
+advancement.chiseled_me:surprise.desc=Convertir une étoile du nether bleue en bloc de lapis
+advancement.chiseled_me:antipolarization=Antipolarisation
+advancement.chiseled_me:antipolarization.desc=Antipolariser de l'essence pym concentrée avec une étoile du nether bleue
+advancement.chiseled_me:double=Double !
+advancement.chiseled_me:double.desc=Devenir deux fois plus grand
+advancement.chiseled_me:quadruple=Quadruple !
+advancement.chiseled_me:quadruple.desc=Devenir 4 fois plus grand
+advancement.chiseled_me:octuple=Octuple !
+advancement.chiseled_me:octuple.desc=Devenir 8 fois plus grand
+advancement.chiseled_me:sexdecuple=Hexadécuple !!1!
+advancement.chiseled_me:sexdecuple.desc=Devenir 16 fois plus grand
