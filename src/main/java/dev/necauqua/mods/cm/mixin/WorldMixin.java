@@ -5,9 +5,11 @@
 
 package dev.necauqua.mods.cm.mixin;
 
+import dev.necauqua.mods.cm.api.IRenderSized;
 import dev.necauqua.mods.cm.api.IWorldPlayPreciseEvent;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.math.BlockPos;
@@ -19,7 +21,9 @@ import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
 
@@ -57,6 +61,12 @@ public abstract class WorldMixin implements IWorldPlayPreciseEvent {
             crashreportcategory3.addCrashSection("Event data", data);
             throw new ReportedException(crashreport3);
         }
+    }
+
+    // to not depend of whether entity calls super in it's onUpdate
+    @Inject(method = "updateEntityWithOptionalForce", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onUpdate()V"))
+    void updateEntityWithOptionalForce(Entity entity, boolean forceUpdate, CallbackInfo ci) {
+        ((IRenderSized) entity).updateCM();
     }
 
     @Shadow

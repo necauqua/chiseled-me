@@ -5,8 +5,6 @@
   "refmap": "chiseled-me.mixins.refmap.json",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "ItemEnderEyeMixin",
-    "ItemMonsterPlacerMixin",
     "NetHandlerPlayServerMixin",
     "ServerWorldEventHandlerMixin",
     "SPacketEffectMixin",
@@ -48,7 +46,10 @@
     "entity.projectile.EntityThrowableAndArrowMixin",
     "entity.projectile.EntityThrowableMixin",
     "entity.projectile.EntityTippedArrowMixin",
-    "entity.projectile.ProjectileHelperMixin"
+    "entity.projectile.ProjectileHelperMixin",
+    "item.ItemBoatMixin",
+    "item.ItemEnderEyeMixin",
+    "item.ItemMonsterPlacerMixin"
   ],
   "client": [
     "client.EntityRendererMixin",

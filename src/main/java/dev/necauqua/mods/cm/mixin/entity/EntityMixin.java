@@ -107,6 +107,20 @@ public abstract class EntityMixin implements IRenderSized {
         setEntityBoundingBox(new AxisAlignedBB(x - w, aabb.minY, z - w, x + w, aabb.minY + h, z + w));
     }
 
+    public void updateCM() {
+        ChangingSizeProcess p = $cm$process;
+        if (p == null) {
+            return;
+        }
+        if (p.lerpedTicks++ < p.lerpTime) {
+            p.prevTickSize = $cm$size;
+            setRawSizeCM(p.fromSize + (p.toSize - p.fromSize) / p.lerpTime * p.lerpedTicks);
+        } else {
+            $cm$process = null;
+            setRawSizeCM(p.toSize);
+        }
+    }
+
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Redirect(method = "<init>", at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/network/datasync/EntityDataManager;register(Lnet/minecraft/network/datasync/DataParameter;Ljava/lang/Object;)V"))
     void registerSize(EntityDataManager dataManager, DataParameter key, Object value, World world) {
@@ -118,21 +132,6 @@ public abstract class EntityMixin implements IRenderSized {
     void notifyDataManagerChange(DataParameter<?> key, CallbackInfo ci) {
         if ($CM$SIZE.equals(key)) {
             setSizeCM(dataManager.get($CM$SIZE), 0);
-        }
-    }
-
-    @Inject(method = "onEntityUpdate", at = @At("HEAD"))
-    void onEntityUpdate(CallbackInfo ci) {
-        ChangingSizeProcess p = $cm$process;
-        if (p == null) {
-            return;
-        }
-        if (p.lerpedTicks++ < p.lerpTime) {
-            p.prevTickSize = $cm$size;
-            setRawSizeCM(p.fromSize + (p.toSize - p.fromSize) / p.lerpTime * p.lerpedTicks);
-        } else {
-            $cm$process = null;
-            setRawSizeCM(p.toSize);
         }
     }
 

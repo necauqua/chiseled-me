@@ -14,7 +14,7 @@ public final class Log {
 
     private Log() {}
 
-    private static Logger logger = LogManager.getLogger(MODID);
+    private static final Logger logger = LogManager.getLogger(MODID);
 
     public static void trace(Object msg) {
         logger.trace(msg);

@@ -3,7 +3,7 @@
  * Licensed under MIT, see the LICENSE file for details.
  */
 
-package dev.necauqua.mods.cm.mixin;
+package dev.necauqua.mods.cm.mixin.item;
 
 import dev.necauqua.mods.cm.api.ISized;
 import net.minecraft.entity.Entity;

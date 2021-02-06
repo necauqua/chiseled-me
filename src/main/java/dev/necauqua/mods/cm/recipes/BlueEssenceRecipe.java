@@ -20,13 +20,11 @@ import net.minecraftforge.fml.common.registry.GameRegistry.ObjectHolder;
 import javax.annotation.Nonnull;
 import java.util.stream.IntStream;
 
+import static dev.necauqua.mods.cm.ChiseledMe.BLUE_STAR;
 import static dev.necauqua.mods.cm.ChiseledMe.ns;
 import static net.minecraft.init.Items.NETHER_STAR;
 
 public final class BlueEssenceRecipe extends ShapelessRecipes {
-
-    @ObjectHolder("chiseled_me:blue_star")
-    private static Item BLUE_STAR;
 
     @ObjectHolder("chiseled_me:pym_essence_b")
     private static Item ESSENCE_B;

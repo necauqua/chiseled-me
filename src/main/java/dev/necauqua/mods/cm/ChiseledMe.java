@@ -67,8 +67,8 @@ public final class ChiseledMe {
         }
     };
 
-    private static final ItemRecalibrator RECALIBRATOR = new ItemRecalibrator();
-    private static final ItemMod BLUE_STAR = new ItemMod("blue_star").setGlowing();
+    public static final ItemRecalibrator RECALIBRATOR = new ItemRecalibrator();
+    public static final ItemMod BLUE_STAR = new ItemMod("blue_star").setGlowing();
 
     private static final Item[] ITEMS = {
             RECALIBRATOR,

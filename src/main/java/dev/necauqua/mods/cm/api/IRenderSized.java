@@ -63,6 +63,16 @@ public interface IRenderSized extends ISized {
     boolean isResizingCM();
 
     /**
+     * Progresses the resizing animation by one ticks if it is in the process.
+     * <p>
+     * It is called from the modified minecraft code on each entity update, you generally should not call this yourself.
+     * <p>
+     * This is done to not be dependent on whether the entity subclass calls super onUpdate or not,
+     * even in vanilla minecarts don't do that.
+     */
+    void updateCM();
+
+    /**
      * Properly sets the entity size with network sync,
      * and thus should be called only on the server.
      * <p>
