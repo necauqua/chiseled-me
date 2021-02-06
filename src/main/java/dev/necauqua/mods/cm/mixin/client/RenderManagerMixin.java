@@ -7,6 +7,7 @@ package dev.necauqua.mods.cm.mixin.client;
 
 import dev.necauqua.mods.cm.api.IRenderSized;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -51,5 +52,18 @@ public final class RenderManagerMixin {
     })
     double renderDebugBoundingBox(double constant, Entity entity) {
         return constant * ((IRenderSized) entity).getSizeCM();
+    }
+
+    @Redirect(method = "renderMultipass", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/Render;renderMultipass(Lnet/minecraft/entity/Entity;DDDFF)V"))
+    void renderMultipass(Render<Entity> self, Entity entity, double x, double y, double z, float yaw, float partialTicks) {
+        double size = ((IRenderSized) entity).getSizeCM(partialTicks);
+        if (size == 1.0) {
+            self.renderMultipass(entity, x, y, z, yaw, partialTicks);
+            return;
+        }
+        GlStateManager.pushMatrix();
+        GlStateManager.scale(size, size, size);
+        self.renderMultipass(entity, x / size, y / size, z / size, yaw, partialTicks);
+        GlStateManager.popMatrix();
     }
 }
