@@ -351,6 +351,9 @@ public abstract class EntityMixin implements IRenderSized {
     public double motionZ;
 
     @Shadow
+    protected abstract void setSize(float width, float height);
+
+    @Shadow
     public abstract AxisAlignedBB getEntityBoundingBox();
 
     @Shadow

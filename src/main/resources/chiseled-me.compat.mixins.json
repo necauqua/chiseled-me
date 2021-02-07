@@ -4,8 +4,15 @@
   "package": "dev.necauqua.mods.cm.mixin.compat",
   "refmap": "chiseled-me.mixins.refmap.json",
   "compatibilityLevel": "JAVA_8",
-  "mixins": [],
+  "mixins": [
+    "CustomNpcFixMixin",
+    "CustomNpcFixMixin$EntityCustomNpcHitboxFix",
+    "CustomNpcFixMixin$EntityNpcHitboxFixes"
+  ],
   "client": [
+    "CustomNpcFixMixin$GuiContainerNPCInterfaceMixin",
+    "CustomNpcFixMixin$GuiNPCInterfaceMixin",
+    "CustomNpcFixMixin$RenderFixes",
     "GCEntityClientPlayerMPMixin",
     "NeatMixin",
     "Rfp2DummyPlayerMixin"

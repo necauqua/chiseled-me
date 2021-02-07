@@ -5,6 +5,7 @@
 
 package dev.necauqua.mods.cm.size;
 
+import dev.necauqua.mods.cm.ChiseledMe;
 import dev.necauqua.mods.cm.ChiseledMe.*;
 import dev.necauqua.mods.cm.Config;
 import dev.necauqua.mods.cm.Log;
@@ -22,6 +23,7 @@ import net.minecraft.entity.projectile.EntityFireball;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
@@ -48,6 +50,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static dev.necauqua.mods.cm.ChiseledMe.*;
+import static net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteract;
 
 /**
  * This class holds misc event handlers.
@@ -78,6 +81,22 @@ public final class EntitySizeInteractions {
     public static void on(EntityInteractSpecific e) {
         if (((ISized) e.getEntity()).getSizeCM() != ((ISized) e.getTarget()).getSizeCM()) {
             e.setCanceled(true);
+        }
+        for (EnumHand hand : EnumHand.values()) {
+            if (e.getEntityPlayer().getHeldItem(hand).getItem() == ChiseledMe.RECALIBRATOR) {
+                e.setCanceled(true);
+                break;
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void on(EntityInteract e) {
+        for (EnumHand hand : EnumHand.values()) {
+            if (e.getEntityPlayer().getHeldItem(hand).getItem() == ChiseledMe.RECALIBRATOR) {
+                e.setCanceled(true);
+                break;
+            }
         }
     }
 
