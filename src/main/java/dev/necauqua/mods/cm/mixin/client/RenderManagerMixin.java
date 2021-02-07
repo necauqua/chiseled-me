@@ -19,7 +19,7 @@ public final class RenderManagerMixin {
 
     private double $cm$sizeHack = 1.0; // idk just a useless optimization I guess
 
-    @Inject(method = "renderEntity", cancellable = true, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/Render;doRender(Lnet/minecraft/entity/Entity;DDDFF)V"))
+    @Inject(method = "renderEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/Render;doRender(Lnet/minecraft/entity/Entity;DDDFF)V"))
     void renderEntityPre(Entity entity, double x, double y, double z, float yaw, float partialTicks, boolean p_188391_10_, CallbackInfo ci) {
         double size = $cm$sizeHack = ((IRenderSized) entity).getSizeCM(partialTicks);
         GlStateManager.pushMatrix();

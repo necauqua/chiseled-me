@@ -15,9 +15,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.*;
 
 @Mixin(Render.class)
-public final class RenderMixin {
+public abstract class RenderMixin {
 
-    private double $cm$sizeHack = 1.0;
+    protected double $cm$sizeHack = 1.0;
 
     // scale distance to camera here to make the shadow transparency *exactly* the same
     @ModifyVariable(method = "doRenderShadowAndFire", ordinal = 3, at = @At("STORE"))
