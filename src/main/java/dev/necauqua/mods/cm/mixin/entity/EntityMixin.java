@@ -180,17 +180,18 @@ public abstract class EntityMixin implements IRenderSized {
 
     @ModifyVariable(method = "move", at = @At("HEAD"), ordinal = 0)
     double moveX(double x, MoverType type) {
-        return type == MoverType.SELF ? x * $cm$size : x;
+        // should be only SELF but some mods call the method with PLAYER :shrug:
+        return type == MoverType.SELF || type == MoverType.PLAYER ? x * $cm$size : x;
     }
 
     @ModifyVariable(method = "move", at = @At("HEAD"), ordinal = 1)
     double moveY(double y, MoverType type) {
-        return type == MoverType.SELF ? y * $cm$size : y;
+        return type == MoverType.SELF || type == MoverType.PLAYER ? y * $cm$size : y;
     }
 
     @ModifyVariable(method = "move", at = @At("HEAD"), ordinal = 2)
     double moveZ(double z, MoverType type) {
-        return type == MoverType.SELF ? z * $cm$size : z;
+        return type == MoverType.SELF || type == MoverType.PLAYER ? z * $cm$size : z;
     }
 
     @ModifyConstant(method = "move", constant = {

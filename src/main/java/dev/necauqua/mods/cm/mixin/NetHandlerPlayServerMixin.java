@@ -20,12 +20,22 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public final class NetHandlerPlayServerMixin {
 
     @ModifyConstant(method = "processPlayer", constant = {
-            @Constant(doubleValue = 0.0625), // fix for small aabbs
+            @Constant(doubleValue = 0.0625, ordinal = 0),
+            @Constant(doubleValue = 0.0625, ordinal = 2),
+            @Constant(doubleValue = 0.0625, ordinal = 3), // fix for small aabbs
             @Constant(doubleValue = -0.03125), // floating checker
             @Constant(doubleValue = -0.55), // some kind of levitation potion effect checker
     })
     double processPlayer(double constant) {
         return constant * ((ISized) player).getSizeCM();
+    }
+
+    @ModifyConstant(method = "processPlayer", constant = @Constant(doubleValue = 0.0625, ordinal = 1))
+    double processPlayerMovementCheck(double constant) {
+        double size = ((ISized) player).getSizeCM();
+        return size > 1.0 ?
+                constant * size :
+                constant;
     }
 
     // entity server reach
