@@ -5,8 +5,8 @@
 
 package dev.necauqua.mods.cm.mixin;
 
-import dev.necauqua.mods.cm.api.IRenderSized;
 import dev.necauqua.mods.cm.api.IWorldPlayPreciseEvent;
+import dev.necauqua.mods.cm.size.IEntityExtras;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.Entity;
@@ -66,7 +66,7 @@ public abstract class WorldMixin implements IWorldPlayPreciseEvent {
     // to not depend of whether entity calls super in it's onUpdate
     @Inject(method = "updateEntityWithOptionalForce", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onUpdate()V"))
     void updateEntityWithOptionalForce(Entity entity, boolean forceUpdate, CallbackInfo ci) {
-        ((IRenderSized) entity).updateCM();
+        ((IEntityExtras) entity).onUpdateCM();
     }
 
     @Shadow

@@ -11,6 +11,7 @@ import dev.necauqua.mods.cm.api.ISized;
 import dev.necauqua.mods.cm.size.ChangingSizeProcess;
 import dev.necauqua.mods.cm.size.DataSerializerDouble;
 import dev.necauqua.mods.cm.size.EntitySizeInteractions;
+import dev.necauqua.mods.cm.size.IEntityExtras;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.item.EntityItem;
@@ -29,15 +30,15 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 
 @Mixin(Entity.class)
-public abstract class EntityMixin implements IRenderSized {
+public abstract class EntityMixin implements IRenderSized, IEntityExtras {
 
     private static final DataParameter<Double> $CM$SIZE = EntityDataManager.createKey(Entity.class, DataSerializerDouble.INSTANCE);
 
     private static final String SIZE_NBT_TAG = "chiseled_me:size";
 
     public double $cm$size = 1.0;
-    private float $cm$originalWidth = 0.0F;
-    private float $cm$originalHeight = 0.0F;
+    public float $cm$originalWidth = 0.0F;
+    public float $cm$originalHeight = 0.0F;
 
     @Nullable
     private ChangingSizeProcess $cm$process = null;
@@ -107,7 +108,8 @@ public abstract class EntityMixin implements IRenderSized {
         setEntityBoundingBox(new AxisAlignedBB(x - w, aabb.minY, z - w, x + w, aabb.minY + h, z + w));
     }
 
-    public void updateCM() {
+    @Override
+    public void onUpdateCM() {
         ChangingSizeProcess p = $cm$process;
         if (p == null) {
             return;
@@ -119,6 +121,14 @@ public abstract class EntityMixin implements IRenderSized {
             $cm$process = null;
             setRawSizeCM(p.toSize);
         }
+    }
+
+    public void setOriginalWidthCM(float width) {
+        $cm$originalWidth = width;
+    }
+
+    public void setOriginalHeightCM(float height) {
+        $cm$originalHeight = height;
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

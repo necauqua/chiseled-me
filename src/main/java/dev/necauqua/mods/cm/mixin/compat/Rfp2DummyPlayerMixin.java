@@ -55,12 +55,4 @@ public abstract class Rfp2DummyPlayerMixin implements IRenderSized {
                 ((IRenderSized) player).getSizeCM() :
                 1.0;
     }
-
-    @Override
-    public void updateCM() {
-        EntityPlayer player = Minecraft.getMinecraft().player;
-        if (player != null) {
-            ((IRenderSized) player).updateCM();
-        }
-    }
 }
