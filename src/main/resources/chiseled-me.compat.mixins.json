@@ -7,7 +7,9 @@
   "mixins": [
     "CustomNpcFixMixin",
     "CustomNpcFixMixin$EntityCustomNpcHitboxFix",
-    "CustomNpcFixMixin$EntityNpcHitboxFixes"
+    "CustomNpcFixMixin$EntityNpcHitboxFixes",
+    "MetamorphMixin",
+    "MetamorphMixin$EntityMorphMixin"
   ],
   "client": [
     "CustomNpcFixMixin$GuiContainerNPCInterfaceMixin",

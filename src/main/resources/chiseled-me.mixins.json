@@ -37,6 +37,7 @@
     "entity.monster.EntityBlazeMixin",
     "entity.monster.EntityEndermanMixin",
     "entity.monster.EntityEndermiteMixin",
+    "entity.monster.EntityShulkerMixin",
     "entity.player.EntityPlayerMixin",
     "entity.player.EntityPlayerMPMixin",
     "entity.projectile.EntityArrowMixin",

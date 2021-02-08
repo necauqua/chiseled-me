@@ -23,6 +23,22 @@ public abstract class EntityPlayerMixin extends EntityMixin {
         return (float) (local * $cm$size);
     }
 
+    @ModifyVariable(method = "updateSize", ordinal = 0, at = @At(value = "LOAD", ordinal = 0))
+    float updateSizeWidth(float f) {
+        return (float) (f * $cm$size);
+    }
+
+    @ModifyVariable(method = "updateSize", ordinal = 1, at = @At(value = "LOAD", ordinal = 0))
+    float updateSizeHeight(float f1) {
+        return (float) (f1 * $cm$size);
+    }
+
+    // and then undo it for the setSize, lol
+    @Redirect(method = "updateSize", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;setSize(FF)V"))
+    void updateSize(EntityPlayer entityPlayer, float width, float height) {
+        setSize((float) (width / $cm$size), (float) (height / $cm$size));
+    }
+
     // fixes collideEntityWithPlayer aabb expansion
     @ModifyConstant(method = "onLivingUpdate", constant = {
             @Constant(doubleValue = 0.5),
