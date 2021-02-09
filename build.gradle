@@ -1,232 +1,45 @@
 buildscript {
     repositories {
-        maven { url = 'http://files.minecraftforge.net/maven' }
+        maven { url = 'https://maven.necauqua.dev' }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        classpath 'dev.necauqua:necauqua-mod:0.6.0'
     }
 }
 
-plugins {
-    id 'net.minecraftforge.gradle.forge' version '2.0.2'
-    id 'org.jetbrains.gradle.plugin.idea-ext' version '0.5'
-    id 'co.riiid.gradle' version '0.4.2'
-    id 'com.matthewprenger.cursegradle' version '1.3.0'
+apply plugin: 'dev.necauqua.nmod'
+
+nmod {
+    curseID = '250075'
+    version = '1.12-3.0.0.0'
+    forge = '1.12.2-14.23.5.2854'
+    mappings = '20171003-1.12'
+    mixin = '0.8'
+    extraMixinConfigs += 'chiseled-me.hack.mixins.json'
 }
 
-ext.versions = [
-    base    : '2.0.0.1',
-//    mc      : '1.12',
-//    mc      : '1.12.1',
-    mc      : '1.12.2',
-    range   : '[1.12.2]',
-//    forge   : '14.21.1.2387',
-//    forge   : '14.22.1.2485',
-    forge   : '14.23.5.2847',
-    mappings: 'stable_39',
-]
-
-version = versions.mc + '-' + versions.base
-group = 'dev.necauqua.mods'
-
-sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
-
-minecraft {
-    version = versions.mc + '-' + versions.forge
-    mappings = versions.mappings
-    runDir = 'build/run'
-    clientRunArgs += ['--username', 'dev'] // force the same username (not each time different PlayerXXX)
-
-    replace '@VERSION@', versions.base
-    replace '@MC_VERSION_RANGE@', versions.range
-    replace '@FORGE_VERSION@', versions.forge
-
-    // here we strip the .minor.patch-detail suffix (meh, shut up, I love regex)
-    replace '@API_VERSION@', versions.base.replaceAll('\\.\\d+\\.\\d+(?:-.*?)?$', '')
+dependencies {
+    // shade in the mixin
+    packaged "org.spongepowered:mixin:${nmod.mixin}"
 }
 
-// fix forgegradle runs being cached lol
-runClient.outputs.upToDateWhen { false }
-runServer.outputs.upToDateWhen { false }
+// fix dev env runner to immediately run compat mixins, this is part of the gross hack to mix into other mods in 1.12
+Collections.replaceAll(minecraft.runs.client.args, 'chiseled-me.hack.mixins.json', 'chiseled-me.compat.mixins.json')
 
-jar {
-    manifest {
-        attributes('FMLCorePlugin': 'dev.necauqua.mods.cm.asm.ChiseledMePlugin', 'FMLCorePluginContainsFMLMod': 'true')
-    }
-    from 'LICENSE'
-}
 
-idea {
-    module {
-        inheritOutputDirs = true
-    }
-}
-
-processResources {
-    inputs.property 'version', versions.base
-    inputs.property 'mcversion', minecraft.version
-    from(sourceSets.main.resources.srcDirs) {
-        include 'mcmod.info'
-        expand 'version': versions.base, 'mcversion': project.minecraft.version
-    }
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'mcmod.info'
-    }
-}
-
-def extractChangelog() {
-    if (project.hasProperty('changelog')) {
-        return project.changelog
-    }
-    def header = "## [${project.version}]"
-    return project.ext.changelog = file('changelog.markdown')
-            .text
-            .readLines()
-            .dropWhile { !it.startsWith(header) }
-            .drop(1)
-            .takeWhile { !it.startsWith('## ') }
-            .join('\n')
-            .trim()
-}
-
-if (project.hasProperty('githubToken')) {
-
-    task makeReleaseGitTag(type: Exec) {
-        def tag = "v${project.version}"
-        commandLine 'bash', '-c',
-                "git tag -sa $tag -m \"Release $tag\" " +
-                        "&& script -qefc 'git push origin refs/tags/$tag' /dev/null"
-        // git push requires interactive shell even when
-        // ssh-agent knows the passphrase for the key
-        // so we emulate having a tty with the `script` program
-        // no actual input is needed so everything works fine
-    }
-
-    github {
-        token = project.githubToken
-        owner = 'necauqua'
-        repo = 'chiseled-me'
-        tagName = "v${project.version}"
-        name = tagName
-        body = extractChangelog()
-        assets = [jar.archivePath]
-        prerelease = versions.base.matches(".*?-(?:beta|rc)\\d+")
-    }
-    githubRelease.group = 'publishing'
-    githubRelease.dependsOn build, makeReleaseGitTag
-}
-
-if (project.hasProperty('curseApiKey')) {
-    def curseID = '250075'
-    curseforge {
-        apiKey = project.curseApiKey
-        project {
-            id = curseID
-            changelog = extractChangelog()
-            changelogType = 'markdown'
-            releaseType = versions.base.matches(".*?-beta\\d+") ?
-                    'alpha' :
-                    versions.base.matches(".*?-rc\\d+") ?
-                            'beta' :
-                            'release'
-        }
-    }
-    // move this task to our group too
-    tasks['curseforge'].group = 'publishing'
-    // and hide single-project task since we have only one project by default
-    project.afterEvaluate {
-        tasks['curseforge' + curseID].group = null
-    }
-}
-
-task publish(dependsOn: ['githubRelease', 'curseforge']) {
-    group = 'publishing'
-}
-
-task signJar(type: SignJar, dependsOn: reobfJar) {
-    onlyIf { project.hasProperty('keyStore') }
-    // gradle executes the whole task body (well it cant stop execution after onlyIf{} call)
-    // and then flips out on project.keyStore if it has no keyStore
-    if (!project.hasProperty('keyStore')) {
-        return
-    }
-    keyStore = project.keyStore
-    alias = project.keyStoreAlias
-    storePass = project.keyStorePass
-    keyPass = project.keyStoreKeyPass
-    inputFile = jar.archivePath
-    outputFile = jar.archivePath
-}
-
-build.dependsOn signJar
-
-import net.minecraftforge.gradle.user.TaskSourceCopy
-
-task postProcessSources {
-    dependsOn += tasks.withType(TaskSourceCopy.class)
-    doLast {
-        def plain = !project.gradle.taskGraph.hasTask(reobfJar)
-        def map = [:].withDefault { [] }
-        genSrgs.mcpToSrg.eachLine {
-            def split = it.split(' ')
-            def type = split[0]
-            if (type == 'MD:' || type == 'FD:') {
-                def mcp = split[1]
-                def srg = split[type == 'FD:' ? 2 : 3]
-                def idx = mcp.lastIndexOf('/')
-                def cls = mcp.substring(mcp.lastIndexOf('/', idx - 1) + 1, idx)
-                def mcpName = mcp.substring(idx + 1)
-                def srgName = srg.substring(srg.lastIndexOf('/') + 1)
-                map[mcpName] += [srg: srgName, cls: cls, desc: type == 'MD:' ? split[4] : null]
-            }
-        }
-
-        def notFound = [:]
-        def ambiguous = [:]
-        tasks.withType(TaskSourceCopy.class) { TaskSourceCopy tsc ->
-            fileTree(tsc.output).each {
-                def filename = it.name
-                it.text = it.text.readLines().indexed().collect { i, line ->
-                    line.replaceAll('srg\\(\\s*"(.*?)"(?:\\s*,\\s*"(.*?)")?(?:\\s*,\\s*"(.*?)")?\\s*\\)') {
-                        def (mcp, cls, desc) = it[1..3]
-                        if (plain) {
-                            return "\"$mcp\""
-                        }
-                        def mapping = map[mcp]
-                        if (cls != null) {
-                            mapping = mapping.findAll { it.cls == cls }
-                        }
-                        if (desc != null) {
-                            mapping = mapping.findAll { it.desc == desc }
-                        }
-                        def errorMap = mapping.size == 0 ? notFound : mapping.size != 1 ? ambiguous : null
-                        if (errorMap != null) {
-                            if (mcp in errorMap) {
-                                errorMap[mcp][0] += 1
-                            } else {
-                                errorMap[mcp] = [1, "$filename:${i + 1}"]
-                            }
-                            return "\"$mcp\""
-                        }
-                        return "\"${mapping.first().srg}\""
-                    }
-                }.join('\n')
-            }
-        }
-        if (!notFound.isEmpty() || !ambiguous.isEmpty()) {
-            def fn = {
-                def (times, file) = it.value
-                "$it.key.($file)" + (times > 1 ? " (${times} times)" : '')
-            }
-            throw new IllegalStateException("\nProcessing SRG literals failed:\n" +
-                    (!notFound.isEmpty() ? "  * Mappings not found for:\n" +
-                            "    - ${notFound.collect(fn).join("\n    - ")}\n" : "") +
-                    (!ambiguous.isEmpty() ? "  * Ambiguous mappings exist for:\n" +
-                            "    - ${ambiguous.collect(fn).join("\n    - ")}\n" : ''))
+// this is not in my plugin because since 1.13 they FINALLY fixed that
+// so this is not universally needed there
+afterEvaluate {
+    tasks.findByName('prepareRuns')?.doLast {
+        copy {
+            from 'build/resources/main'
+            into 'build/classes/java/main'
         }
     }
 }
 
-tasks.withType(AbstractCompile) { AbstractCompile ac ->
-    ac.dependsOn(postProcessSources)
-}
+// another couple of things that are not needed in new Forge (>=1.15) as it comes with Mixin and knows about it
+jar.manifest.attributes 'ForceLoadAsMod': 'true', 'TweakClass': 'org.spongepowered.asm.launch.MixinTweaker'
+
+// "fix" that duplicate mod issue (1.12 only I think)
+jar.manifest.attributes 'FMLCorePluginContainsFMLMod': 'true'

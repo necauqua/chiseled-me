@@ -1,13 +1,13 @@
 [{
   "modid": "chiseled_me",
   "name": "Chiseled Me",
-  "description": "This mods adds a thing that makes you so small that bits from Chisel and Bits (basically Minecraft voxels) mod appear as big as usual blocks to you.\n Also it can make you even smaller than that or it can make you bigger than you are.",
+  "description": "The best entity resizing mod that ever existed.\nAlso the best particle resizing mod (as the only one so far)",
   "version": "${version}",
   "mcversion": "${mcversion}",
-  "url": "",
-  "updateUrl": "",
+  "url": "https://www.curseforge.com/minecraft/mc-mods/chiseled-me",
+  "updateUrl": "https://raw.githubusercontent.com/necauqua/chiseled-me.wiki/master/updates.json",
   "authorList": ["necauqua"],
-  "credits": "",
+  "credits": "People from my Discord who are very helpful with testing and entertainment hehe",
   "logoFile": "",
   "screenshots": [],
   "dependencies": []

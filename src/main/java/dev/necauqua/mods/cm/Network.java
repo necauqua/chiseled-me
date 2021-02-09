@@ -1,26 +1,19 @@
 /*
- * Copyright (c) 2016-2019 Anton Bulakh <necauqua@gmail.com>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright (c) 2017-2021 Anton Bulakh <self@necauqua.dev>
+ * Licensed under MIT, see the LICENSE file for details.
  */
 
 package dev.necauqua.mods.cm;
 
-import dev.necauqua.mods.cm.ChiseledMe.OnPreInit;
-import dev.necauqua.mods.cm.size.EntitySizeManager;
+import dev.necauqua.mods.cm.ChiseledMe.Init;
+import dev.necauqua.mods.cm.api.IRenderSized;
 import io.netty.buffer.Unpooled;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.FMLEventChannel;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent.ClientCustomPacketEvent;
@@ -36,8 +29,8 @@ public final class Network {
 
     private Network() {}
 
-    @OnPreInit
-    public static void init() {
+    @Init
+    private static void init() {
         channel.register(Network.class);
     }
 
@@ -46,30 +39,36 @@ public final class Network {
         PacketBuffer payload = new PacketBuffer(e.getPacket().payload());
         byte id = payload.readByte();
         switch (id) {
-            case 0:
-                EntitySizeManager.setClientSize(payload.readInt(), payload.readDouble(), payload.readBoolean());
+            case 0: {
+                double size = payload.readDouble();
+                int lerpTime = payload.readInt();
+                SidedHandler.instance.scheduleClientMainLoopTask(() -> {
+                    EntityPlayer player = SidedHandler.instance.getClientPlayer();
+                    if (player != null) {
+                        ((IRenderSized) player).setSizeCM(size, lerpTime);
+                    }
+                });
                 break;
-            case 1:
-                EntitySizeManager.setClientSize(-1, payload.readDouble(), payload.readBoolean());
+            }
+            case 1: {
+                int entityId = payload.readInt();
+                double size = payload.readDouble();
+                int lerpTime = payload.readInt();
+                SidedHandler.instance.scheduleClientMainLoopTask(() -> {
+                    World world = SidedHandler.instance.getClientWorld();
+                    if (world == null) {
+                        return;
+                    }
+                    Entity entity = world.getEntityByID(entityId);
+                    if (entity != null) {
+                        ((IRenderSized) entity).setSizeCM(size, lerpTime);
+                    }
+                });
                 break;
+            }
             default:
                 invalidPacket(id, payload);
         }
-    }
-
-    public static void setSizeOnClient(EntityPlayerMP client, int entityId, double size, boolean interpolate) {
-        channel.sendTo(packet(0, p -> {
-            p.writeInt(entityId);
-            p.writeDouble(size);
-            p.writeBoolean(interpolate);
-        }), client);
-    }
-
-    public static void setSizeOfClient(EntityPlayerMP client, double size, boolean interpolate) {
-        channel.sendTo(packet(1, p -> {
-            p.writeDouble(size);
-            p.writeBoolean(interpolate);
-        }), client);
     }
 
     private static FMLProxyPacket packet(int id, Consumer<PacketBuffer> data) {
@@ -95,5 +94,21 @@ public final class Network {
             out.append("and ").append(payload.readableBytes()).append(" bytes more...");
         }
         Log.error(out);
+    }
+
+    public static void sync(Entity entity, double size, int lerpTime) {
+        if (entity instanceof EntityPlayerMP) {
+            channel.sendTo(packet(0, p -> {
+                p.writeDouble(size);
+                p.writeInt(lerpTime);
+            }), (EntityPlayerMP) entity);
+        }
+        for (EntityPlayer entityPlayer : ((WorldServer) entity.world).getEntityTracker().getTrackingPlayers(entity)) {
+            channel.sendTo(packet(1, p -> {
+                p.writeInt(entity.getEntityId());
+                p.writeDouble(size);
+                p.writeInt(lerpTime);
+            }), (EntityPlayerMP) entityPlayer);
+        }
     }
 }

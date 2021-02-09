@@ -1,10 +1,10 @@
 
 itemGroup.chiseled_me=Chiseled Me
 
-chiseled_me.bed.too_small=Ваш размер слишком мал чтобы спать в кровати!
-chiseled_me.bed.too_big=Ваш размер слишком велик чтобы спать в кровати!
+chiseled_me.bed.too_small=Вы слишком маленький чтобы спать в кровати!
+chiseled_me.bed.too_big=Вы слишком велики чтобы спать в кровати!
 
-commands.chiseled_me:sizeof.usage=/sizeof entity [<set|add|subtract|multiply|divide> size [animate]]
+commands.chiseled_me:sizeof.usage=/sizeof <entity> [(set|add|subtract|multiply|divide) <size> [animate [<ticks>]]]
 commands.chiseled_me:sizeof.get=Относительный размер %s - %s!
 commands.chiseled_me:sizeof.set=Размер %s изменён на %s!
 
@@ -28,38 +28,38 @@ advancement.chiseled_me:beginning.desc=Создайте контейнер Пи�
 advancement.chiseled_me:essence=Эссенция Пима
 advancement.chiseled_me:essence.desc=Неустойчивая красная субстанция в маленьком контейнере
 advancement.chiseled_me:depletion=Опустошение
-advancement.chiseled_me:depletion.desc=Занятно, что эта штука восстанавливает ваш размер бесплатно
+advancement.chiseled_me:depletion.desc=Занятно, эта штука восстанавливает ваш размер бесплатно!
 advancement.chiseled_me:cablework=Провода? Легко!
-advancement.chiseled_me:cablework.desc=Станьте 1/2 от вашего размера
+advancement.chiseled_me:cablework.desc=Станьте 1/2 от вашего обычного размера
 advancement.chiseled_me:big_stairs=Ступени теперь слишком велики
-advancement.chiseled_me:big_stairs.desc=Станьте 1/4 от вашего размера
+advancement.chiseled_me:big_stairs.desc=Станьте 1/4 от вашего обычного размера
 advancement.chiseled_me:mouse_holes=Доступные мышиные норы
 advancement.chiseled_me:mouse_holes.desc=Станьте 1/8 от вашего размера
-advancement.chiseled_me:c&b_galore=Вперёд Chisel & Bits!
-advancement.chiseled_me:c&b_galore.desc=Станьте 1/16 от вашего размера
+advancement.chiseled_me:c&b_galore=Даёшь Chisel & Bits!
+advancement.chiseled_me:c&b_galore.desc=Станьте 1/16 от вашего обычного размера
 advancement.chiseled_me:c&b_squared=Хочу C&B для C&B!
-advancement.chiseled_me:c&b_squared.desc=Станьте 1/256 от вашего размера
+advancement.chiseled_me:c&b_squared.desc=Станьте 1/256 от вашего обычного размера
 advancement.chiseled_me:advancements=Улучшения
 advancement.chiseled_me:advancements.desc=Создайте больший контейнер Пима
 advancement.chiseled_me:concentrated=Концентрированная эссенция
 advancement.chiseled_me:concentrated.desc=Неустойчивая красная субстанция в *большом* контейнере
 advancement.chiseled_me:supersmalls=Сверхмалый
-advancement.chiseled_me:supersmalls.desc=Станьте 1/512 от вашего размера
+advancement.chiseled_me:supersmalls.desc=Станьте 1/512 от вашего обычного размера
 advancement.chiseled_me:the_limit=Предел
-advancement.chiseled_me:the_limit.desc=Станьте 1/4096 от вашего размера
+advancement.chiseled_me:the_limit.desc=Станьте 1/4096 от вашего обычного размера
 advancement.chiseled_me:blue_nether_star=Синяя Звезда Незера?
 advancement.chiseled_me:blue_nether_star.desc=Соедините Звезду из Незера и блок лазурита
 advancement.chiseled_me:weird_beacon=Необычный маяк
 advancement.chiseled_me:weird_beacon.desc=Этот маяк чем-то необычен. Используйте его?
-advancement.chiseled_me:surprise=Опаньки! :D
+advancement.chiseled_me:surprise=Опаньки!
 advancement.chiseled_me:surprise.desc=Превратите синюю Звезду Незера в блок лазурита
 advancement.chiseled_me:antipolarization=Антиполяризация
 advancement.chiseled_me:antipolarization.desc=Антиполяризуйте немного концентрированной эссенции Пима при помощи синей Звезды Незера
 advancement.chiseled_me:double=Двойной!
 advancement.chiseled_me:double.desc=Станьте вдвое больше
 advancement.chiseled_me:quadruple=Четверной!
-advancement.chiseled_me:quadruple.desc=Станьте вчетверо больше
+advancement.chiseled_me:quadruple.desc=Станьте больше в четыре раза
 advancement.chiseled_me:octuple=Восьмерной!
-advancement.chiseled_me:octuple.desc=Станьте в восемь раз больше
+advancement.chiseled_me:octuple.desc=Станьте больше в восемь раз
 advancement.chiseled_me:sexdecuple=Шестнадцатерной!!1!
-advancement.chiseled_me:sexdecuple.desc=Станьте в шестнадцать раз больше
+advancement.chiseled_me:sexdecuple.desc=Станьте в шестнадцать раз большеcommands.chiseled_me:sizeof.usage=/sizeof <entity> [(set|add|subtract|multiply|divide) <size> [default [<ticks>]]]commands.chiseled_me:sizeof.usage=/sizeof <entity> [(set|add|subtract|multiply|divide) <size> [default [<ticks>]]]commands.chiseled_me:sizeof.usage=/sizeof <entity> [(set|add|subtract|multiply|divide) <size> [default [<ticks>]]]commands.chiseled_me:sizeof.usage=/sizeof <entity> [(set|add|subtract|multiply|divide) <size> [default [<ticks>]]]

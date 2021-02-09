@@ -4,7 +4,7 @@ itemGroup.chiseled_me=Chiseled Me
 chiseled_me.bed.too_small=你太小了，不能睡在床上！
 chiseled_me.bed.too_big=你太大了，不能睡在床上！
 
-commands.chiseled_me:sizeof.usage=/sizeof entity [<set|add|subtract|multiply|divide> size [animate]]
+commands.chiseled_me:sizeof.usage=/sizeof <entity> [(set|add|subtract|multiply|divide) <size> [animate [<ticks>]]]
 commands.chiseled_me:sizeof.get=%s的相对尺寸为%s！
 commands.chiseled_me:sizeof.set=已将%s的尺寸设定为%s!
 

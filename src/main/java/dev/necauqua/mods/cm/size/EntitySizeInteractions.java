@@ -1,36 +1,32 @@
 /*
- * Copyright (c) 2016-2019 Anton Bulakh <necauqua@gmail.com>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright (c) 2017-2021 Anton Bulakh <self@necauqua.dev>
+ * Licensed under MIT, see the LICENSE file for details.
  */
 
 package dev.necauqua.mods.cm.size;
 
-import dev.necauqua.mods.cm.ChiseledMe.OnInit;
+import dev.necauqua.mods.cm.ChiseledMe;
+import dev.necauqua.mods.cm.ChiseledMe.*;
 import dev.necauqua.mods.cm.Config;
 import dev.necauqua.mods.cm.Log;
 import dev.necauqua.mods.cm.SidedHandler;
+import dev.necauqua.mods.cm.api.IRenderSized;
+import dev.necauqua.mods.cm.api.ISized;
 import net.minecraft.block.BlockBed;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayer.SleepResult;
 import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.entity.projectile.EntityFireball;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.util.EnumHelper;
@@ -39,69 +35,76 @@ import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.living.BabyEntitySpawnEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
-import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteractSpecific;
 import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
 import net.minecraftforge.event.world.BlockEvent;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.IThrowableEntity;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.util.Arrays;
 import java.util.List;
 
-import static dev.necauqua.mods.cm.ChiseledMe.MODID;
-import static dev.necauqua.mods.cm.asm.dsl.ASM.srg;
-import static dev.necauqua.mods.cm.size.EntitySizeManager.getSize;
-import static dev.necauqua.mods.cm.size.EntitySizeManager.setSize;
+import static dev.necauqua.mods.cm.ChiseledMe.*;
+import static net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteract;
 
-/** This class holds misc event handlers. **/
+/**
+ * This class holds misc event handlers.
+ **/
 public final class EntitySizeInteractions {
 
     private static final String NBT_KEY_SIZE = MODID + ":size";
 
     private EntitySizeInteractions() {}
 
-    @OnInit
-    public static void fixBedAABB() {
+    @Init
+    private static void fixBedAABB() {
         if (!Config.changeBedAABB) {
             return;
         }
         try {
             EnumHelper.setFailsafeFieldValue(
-                BlockBed.class.getDeclaredField(srg("BED_AABB")),
-                null,
-                new AxisAlignedBB(0.0, 0.1875, 0.0, 1.0, 0.5625, 1.0)
-            ); // this can set final non-primitive fields
+                    ObfuscationReflectionHelper.findField(BlockBed.class, "field_185513_c"),
+                    null,
+                    new AxisAlignedBB(0.0, 0.1875, 0.0, 1.0, 0.5625, 1.0));
+            // ^ this can set final non-primitive fields
         } catch (Exception e) {
             Log.error("Failed to modify bed AABB!", e);
         }
     }
 
     @SubscribeEvent
-    public static void on(LivingFallEvent event) {
-        EntityLivingBase entity = event.getEntityLiving();
-        double size = getSize(entity);
-        if (size == 1.0) {
-            return;
+    public static void on(EntityInteractSpecific e) {
+        if (((ISized) e.getEntity()).getSizeCM() != ((ISized) e.getTarget()).getSizeCM()) {
+            e.setCanceled(true);
         }
-        if (size < 1.0 && Config.scaleSmall) {
-            event.setDistance((float) (event.getDistance() / size));
-        } else if (size > 1.0 && Config.scaleBig) {
-            event.setDistance((float) (event.getDistance() / size));
+        for (EnumHand hand : EnumHand.values()) {
+            if (e.getEntityPlayer().getHeldItem(hand).getItem() == ChiseledMe.RECALIBRATOR) {
+                e.setCanceled(true);
+                break;
+            }
         }
     }
 
     @SubscribeEvent
-    public static void on(EntityInteractSpecific e) {
-        if (getSize(e.getEntity()) != getSize(e.getTarget())) {
-            e.setCanceled(true);
+    public static void on(EntityInteract e) {
+        for (EnumHand hand : EnumHand.values()) {
+            if (e.getEntityPlayer().getHeldItem(hand).getItem() == ChiseledMe.RECALIBRATOR) {
+                e.setCanceled(true);
+                break;
+            }
         }
     }
 
     @SubscribeEvent
     public static void on(EntityMountEvent e) {
-        if (e.isMounting() && (getSize(e.getEntityMounting()) != 1.0 || getSize(e.getEntityBeingMounted()) != 1.0)) {
+        double mountingSize = ((ISized) e.getEntityMounting()).getSizeCM();
+        double mountedSize = e.getEntityBeingMounted() != null ? ((ISized) e.getEntityBeingMounted()).getSizeCM() : 1.0;
+        if (e.isMounting() && (mountingSize != 1.0 || mountedSize != 1.0)) {
             e.setCanceled(true);
         }
     }
@@ -112,8 +115,8 @@ public final class EntitySizeInteractions {
     @SubscribeEvent
     public static void on(PlayerSleepInBedEvent e) {
         EntityPlayer player = e.getEntityPlayer();
-        double size = getSize(player);
-        if (size < 1.0) {
+        double size = ((ISized) player).getSizeCM();
+        if (size < 1.0 && !Config.allowSleepingWhenSmall) {
             e.setResult(TOO_SMALL);
             player.sendMessage(new TextComponentTranslation("chiseled_me.bed.too_small"));
         } else if (size > 1.0) {
@@ -124,20 +127,20 @@ public final class EntitySizeInteractions {
 
     @SubscribeEvent
     public static void on(LivingDropsEvent e) {
-        double size = getSize(e.getEntity());
+        double size = ((ISized) e.getEntity()).getSizeCM();
         if (size == 1.0) {
             return;
         }
         for (EntityItem item : e.getDrops()) {
-            setSize(item, size, false);
+            ((ISized) item).setSizeCM(size);
         }
     }
 
     @SubscribeEvent
     public static void on(ItemTossEvent e) {
-        double size = getSize(e.getPlayer());
+        double size = ((ISized) e.getPlayer()).getSizeCM();
         if (size != 1.0) {
-            setSize(e.getEntityItem(), size, false);
+            ((ISized) e.getEntity()).setSizeCM(size);
         }
     }
 
@@ -147,7 +150,10 @@ public final class EntitySizeInteractions {
         if (player == null) {
             return;
         }
-        double size = getSize(player);
+        double size = ((ISized) player).getSizeCM();
+        if (size == 1.0) {
+            return;
+        }
         for (ItemStack stack : e.getDrops()) {
             NBTTagCompound nbt = stack.getTagCompound();
             if (nbt == null) {
@@ -158,17 +164,39 @@ public final class EntitySizeInteractions {
         }
     }
 
+    private static void applyDefaultSize(Entity entity, String entitySizeRule) {
+        try {
+            double size = MathHelper.clamp(Double.parseDouble(entity.world.getGameRules().getString(entitySizeRule)), LOWER_LIMIT, UPPER_LIMIT);
+            if (size != 1.0 && ((ISized) entity).getSizeCM() == 1.0) {
+                ((ISized) entity).setSizeCM(size);
+            }
+        } catch (NumberFormatException ignored) {}
+    }
+
+    @SubscribeEvent
+    public static void on(PlayerEvent.Clone e) {
+        if (e.isWasDeath() && e.getEntityPlayer().world.getGameRules().getBoolean(KEEP_SIZE_RULE)) {
+            ((ISized) e.getEntityPlayer()).setSizeCM(((ISized) e.getOriginal()).getSizeCM());
+        }
+    }
+
     @SubscribeEvent
     public static void on(EntityJoinWorldEvent e) {
         Entity entity = e.getEntity();
+
+        if (entity instanceof EntityPlayer) {
+            applyDefaultSize(entity, PLAYER_SIZE_RULE);
+        } else {
+            applyDefaultSize(entity, ENTITY_SIZE_RULE);
+        }
 
         if (entity instanceof EntityItem) {
             ItemStack stack = ((EntityItem) entity).getItem();
             NBTTagCompound nbt = stack.getTagCompound();
             if (nbt != null && nbt.hasKey(NBT_KEY_SIZE, 6)) {
-                setSize(entity, nbt.getDouble(NBT_KEY_SIZE), false);
+                ((ISized) entity).setSizeCM(nbt.getDouble(NBT_KEY_SIZE));
                 nbt.removeTag(NBT_KEY_SIZE);
-                if (nbt.isEmpty()) {
+                if (nbt.hasNoTags()) {
                     stack.setTagCompound(null);
                 }
             }
@@ -180,6 +208,8 @@ public final class EntitySizeInteractions {
             thrower = ((EntityThrowable) entity).getThrower();
         } else if (entity instanceof EntityArrow) {
             thrower = ((EntityArrow) entity).shootingEntity;
+        } else if (entity instanceof EntityFireball) {
+            thrower = ((EntityFireball) entity).shootingEntity;
         } else if (entity instanceof IThrowableEntity) {
             thrower = ((IThrowableEntity) entity).getThrower();
         } else {
@@ -188,15 +218,15 @@ public final class EntitySizeInteractions {
         if (thrower == null) {
             return;
         }
-        double size = getSize(thrower);
+        double size = ((ISized) thrower).getSizeCM();
         if (size != 1.0) {
-            setSize(entity, size, false);
+            ((ISized) entity).setSizeCM(size);
         }
     }
 
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void on(PlayerEvent.BreakSpeed e) {
-        e.setNewSpeed((float) (e.getNewSpeed() * getSize(e.getEntity())));
+        e.setNewSpeed((float) (e.getNewSpeed() * ((ISized) e.getEntity()).getSizeCM()));
     }
 
     @SubscribeEvent
@@ -205,20 +235,79 @@ public final class EntitySizeInteractions {
         if (player == null) {
             return;
         }
-        double size = getSize(player);
-        if (size != 1.0) {
-            List<String> list = e.getLeft();
-            if (list.size() >= 3) {
-                list.add(list.size() - 3, String.format("Size: %f", size));
-            }
+        double size = ((ISized) player).getSizeCM();
+        if (size == 1.0) {
+            return;
+        }
+        List<String> list = e.getLeft();
+        if (list.size() >= 3) {
+            list.add(list.size() - 3, String.format("Size: %f", size));
         }
     }
 
     @SubscribeEvent
     public static void on(BabyEntitySpawnEvent e) {
-        double size = getSize(e.getParentA());
-        if (size != 1.0) {
-            setSize(e.getChild(), size, false);
+        double size = ((ISized) e.getParentA()).getSizeCM();
+        Entity child = e.getChild();
+        if (child != null && size != 1.0) {
+            ((ISized) child).setSizeCM(size);
         }
+    }
+
+    // apparently you cannot reference EntityPlayer from Entity mixin idk
+    public static void wakeUp(Entity entity) {
+        if (entity instanceof EntityPlayer && ((EntityPlayer) entity).isPlayerSleeping()) {
+            ((EntityPlayer) entity).wakeUpPlayer(true, !entity.world.isRemote, true);
+        }
+    }
+
+    public static double getAverageSize(Object a, Object b) {
+        double sa = ((ISized) a).getSizeCM();
+        double sb = ((ISized) b).getSizeCM();
+        return sa == sb ? sa : Math.sqrt(sa * sb);
+    }
+
+    @SideOnly(Side.CLIENT)
+    public static double getViewerSize() {
+        Entity viewer = Minecraft.getMinecraft().getRenderViewEntity();
+        return viewer != null ?
+                ((ISized) viewer).getSizeCM() :
+                1.0;
+    }
+
+    @SideOnly(Side.CLIENT)
+    public static double getViewerSize(float partialTicks) {
+        Entity viewer = Minecraft.getMinecraft().getRenderViewEntity();
+        return viewer != null ?
+                ((IRenderSized) viewer).getSizeCM(partialTicks) :
+                1.0;
+    }
+
+    public static int[] appendSize(int[] array, double d) {
+        if (d == 1.0) {
+            return array;
+        }
+        int[] modified = Arrays.copyOf(array, array.length + 2);
+        long bits = Double.doubleToRawLongBits(d);
+        modified[array.length] = (int) (bits >> 32);
+        modified[array.length + 1] = (int) bits;
+        return modified;
+    }
+
+    public static double extractSize(int particleId, int[] parameters) {
+        EnumParticleTypes type = EnumParticleTypes.getParticleFromId(particleId);
+        if (type == null) {
+            return 1.0;
+        }
+        int offset;
+        int count = type.getArgumentCount();
+        if (parameters.length - count == 2) {
+            offset = count;
+        } else if (type == EnumParticleTypes.ITEM_CRACK && parameters.length > 2) {
+            offset = 1;
+        } else {
+            return 1.0;
+        }
+        return Double.longBitsToDouble((long) parameters[offset] << 32 | parameters[offset + 1] & 0xFFFFFFFFL);
     }
 }

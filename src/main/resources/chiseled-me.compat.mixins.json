@@ -1,0 +1,25 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.necauqua.mods.cm.mixin.compat",
+  "refmap": "chiseled-me.mixins.refmap.json",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "CustomNpcFixMixin",
+    "CustomNpcFixMixin$EntityCustomNpcHitboxFix",
+    "CustomNpcFixMixin$EntityNpcHitboxFixes",
+    "MetamorphMixin",
+    "MetamorphMixin$EntityMorphMixin"
+  ],
+  "client": [
+    "CustomNpcFixMixin$GuiContainerNPCInterfaceMixin",
+    "CustomNpcFixMixin$GuiNPCInterfaceMixin",
+    "CustomNpcFixMixin$RenderFixes",
+    "GCEntityClientPlayerMPMixin",
+    "NeatMixin",
+    "Rfp2DummyPlayerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
