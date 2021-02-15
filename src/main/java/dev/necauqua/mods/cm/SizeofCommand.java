@@ -68,10 +68,12 @@ public final class SizeofCommand extends CommandBase {
             default:
                 throw new WrongUsageException(getUsage(sender));
         }
-        if (size < LOWER_LIMIT) {
-            throw new NumberInvalidException("commands.generic.num.tooSmall", format("%.2f", size), LOWER_LIMIT);
-        } else if (size > UPPER_LIMIT) {
-            throw new NumberInvalidException("commands.generic.num.tooBig", format("%.2f", size), UPPER_LIMIT);
+        if (!Config.allowAnySizes) {
+            if (size < LOWER_LIMIT) {
+                throw new NumberInvalidException("commands.generic.num.tooSmall", format("%.2f", size), LOWER_LIMIT);
+            } else if (size > UPPER_LIMIT) {
+                throw new NumberInvalidException("commands.generic.num.tooBig", format("%.2f", size), UPPER_LIMIT);
+            }
         }
         int lerpTime = 0;
         if (args.length > 3 && !args[3].equals("animate")) {

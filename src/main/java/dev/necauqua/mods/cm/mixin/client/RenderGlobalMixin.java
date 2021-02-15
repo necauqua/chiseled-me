@@ -45,33 +45,37 @@ public abstract class RenderGlobalMixin implements IWorldPlayPreciseEvent {
         return constant * extractSize(particleId, parameters) * getViewerSize();
     }
 
-    @Redirect(method = "playEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderGlobal;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V"))
-    void spawnParticle(RenderGlobal self, EnumParticleTypes particleIn, double xCoord, double yCoord, double zCoord, double xSpeed, double ySpeed, double zSpeed, int[] parameters) {
-        if ($cm$blockPos == null) {
-            spawnParticle(particleIn, xCoord, yCoord, zCoord, xSpeed, ySpeed, zSpeed, parameters);
-            return;
-        }
-        spawnParticle(
-                particleIn,
-                $cm$pos.x + (xCoord - $cm$blockPos.getX()) * $cm$size,
-                $cm$pos.y + (yCoord - $cm$blockPos.getY()) * $cm$size,
-                $cm$pos.z + (zCoord - $cm$blockPos.getZ()) * $cm$size,
-                xSpeed, ySpeed, zSpeed,
-                appendSize(parameters, $cm$size)
-        );
-    }
-
     @Redirect(method = "playEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderGlobal;spawnParticle0(IZDDDDDD[I)Lnet/minecraft/client/particle/Particle;"))
     Particle spawnParticle0(RenderGlobal renderGlobal, int particleID, boolean ignoreRange, double xCoord, double yCoord, double zCoord, double xSpeed, double ySpeed, double zSpeed, int[] parameters) {
-        if ($cm$blockPos == null) {
+        BlockPos blockPos = $cm$blockPos;
+        Vec3d pos = $cm$pos;
+        if (blockPos == null || pos == null) {
             return spawnParticle0(particleID, ignoreRange, xCoord, yCoord, zCoord, xSpeed, ySpeed, zSpeed, parameters);
         }
         return spawnParticle0(
                 particleID,
                 ignoreRange,
-                $cm$pos.x + (xCoord - $cm$blockPos.getX()) * $cm$size,
-                $cm$pos.y + (yCoord - $cm$blockPos.getY()) * $cm$size,
-                $cm$pos.z + (zCoord - $cm$blockPos.getZ()) * $cm$size,
+                pos.x + (xCoord - blockPos.getX()) * $cm$size,
+                pos.y + (yCoord - blockPos.getY()) * $cm$size,
+                pos.z + (zCoord - blockPos.getZ()) * $cm$size,
+                xSpeed, ySpeed, zSpeed,
+                appendSize(parameters, $cm$size)
+        );
+    }
+
+    @Redirect(method = "playEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderGlobal;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V"))
+    void spawnParticle(RenderGlobal self, EnumParticleTypes particleIn, double xCoord, double yCoord, double zCoord, double xSpeed, double ySpeed, double zSpeed, int[] parameters) {
+        BlockPos blockPos = $cm$blockPos;
+        Vec3d pos = $cm$pos;
+        if (blockPos == null || pos == null) {
+            spawnParticle(particleIn, xCoord, yCoord, zCoord, xSpeed, ySpeed, zSpeed, parameters);
+            return;
+        }
+        spawnParticle(
+                particleIn,
+                pos.x + (xCoord - blockPos.getX()) * $cm$size,
+                pos.y + (yCoord - blockPos.getY()) * $cm$size,
+                pos.z + (zCoord - blockPos.getZ()) * $cm$size,
                 xSpeed, ySpeed, zSpeed,
                 appendSize(parameters, $cm$size)
         );
@@ -79,15 +83,17 @@ public abstract class RenderGlobalMixin implements IWorldPlayPreciseEvent {
 
     @Redirect(method = "playEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/WorldClient;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V"))
     void spawnParticle(WorldClient self, EnumParticleTypes particleType, double xCoord, double yCoord, double zCoord, double xSpeed, double ySpeed, double zSpeed, int[] parameters) {
-        if ($cm$blockPos == null) {
+        BlockPos blockPos = $cm$blockPos;
+        Vec3d pos = $cm$pos;
+        if (blockPos == null || pos == null) {
             self.spawnParticle(particleType, xCoord, yCoord, zCoord, xSpeed, ySpeed, zSpeed, parameters);
             return;
         }
         self.spawnParticle(
                 particleType,
-                $cm$pos.x + (xCoord - $cm$blockPos.getX()) * $cm$size,
-                $cm$pos.y + (yCoord - $cm$blockPos.getY()) * $cm$size,
-                $cm$pos.z + (zCoord - $cm$blockPos.getZ()) * $cm$size,
+                pos.x + (xCoord - blockPos.getX()) * $cm$size,
+                pos.y + (yCoord - blockPos.getY()) * $cm$size,
+                pos.z + (zCoord - blockPos.getZ()) * $cm$size,
                 xSpeed, ySpeed, zSpeed,
                 appendSize(parameters, $cm$size)
         );
@@ -95,16 +101,18 @@ public abstract class RenderGlobalMixin implements IWorldPlayPreciseEvent {
 
     @Redirect(method = "playEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/WorldClient;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;ZDDDDDD[I)V"))
     void spawnParticle(WorldClient self, EnumParticleTypes particleType, boolean ignoreRange, double xCoord, double yCoord, double zCoord, double xSpeed, double ySpeed, double zSpeed, int[] parameters) {
-        if ($cm$blockPos == null) {
+        BlockPos blockPos = $cm$blockPos;
+        Vec3d pos = $cm$pos;
+        if (blockPos == null || pos == null) {
             self.spawnParticle(particleType, ignoreRange, xCoord, yCoord, zCoord, xSpeed, ySpeed, zSpeed, parameters);
             return;
         }
         self.spawnParticle(
                 particleType,
                 ignoreRange,
-                $cm$pos.x + (xCoord - $cm$blockPos.getX()) * $cm$size,
-                $cm$pos.y + (yCoord - $cm$blockPos.getY()) * $cm$size,
-                $cm$pos.z + (zCoord - $cm$blockPos.getZ()) * $cm$size,
+                pos.x + (xCoord - blockPos.getX()) * $cm$size,
+                pos.y + (yCoord - blockPos.getY()) * $cm$size,
+                pos.z + (zCoord - blockPos.getZ()) * $cm$size,
                 xSpeed, ySpeed, zSpeed,
                 appendSize(parameters, $cm$size)
         );
