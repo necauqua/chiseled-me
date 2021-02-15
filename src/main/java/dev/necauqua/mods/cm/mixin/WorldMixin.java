@@ -39,7 +39,7 @@ public abstract class WorldMixin implements IWorldPlayPreciseEvent {
         int x = MathHelper.floor(vec31.x);
         int y = MathHelper.floor(vec31.y);
         int z = MathHelper.floor(vec31.z);
-        return new RayTraceResult(RayTraceResult.Type.MISS, vec31, EnumFacing.DOWN, new BlockPos(x, y, z));
+        return new RayTraceResult(RayTraceResult.Type.MISS, vec32, EnumFacing.DOWN, new BlockPos(x, y, z));
     }
 
     @SuppressWarnings("ConstantConditions") // that null player lol

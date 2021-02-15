@@ -21,9 +21,11 @@ public abstract class EntityPlayerSPMixin extends EntityMixin {
     }
 
     // scale the distance between sending movement packets
-    @ModifyConstant(method = "onUpdateWalkingPlayer", constant = @Constant(doubleValue = 0.0009))
+    @ModifyConstant(method = "onUpdateWalkingPlayer", constant = @Constant(doubleValue = 9.0E-4D))
     double onUpdateWalkingPlayer(double constant) {
-        return constant * $cm$size * $cm$size;
+        return $cm$size < 1.0 ? // only add precision, not lose it with big sizes
+                constant * $cm$size * $cm$size :
+                constant;
     }
 
     @ModifyConstant(method = "updateAutoJump", constant = @Constant(doubleValue = 0.5099999904632568D))

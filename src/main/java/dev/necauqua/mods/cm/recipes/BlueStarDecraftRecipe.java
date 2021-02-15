@@ -15,6 +15,8 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry.ObjectHolder;
 import net.minecraftforge.registries.IForgeRegistryEntry;
@@ -22,10 +24,12 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import javax.annotation.Nonnull;
 import java.util.stream.IntStream;
 
+import static dev.necauqua.mods.cm.ChiseledMe.MODID;
 import static dev.necauqua.mods.cm.ChiseledMe.ns;
 import static net.minecraft.init.Blocks.LAPIS_BLOCK;
 import static net.minecraft.init.Items.NETHER_STAR;
 
+@EventBusSubscriber(modid = MODID)
 public final class BlueStarDecraftRecipe extends IForgeRegistryEntry.Impl<IRecipe> implements IRecipe {
 
     @ObjectHolder("chiseled_me:blue_star")

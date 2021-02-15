@@ -20,6 +20,8 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry.ObjectHolder;
 import net.minecraftforge.fml.relauncher.Side;
@@ -27,9 +29,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 
+import static dev.necauqua.mods.cm.ChiseledMe.MODID;
 import static dev.necauqua.mods.cm.ChiseledMe.ns;
 import static net.minecraft.init.Blocks.*;
 
+@EventBusSubscriber(modid = MODID)
 public final class WeirdBeaconRecipe extends ShapedRecipes {
 
     @ObjectHolder("chiseled_me:blue_star")
