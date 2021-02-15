@@ -39,6 +39,8 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteractSpecific;
 import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
 import net.minecraftforge.event.world.BlockEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -52,9 +54,7 @@ import java.util.List;
 import static dev.necauqua.mods.cm.ChiseledMe.*;
 import static net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteract;
 
-/**
- * This class holds misc event handlers.
- **/
+@EventBusSubscriber(modid = MODID)
 public final class EntitySizeInteractions {
 
     private static final String NBT_KEY_SIZE = MODID + ":size";
@@ -145,26 +145,6 @@ public final class EntitySizeInteractions {
         double size = ((ISized) e.getPlayer()).getSizeCM();
         if (size != 1.0) {
             ((ISized) e.getEntity()).setSizeCM(size);
-        }
-    }
-
-    @SubscribeEvent
-    public static void on(BlockEvent.HarvestDropsEvent e) {
-        EntityPlayer player = e.getHarvester();
-        if (player == null) {
-            return;
-        }
-        double size = ((ISized) player).getSizeCM();
-        if (size == 1.0) {
-            return;
-        }
-        for (ItemStack stack : e.getDrops()) {
-            NBTTagCompound nbt = stack.getTagCompound();
-            if (nbt == null) {
-                nbt = new NBTTagCompound();
-            }
-            nbt.setDouble(NBT_KEY_SIZE, size);
-            stack.setTagCompound(nbt);
         }
     }
 

@@ -14,6 +14,8 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.FMLEventChannel;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent.ClientCustomPacketEvent;
@@ -24,6 +26,7 @@ import java.util.function.Consumer;
 
 import static dev.necauqua.mods.cm.ChiseledMe.MODID;
 
+@EventBusSubscriber(modid = MODID)
 public final class Network {
     private static final FMLEventChannel channel = NetworkRegistry.INSTANCE.newEventDrivenChannel(MODID);
 

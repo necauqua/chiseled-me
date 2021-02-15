@@ -23,8 +23,10 @@ public final class NetHandlerPlayServerMixin {
             @Constant(doubleValue = 0.0625, ordinal = 0),
             @Constant(doubleValue = 0.0625, ordinal = 2),
             @Constant(doubleValue = 0.0625, ordinal = 3), // fix for small aabbs
+            @Constant(doubleValue = -0.5), // some sort of vertical movement checker
+            @Constant(doubleValue = 0.5),  //
             @Constant(doubleValue = -0.03125), // floating checker
-            @Constant(doubleValue = -0.55), // some kind of levitation potion effect checker
+            @Constant(doubleValue = -0.55),    //
     })
     double processPlayer(double constant) {
         return constant * ((ISized) player).getSizeCM();
@@ -32,9 +34,8 @@ public final class NetHandlerPlayServerMixin {
 
     @ModifyConstant(method = "processPlayer", constant = @Constant(doubleValue = 0.0625, ordinal = 1))
     double processPlayerMovementCheck(double constant) {
-        double size = ((ISized) player).getSizeCM();
-        return size > 1.0 ?
-                constant * size :
+        return ((ISized) player).getSizeCM() > 1.0 ?
+                Double.MAX_VALUE: // ok, no idea how to properly scale it, just disable the check for big sizes
                 constant;
     }
 
@@ -50,6 +51,33 @@ public final class NetHandlerPlayServerMixin {
         return player.getEyeHeight();
     }
 
+    // copy stuff for vehicle movement just in case
+
+    @ModifyConstant(method = "processVehicleMove", constant = {
+            @Constant(doubleValue = 0.0625, ordinal = 0),
+            @Constant(doubleValue = 0.0625, ordinal = 2),
+            @Constant(doubleValue = 0.0625, ordinal = 3), // fix for small aabbs
+            @Constant(doubleValue = -0.5), // some sort of vertical movement checker
+            @Constant(doubleValue = 0.5),  //
+            @Constant(doubleValue = -0.03125), // floating checker
+            @Constant(doubleValue = -0.55),    //
+            @Constant(doubleValue = 1.0E-6D), // some vehicle-specific vertical offset
+            @Constant(doubleValue = 100.0D), // vehicle-specific speed check
+    })
+    double processVehicleMove(double constant) {
+        return constant * ((ISized) lowestRiddenEnt).getSizeCM();
+    }
+
+    @ModifyConstant(method = "processVehicleMove", constant = @Constant(doubleValue = 0.0625, ordinal = 1))
+    double processVehicleMoveMovementCheck(double constant) {
+        return ((ISized) player).getSizeCM() > 1.0 ?
+                Double.MAX_VALUE: // ok, no idea how to properly scale it, just disable the check for big sizes
+                constant;
+    }
+
     @Shadow
     public EntityPlayerMP player;
+
+    @Shadow
+    private Entity lowestRiddenEnt;
 }

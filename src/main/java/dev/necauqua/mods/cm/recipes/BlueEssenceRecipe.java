@@ -14,16 +14,19 @@ import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.item.crafting.ShapelessRecipes;
 import net.minecraft.util.NonNullList;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry.ObjectHolder;
+import net.minecraftforge.fml.relauncher.Side;
 
 import javax.annotation.Nonnull;
 import java.util.stream.IntStream;
 
-import static dev.necauqua.mods.cm.ChiseledMe.BLUE_STAR;
-import static dev.necauqua.mods.cm.ChiseledMe.ns;
+import static dev.necauqua.mods.cm.ChiseledMe.*;
 import static net.minecraft.init.Items.NETHER_STAR;
 
+@EventBusSubscriber(modid = MODID)
 public final class BlueEssenceRecipe extends ShapelessRecipes {
 
     @ObjectHolder("chiseled_me:pym_essence_b")

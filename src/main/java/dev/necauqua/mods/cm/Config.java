@@ -8,6 +8,8 @@ package dev.necauqua.mods.cm;
 import dev.necauqua.mods.cm.ChiseledMe.Init;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent.OnConfigChangedEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.FMLInjectionData;
 
@@ -15,6 +17,7 @@ import java.io.File;
 
 import static dev.necauqua.mods.cm.ChiseledMe.MODID;
 
+@EventBusSubscriber(modid = MODID)
 public final class Config {
 
     // main

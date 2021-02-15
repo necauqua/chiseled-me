@@ -83,7 +83,7 @@ public abstract class EntityRendererMixin {
 
     @ModifyConstant(method = "getMouseOver", constant = {
             @Constant(doubleValue = 3.0),
-            @Constant(doubleValue = 6.0), // this LCD 6.0 might or might not exist if some sort of astral sorcery also patches reach
+            @Constant(doubleValue = 6.0), // this LDC 6.0 might or might not exist if some sort of astral sorcery also patches reach
             @Constant(doubleValue = 1.0),
     })
     double getMouseOver(double constant, float partialTicks) {

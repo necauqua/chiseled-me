@@ -13,9 +13,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.GameRules;
 import net.minecraftforge.client.event.ModelRegistryEvent;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.discovery.ASMDataTable.ASMData;
 import net.minecraftforge.fml.common.event.FMLFingerprintViolationEvent;
@@ -36,7 +36,6 @@ import static dev.necauqua.mods.cm.ChiseledMe.MODID;
 import static dev.necauqua.mods.cm.item.ItemRecalibrator.RecalibrationType.REDUCTION;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import static java.util.stream.Collectors.toSet;
 import static net.minecraft.world.GameRules.ValueType.ANY_VALUE;
 import static net.minecraft.world.GameRules.ValueType.BOOLEAN_VALUE;
 
@@ -46,6 +45,7 @@ import static net.minecraft.world.GameRules.ValueType.BOOLEAN_VALUE;
         updateJSON = "https://raw.githubusercontent.com/wiki/necauqua/chiseled-me/updates.json",
         certificateFingerprint = "c677c954974252994736eb15e855e1e6fc5a2e62",
         useMetadata = true)
+@EventBusSubscriber(modid = MODID)
 public final class ChiseledMe {
 
     public static final String MODID = "chiseled_me";
@@ -93,20 +93,6 @@ public final class ChiseledMe {
             throw new AssertionError("This should not happen", e1);
         } catch (InvocationTargetException e1) {
             rethrow(e1.getCause());
-        }
-
-        // kinda could've been the default
-        // possibly with separate annotation just for main event bus, idk
-        try {
-            for (String s : e.getAsmData().getAll(SubscribeEvent.class.getName())
-                    .stream()
-                    .map(ASMData::getClassName)
-                    .filter(cls -> cls.startsWith("dev.necauqua.mods.cm") && !cls.contains("mixin"))
-                    .collect(toSet())) {
-                MinecraftForge.EVENT_BUS.register(Class.forName(s));
-            }
-        } catch (ClassNotFoundException ex) {
-            throw new AssertionError("This should not happen", ex);
         }
     }
 
