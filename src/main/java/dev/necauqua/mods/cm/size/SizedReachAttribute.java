@@ -5,6 +5,7 @@
 
 package dev.necauqua.mods.cm.size;
 
+import dev.necauqua.mods.cm.Config;
 import dev.necauqua.mods.cm.api.ISized;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttribute;
@@ -26,7 +27,14 @@ public final class SizedReachAttribute implements IAttributeInstance, ISized {
 
     @Override
     public double getAttributeValue() { // the main deal
-        return peer.getAttributeValue() * sized.getSizeCM();
+        double real = peer.getAttributeValue();
+        if (real < 1.0 && Config.scaleReachSmall) {
+            return real * sized.getSizeCM();
+        }
+        if (real > 1.0 && Config.scaleReachBig) {
+            return real * sized.getSizeCM();
+        }
+        return real;
     }
 
     @Override

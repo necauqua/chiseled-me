@@ -102,9 +102,13 @@ public final class EntitySizeInteractions {
 
     @SubscribeEvent
     public static void on(EntityMountEvent e) {
+        if (Config.allowAnyRiding || !e.isMounting()) {
+            return;
+        }
         double mountingSize = ((ISized) e.getEntityMounting()).getSizeCM();
         double mountedSize = e.getEntityBeingMounted() != null ? ((ISized) e.getEntityBeingMounted()).getSizeCM() : 1.0;
-        if (e.isMounting() && (mountingSize != 1.0 || mountedSize != 1.0)) {
+
+        if ((!Config.allowRidingSameSize || mountingSize != mountedSize) && (mountingSize != 1.0 || mountedSize != 1.0)) {
             e.setCanceled(true);
         }
     }
@@ -119,7 +123,7 @@ public final class EntitySizeInteractions {
         if (size < 1.0 && !Config.allowSleepingWhenSmall) {
             e.setResult(TOO_SMALL);
             player.sendMessage(new TextComponentTranslation("chiseled_me.bed.too_small"));
-        } else if (size > 1.0) {
+        } else if (size > 1.0 && !Config.allowSleepingWhenBig) {
             e.setResult(TOO_BIG);
             player.sendMessage(new TextComponentTranslation("chiseled_me.bed.too_big"));
         }

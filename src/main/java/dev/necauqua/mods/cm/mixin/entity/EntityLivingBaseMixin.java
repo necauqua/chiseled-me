@@ -5,6 +5,7 @@
 
 package dev.necauqua.mods.cm.mixin.entity;
 
+import dev.necauqua.mods.cm.Config;
 import dev.necauqua.mods.cm.api.ISized;
 import dev.necauqua.mods.cm.size.EntitySizeInteractions;
 import dev.necauqua.mods.cm.size.SizedReachAttribute;
@@ -13,6 +14,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
@@ -29,16 +31,39 @@ public abstract class EntityLivingBaseMixin extends EntityMixin {
         }
     }
 
+    @ModifyVariable(method = "attackEntityFrom", ordinal = 0, at = @At("HEAD"))
+    float attackEntityFrom(float amount, DamageSource source) {
+        Entity attacker = source.getImmediateSource();
+        // scaling only entity-to-entity damage
+        if (attacker == null) {
+            return amount;
+        }
+        double attackerSize = ((ISized) attacker).getSizeCM();
+        if (Config.scaleDamageDealtSmall && attackerSize < 1.0 || Config.scaleDamageDealtBig && attackerSize > 1.0) {
+            amount *= attackerSize;
+        }
+        if (Config.scaleDamageReceivedSmall && $cm$size < 1.0 || Config.scaleDamageReceivedBig && $cm$size > 1.0) {
+            amount /= $cm$size;
+        }
+        return amount;
+    }
+
     // knockback
     @Redirect(method = "attackEntityFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;knockBack(Lnet/minecraft/entity/Entity;FDD)V"))
     void attackEntityFrom(EntityLivingBase self, Entity attacker, float strength, double xRatio, double zRatio) {
-        self.knockBack(attacker, (float) (strength * ((ISized) attacker).getSizeCM() / $cm$size), xRatio, zRatio);
+        if (Config.scaleMassSmall && $cm$size < 1.0 || Config.scaleMassBig && $cm$size > 1.0) {
+            strength = (float) (strength * ((ISized) attacker).getSizeCM() / $cm$size);
+        }
+        self.knockBack(attacker, strength, xRatio, zRatio);
     }
 
     // shield reverse knockback
     @ModifyConstant(method = "blockUsingShield", constant = @Constant(floatValue = 0.5f))
     float blockUsingShield(float constant, EntityLivingBase attacker) {
-        return (float) (constant * $cm$size / ((ISized) attacker).getSizeCM());
+        double otherSize = ((ISized) attacker).getSizeCM();
+        return Config.scaleMassSmall && otherSize < 1.0 || Config.scaleMassBig && otherSize > 1.0 ?
+                (float) (constant * otherSize / $cm$size) :
+                constant;
     }
 
     // xp orbs spawn at living death

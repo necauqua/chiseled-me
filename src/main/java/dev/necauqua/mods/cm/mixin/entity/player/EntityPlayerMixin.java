@@ -15,6 +15,8 @@ import net.minecraft.world.WorldServer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
 
+import static org.objectweb.asm.Opcodes.IFNE;
+
 @Mixin(EntityPlayer.class)
 public abstract class EntityPlayerMixin extends EntityMixin {
 
@@ -23,12 +25,12 @@ public abstract class EntityPlayerMixin extends EntityMixin {
         return (float) (local * $cm$size);
     }
 
-    @ModifyVariable(method = "updateSize", ordinal = 0, at = @At(value = "LOAD", ordinal = 0))
+    @ModifyVariable(method = "updateSize", ordinal = 0, at = @At(value = "JUMP", opcode = IFNE, ordinal = 0))
     float updateSizeWidth(float f) {
         return (float) (f * $cm$size);
     }
 
-    @ModifyVariable(method = "updateSize", ordinal = 1, at = @At(value = "LOAD", ordinal = 0))
+    @ModifyVariable(method = "updateSize", ordinal = 1, at = @At(value = "JUMP", opcode = IFNE, ordinal = 0))
     float updateSizeHeight(float f1) {
         return (float) (f1 * $cm$size);
     }

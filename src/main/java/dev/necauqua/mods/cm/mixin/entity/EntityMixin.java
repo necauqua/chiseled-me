@@ -5,6 +5,7 @@
 
 package dev.necauqua.mods.cm.mixin.entity;
 
+import dev.necauqua.mods.cm.Config;
 import dev.necauqua.mods.cm.Network;
 import dev.necauqua.mods.cm.api.IRenderSized;
 import dev.necauqua.mods.cm.api.ISized;
@@ -239,19 +240,30 @@ public abstract class EntityMixin implements IRenderSized, IEntityExtras {
 
     @ModifyVariable(method = "updateFallState", at = @At("HEAD"), ordinal = 0)
     double updateFallState(double y) {
-        return y / $cm$size;
+        return !Config.scaleFallSmall && $cm$size < 1.0 || !Config.scaleFallBig && $cm$size > 1.0 ?
+                y :
+                y / $cm$size;
     }
 
     @Redirect(method = "applyEntityCollision", at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/entity/Entity;addVelocity(DDD)V"))
     void applyEntityCollision(Entity self, double x, double y, double z, Entity other) {
-        double coeff = ((ISized) other).getSizeCM() / ((ISized) self).getSizeCM();
-        self.addVelocity(x * coeff, y * coeff, z * coeff);
+        if ($cm$size < 1.0 && Config.scaleMassSmall || $cm$size > 1.0 && Config.scaleMassBig) {
+            double coeff = ((ISized) other).getSizeCM() / $cm$size;
+            self.addVelocity(x * coeff, y * coeff, z * coeff);
+        } else {
+            self.addVelocity(x, y, z);
+        }
     }
 
     @Redirect(method = "applyEntityCollision", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/entity/Entity;addVelocity(DDD)V"))
     void applyEntityCollision2(Entity self, double x, double y, double z, Entity other) {
-        double coeff = ((ISized) self).getSizeCM() / ((ISized) other).getSizeCM();
-        self.addVelocity(x * coeff, y * coeff, z * coeff);
+        double otherSize = ((ISized) other).getSizeCM();
+        if (otherSize < 1.0 && Config.scaleMassSmall || otherSize > 1.0 && Config.scaleMassBig) {
+            double coeff = $cm$size / otherSize;
+            self.addVelocity(x * coeff, y * coeff, z * coeff);
+        } else {
+            self.addVelocity(x, y, z);
+        }
     }
 
     // endregion

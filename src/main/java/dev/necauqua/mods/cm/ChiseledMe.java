@@ -15,7 +15,6 @@ import net.minecraft.world.GameRules;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.discovery.ASMDataTable.ASMData;
@@ -32,7 +31,6 @@ import java.lang.annotation.Target;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.UUID;
 
 import static dev.necauqua.mods.cm.ChiseledMe.MODID;
 import static dev.necauqua.mods.cm.item.ItemRecalibrator.RecalibrationType.REDUCTION;
@@ -52,8 +50,8 @@ public final class ChiseledMe {
 
     public static final String MODID = "chiseled_me";
 
-    public static final float LOWER_LIMIT = 0.000244140625f; // = 1/16/16/16 = 1/4096
-    public static final float UPPER_LIMIT = 16.0f;
+    public static final double LOWER_LIMIT = 0.000244140625; // = 1/16/16/16 = 1/4096, lower and we start geting issues with 32-bit floats
+    public static final double UPPER_LIMIT = 16.0;
     public static final String ENTITY_SIZE_RULE = MODID + ":defaultEntitySize";
     public static final String PLAYER_SIZE_RULE = MODID + ":defaultPlayerSize";
     public static final String KEEP_SIZE_RULE = MODID + ":keepSize";
@@ -120,7 +118,7 @@ public final class ChiseledMe {
                     .set(null, true); // IMC (or something) IS FOR LOOOOSEEERS
 
             // (if you are reading this source and can't get the sarcasm, I am not stating that
-            // IMC is for losers and thats why I am mixing into their init, I am stating that they
+            // IMC is for losers and thats why I am reflecting their field, I am stating that they
             // must think that IMC is for losers as they don't have any, and their management of
             // `isHeightConflictingModInstalled` field is based on hardcode-detecting a couple of
             // popular mods that they know have such issues)
@@ -144,17 +142,6 @@ public final class ChiseledMe {
     @SubscribeEvent
     public static void on(ModelRegistryEvent e) {
         Arrays.stream(ITEMS).forEach(SidedHandler.instance::registerDefaultModel);
-    }
-
-    // everybody has some kind of this, I want it too, lol
-    @SubscribeEvent
-    public static void on(PlayerEvent.NameFormat e) {
-        UUID id = e.getEntityPlayer().getGameProfile().getId();
-
-        if (id.getMostSignificantBits() == 0xf98e93652c5248c5L &&
-                id.getLeastSignificantBits() == 0x86476662f70b7e3dL) {
-            e.setDisplayname("§o§dnecauqua§r");
-        }
     }
 
     @EventHandler
