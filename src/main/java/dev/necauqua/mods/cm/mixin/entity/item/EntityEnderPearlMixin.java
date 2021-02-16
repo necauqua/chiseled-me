@@ -33,7 +33,8 @@ public abstract class EntityEnderPearlMixin extends EntityMixin {
         return entity;
     }
 
-    @SuppressWarnings("UnresolvedMixinReference") // method added by spigot and EnderPearlEntity patched to use it directly (to have SpawnReason.ENDER_PEARL)
+    // method added by spigot and EnderPearlEntity patched to use it directly (to have SpawnReason.ENDER_PEARL)
+    @SuppressWarnings("UnresolvedMixinReference")
     @Group(name = "onImpact", min = 1, max = 1)
     @ModifyArg(method = "onImpact", at = @At(value = "INVOKE", remap = false, target = "Lnet/minecraft/world/World;addEntity(Lnet/minecraft/entity/Entity;Lorg/bukkit/event/entity/CreatureSpawnEvent$SpawnReason;)Z"), expect = 0, require = 0)
     Entity onImpactSpigot(Entity entity) {

@@ -62,8 +62,8 @@ public abstract class AdvancementTrigger<T extends ICriterionInstance> implement
         }
         PlayerAdvancements advancements = ((EntityPlayerMP) player).getAdvancements();
         listeners.getOrDefault(advancements, emptySet()).stream()
-            .filter(listener -> filter.test(listener.getCriterionInstance()))
-            .collect(toList()) // intermediate collection because grantCondition might call removeListener and cause CMEs
-            .forEach(listener -> listener.grantCriterion(advancements));
+                .filter(listener -> filter.test(listener.getCriterionInstance()))
+                .collect(toList()) // intermediate collection because grantCondition might call removeListener and cause CMEs
+                .forEach(listener -> listener.grantCriterion(advancements));
     }
 }

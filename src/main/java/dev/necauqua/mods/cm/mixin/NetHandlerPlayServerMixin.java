@@ -35,7 +35,7 @@ public final class NetHandlerPlayServerMixin {
     @ModifyConstant(method = "processPlayer", constant = @Constant(doubleValue = 0.0625, ordinal = 1))
     double processPlayerMovementCheck(double constant) {
         return ((ISized) player).getSizeCM() > 1.0 ?
-                Double.MAX_VALUE: // ok, no idea how to properly scale it, just disable the check for big sizes
+                Double.MAX_VALUE : // ok, no idea how to properly scale it, just disable the check for big sizes
                 constant;
     }
 
@@ -71,7 +71,7 @@ public final class NetHandlerPlayServerMixin {
     @ModifyConstant(method = "processVehicleMove", constant = @Constant(doubleValue = 0.0625, ordinal = 1))
     double processVehicleMoveMovementCheck(double constant) {
         return ((ISized) player).getSizeCM() > 1.0 ?
-                Double.MAX_VALUE: // ok, no idea how to properly scale it, just disable the check for big sizes
+                Double.MAX_VALUE : // ok, no idea how to properly scale it, just disable the check for big sizes
                 constant;
     }
 

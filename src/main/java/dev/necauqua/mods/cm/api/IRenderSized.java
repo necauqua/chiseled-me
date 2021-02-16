@@ -36,8 +36,9 @@ import net.minecraft.entity.Entity;
  * Same with other methods defined in this interface.
  * <p>
  * Put this code somewhere where you use it.
- * @see ISized
+ *
  * @author necauqua
+ * @see ISized
  */
 public interface IRenderSized extends ISized {
 

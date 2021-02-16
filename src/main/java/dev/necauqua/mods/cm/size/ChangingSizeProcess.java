@@ -27,10 +27,10 @@ public final class ChangingSizeProcess {
     @Override
     public String toString() {
         return "ChangingSizeProcess{" +
-            "fromSize=" + fromSize +
-            ", toSize=" + toSize +
-            ", lerpTime=" + lerpTime +
-            '}';
+                "fromSize=" + fromSize +
+                ", toSize=" + toSize +
+                ", lerpTime=" + lerpTime +
+                '}';
     }
 
     public static int log2LerpTime(double fromSize, double toSize) {
