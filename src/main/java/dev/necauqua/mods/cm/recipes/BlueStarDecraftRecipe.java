@@ -15,7 +15,6 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry.ObjectHolder;
@@ -76,8 +75,8 @@ public final class BlueStarDecraftRecipe extends IForgeRegistryEntry.Impl<IRecip
     public NonNullList<ItemStack> getRemainingItems(@Nonnull InventoryCrafting inv) {
         NonNullList<ItemStack> ret = NonNullList.withSize(inv.getSizeInventory(), ItemStack.EMPTY);
         IntStream.range(0, inv.getSizeInventory())
-            .filter(i -> inv.getStackInSlot(i).getItem() == BLUE_STAR)
-            .forEach(i -> ret.set(i, new ItemStack(NETHER_STAR)));
+                .filter(i -> inv.getStackInSlot(i).getItem() == BLUE_STAR)
+                .forEach(i -> ret.set(i, new ItemStack(NETHER_STAR)));
 
         AdvancementTriggers.BLUE_STAR_DECRAFT.trigger(ForgeHooks.getCraftingPlayer());
 

@@ -10,8 +10,9 @@ package dev.necauqua.mods.cm.api;
  * This is usually implemented on vanilla types (Entities, Particles etc.) by a mixin.
  * <p>
  * See {@link IRenderSized} for more description and for example usage as a soft dependency.
- * @see IRenderSized
+ *
  * @author necauqua
+ * @see IRenderSized
  */
 public interface ISized {
 

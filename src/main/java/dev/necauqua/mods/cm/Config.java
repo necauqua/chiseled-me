@@ -8,7 +8,6 @@ package dev.necauqua.mods.cm;
 import dev.necauqua.mods.cm.ChiseledMe.Init;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent.OnConfigChangedEvent;
-import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.FMLInjectionData;
@@ -47,6 +46,7 @@ public final class Config {
 
     // misc
     public static boolean changeBedAABB;
+    public static float maxShadowSize;
 
     // compat
     public static boolean enableNeatIntegration;
@@ -63,11 +63,11 @@ public final class Config {
         // main
 
         enableSupersmalls = c.getBoolean("enableSupersmalls", "main", true,
-            "At these sizes (most noticeable at 1/4096) Minecraft starts to break a little so beware " +
-                "of various (mostly visual, mob AI and colliding) glitches");
+                "At these sizes (most noticeable at 1/4096) Minecraft starts to break a little so beware " +
+                        "of various (mostly visual, mob AI and colliding) glitches");
 
         enableBigSizes = c.getBoolean("enableBigs", "main", true,
-            "Big sizes are OP and bugged even more then small.");
+                "Big sizes are OP and bugged even more then small.");
 
         allowRecalibratingOtherEntities = c.getBoolean("allowRecalibratingOtherEntities", "main", true,
                 "Allows to disable shift-click-recalibrating arbitrary entities");
@@ -132,12 +132,16 @@ public final class Config {
         // misc
 
         changeBedAABB = c.getBoolean("bedBBox", "misc", true,
-            "Override vanilla bed bounding box so if you're small enough you can walk under it");
+                "Override vanilla bed bounding box so if you're small enough you can walk under it");
+
+        maxShadowSize = c.getFloat("maxShadowSize", "misc", 16.0f, 0.0f, Float.MAX_VALUE,
+                "If allowAnySizes is set to true, the shadow size is limited by this value, " +
+                        "because vanilla code iterates through a lot of blocks to render the shadow and this degrades performance by a lot");
 
         // compat
 
         enableNeatIntegration = c.getBoolean("enableNeatIntegration", "compat", true,
-            "Enable or disable scaling of the mob health bars from Neat, which is a mod by Vazkii");
+                "Enable or disable scaling of the mob health bars from Neat, which is a mod by Vazkii");
     }
 
     @Init

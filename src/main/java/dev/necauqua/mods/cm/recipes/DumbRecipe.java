@@ -19,7 +19,6 @@ import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.JsonContext;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Loader;
-import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -50,29 +49,29 @@ public final class DumbRecipe extends IForgeRegistryEntry.Impl<IRecipe> implemen
 
         // @see CraftingHelper#loadRecipes(ModContainer)
         CraftingHelper.findFiles(mod, "assets/" + MODID + "/recipes", null,
-            (root, file) -> {
-                String relative = root.relativize(file).toString();
-                if (!"json".equals(FilenameUtils.getExtension(file.toString())) || relative.startsWith("_")) {
-                    return true;
-                }
-
-                String name = FilenameUtils.removeExtension(relative).replaceAll("\\\\", "/");
-
-                try (BufferedReader reader = Files.newBufferedReader(file)) {
-                    JsonObject json = JsonUtils.fromJson(recipesLikeGson, reader, JsonObject.class);
-                    if (json == null) {
+                (root, file) -> {
+                    String relative = root.relativize(file).toString();
+                    if (!"json".equals(FilenameUtils.getExtension(file.toString())) || relative.startsWith("_")) {
                         return true;
                     }
-                    if (!CraftingHelper.processConditions(JsonUtils.getJsonArray(json, "conditions"), ctx)) {
-                        ForgeRegistries.RECIPES.register(new DumbRecipe(name));
-                        Log.trace("Registered a dumb recipe " + name);
+
+                    String name = FilenameUtils.removeExtension(relative).replaceAll("\\\\", "/");
+
+                    try (BufferedReader reader = Files.newBufferedReader(file)) {
+                        JsonObject json = JsonUtils.fromJson(recipesLikeGson, reader, JsonObject.class);
+                        if (json == null) {
+                            return true;
+                        }
+                        if (!CraftingHelper.processConditions(JsonUtils.getJsonArray(json, "conditions"), ctx)) {
+                            ForgeRegistries.RECIPES.register(new DumbRecipe(name));
+                            Log.trace("Registered a dumb recipe " + name);
+                        }
+                    } catch (JsonParseException | IOException ex) {
+                        return false;
                     }
-                } catch (JsonParseException | IOException ex) {
-                    return false;
-                }
-                return true;
-            },
-            true, true
+                    return true;
+                },
+                true, true
         );
     }
 

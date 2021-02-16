@@ -5,6 +5,7 @@
 
 package dev.necauqua.mods.cm.mixin.client;
 
+import dev.necauqua.mods.cm.Config;
 import dev.necauqua.mods.cm.api.IRenderSized;
 import dev.necauqua.mods.cm.api.ISized;
 import net.minecraft.client.renderer.entity.Render;
@@ -28,7 +29,7 @@ public abstract class RenderMixin {
     // scale shadow size
     @Redirect(method = "renderShadow", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/entity/Render;shadowSize:F"))
     float renderShadow(Render<?> self, Entity entity, double x, double y, double z, float shadowAlpha, float partialTicks) {
-        return (float) (shadowSize * $cm$sizeHack); // well reuse the hack, whatever
+        return Math.min((float) (shadowSize * $cm$sizeHack), Config.maxShadowSize); // well reuse the hack, whatever
     }
 
     // transparency

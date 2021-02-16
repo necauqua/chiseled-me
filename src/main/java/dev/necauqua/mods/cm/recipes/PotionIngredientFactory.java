@@ -22,7 +22,6 @@ import net.minecraftforge.advancements.critereon.ItemPredicates;
 import net.minecraftforge.common.crafting.IIngredientFactory;
 import net.minecraftforge.common.crafting.JsonContext;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -84,13 +83,13 @@ public final class PotionIngredientFactory implements IIngredientFactory {
             Item item = getPotionItem(json);
             PotionType potion = getPotion(null, json);
             return new ItemPredicate(
-                item,
-                null,
-                MinMaxBounds.UNBOUNDED,
-                MinMaxBounds.UNBOUNDED,
-                new EnchantmentPredicate[0],
-                potion,
-                NBTPredicate.ANY);
+                    item,
+                    null,
+                    MinMaxBounds.UNBOUNDED,
+                    MinMaxBounds.UNBOUNDED,
+                    new EnchantmentPredicate[0],
+                    potion,
+                    NBTPredicate.ANY);
         });
     }
 }
