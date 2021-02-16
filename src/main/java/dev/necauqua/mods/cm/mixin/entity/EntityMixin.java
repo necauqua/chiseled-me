@@ -287,12 +287,6 @@ public abstract class EntityMixin implements IRenderSized, IEntityExtras {
 
     @Inject(method = "readFromNBT", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;readEntityFromNBT(Lnet/minecraft/nbt/NBTTagCompound;)V"))
     void readFromNBT(NBTTagCompound nbt, CallbackInfo ci) {
-
-        // fix for when mods just set width/height in constructor
-        $cm$originalWidth = width;
-        $cm$originalHeight = height;
-        setRawSizeCM(1.0);
-
         double size = nbt.getDouble(SIZE_NBT_TAG);
         if (size != 0.0) {
             setSizeCM(size);
@@ -327,6 +321,13 @@ public abstract class EntityMixin implements IRenderSized, IEntityExtras {
     @ModifyArg(method = "doWaterSplashEffect", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V"))
     int[] doWaterSplashEffect(int[] args) {
         return EntitySizeInteractions.appendSize(args, $cm$size);
+    }
+
+    @Inject(method = "spawnRunningParticles", at = @At("HEAD"), cancellable = true)
+    void createRunningParticles(CallbackInfo ci) {
+        if (!onGround) {
+            ci.cancel();
+        }
     }
 
     @ModifyConstant(method = "createRunningParticles", constant = {
@@ -372,6 +373,9 @@ public abstract class EntityMixin implements IRenderSized, IEntityExtras {
 
     @Shadow
     public double motionZ;
+
+    @Shadow
+    public boolean onGround;
 
     @Shadow
     protected abstract void setSize(float width, float height);
