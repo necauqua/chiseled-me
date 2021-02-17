@@ -9,6 +9,7 @@ import dev.necauqua.mods.cm.api.ISized;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
+import net.minecraftforge.fml.common.Loader;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,6 +19,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(NetHandlerPlayServer.class)
 public final class NetHandlerPlayServerMixin {
+
+    private static final boolean adjustMovementCheckForSmalls = Loader.isModLoaded("adhooks");
 
     @ModifyConstant(method = "processPlayer", constant = {
             @Constant(doubleValue = 0.0625, ordinal = 0),
@@ -34,9 +37,12 @@ public final class NetHandlerPlayServerMixin {
 
     @ModifyConstant(method = "processPlayer", constant = @Constant(doubleValue = 0.0625, ordinal = 1))
     double processPlayerMovementCheck(double constant) {
-        return ((ISized) player).getSizeCM() > 1.0 ?
+        double size = ((ISized) player).getSizeCM();
+        return size > 1.0 ?
                 Double.MAX_VALUE : // ok, no idea how to properly scale it, just disable the check for big sizes
-                constant;
+                adjustMovementCheckForSmalls && size < 1.0 ?
+                    constant / size : // idk a dumb patch for that weird mod
+                    constant;
     }
 
     // entity server reach
@@ -52,32 +58,33 @@ public final class NetHandlerPlayServerMixin {
     }
 
     // copy stuff for vehicle movement just in case
+    // commented out atm because of some issues with some mod from a huge modpack someone was testing it with
 
-    @ModifyConstant(method = "processVehicleMove", constant = {
-            @Constant(doubleValue = 0.0625, ordinal = 0),
-            @Constant(doubleValue = 0.0625, ordinal = 2),
-            @Constant(doubleValue = 0.0625, ordinal = 3), // fix for small aabbs
-            @Constant(doubleValue = -0.5), // some sort of vertical movement checker
-            @Constant(doubleValue = 0.5),  //
-            @Constant(doubleValue = -0.03125), // floating checker
-            @Constant(doubleValue = -0.55),    //
-            @Constant(doubleValue = 1.0E-6D), // some vehicle-specific vertical offset
-            @Constant(doubleValue = 100.0D), // vehicle-specific speed check
-    })
-    double processVehicleMove(double constant) {
-        return constant * ((ISized) lowestRiddenEnt).getSizeCM();
-    }
-
-    @ModifyConstant(method = "processVehicleMove", constant = @Constant(doubleValue = 0.0625, ordinal = 1))
-    double processVehicleMoveMovementCheck(double constant) {
-        return ((ISized) player).getSizeCM() > 1.0 ?
-                Double.MAX_VALUE : // ok, no idea how to properly scale it, just disable the check for big sizes
-                constant;
-    }
+//    @ModifyConstant(method = "processVehicleMove", constant = {
+//            @Constant(doubleValue = 0.0625, ordinal = 0),
+//            @Constant(doubleValue = 0.0625, ordinal = 2),
+//            @Constant(doubleValue = 0.0625, ordinal = 3), // fix for small aabbs
+//            @Constant(doubleValue = -0.5), // some sort of vertical movement checker
+//            @Constant(doubleValue = 0.5),  //
+//            @Constant(doubleValue = -0.03125), // floating checker
+//            @Constant(doubleValue = -0.55),    //
+//            @Constant(doubleValue = 1.0E-6D), // some vehicle-specific vertical offset
+//            @Constant(doubleValue = 100.0D), // vehicle-specific speed check
+//    })
+//    double processVehicleMove(double constant) {
+//        return constant * ((ISized) lowestRiddenEnt).getSizeCM();
+//    }
+//
+//    @ModifyConstant(method = "processVehicleMove", constant = @Constant(doubleValue = 0.0625, ordinal = 1))
+//    double processVehicleMoveMovementCheck(double constant) {
+//        return ((ISized) player).getSizeCM() > 1.0 ?
+//                Double.MAX_VALUE : // ok, no idea how to properly scale it, just disable the check for big sizes
+//                constant;
+//    }
 
     @Shadow
     public EntityPlayerMP player;
 
-    @Shadow
-    private Entity lowestRiddenEnt;
+//    @Shadow
+//    private Entity lowestRiddenEnt;
 }
