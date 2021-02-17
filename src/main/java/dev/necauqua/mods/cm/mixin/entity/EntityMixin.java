@@ -345,6 +345,14 @@ public abstract class EntityMixin implements IRenderSized, IEntityExtras {
 
     // endregion
 
+    // more vanilla fixes for the surprising cases like entities being tiny lol
+    @Inject(method = "playStepSound", at = @At("HEAD"), cancellable = true)
+    void playStepSound(CallbackInfo ci) {
+        if (!onGround) {
+            ci.cancel();
+        }
+    }
+
     // getPosition fix for commands or something
     @ModifyConstant(method = "getPosition", constant = @Constant(doubleValue = 0.5))
     double getPosition(double constant) {
