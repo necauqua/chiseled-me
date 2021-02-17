@@ -21,6 +21,10 @@ public final class NetHandlerPlayClientMixin {
     @Redirect(method = "handleEffect", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/WorldClient;playEvent(ILnet/minecraft/util/math/BlockPos;I)V"))
     void handleEffect(WorldClient self, int type, BlockPos pos, int data, SPacketEffect packet) {
         IPreciseEffectPacket p = (IPreciseEffectPacket) packet;
-        ((IWorldPlayPreciseEvent) self).playEvent(type, pos, data, p.getSizeCM(), p.getCoordsCM());
+        if (p.getCoordsCM() != null) {
+            ((IWorldPlayPreciseEvent) self).playEvent(type, pos, data, p.getSizeCM(), p.getCoordsCM());
+        } else {
+            self.playEvent(type, pos, data);
+        }
     }
 }
