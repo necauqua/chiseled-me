@@ -12,7 +12,6 @@ import dev.necauqua.mods.cm.api.IRenderSized;
 import net.minecraft.block.BlockDispenser;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.dispenser.IBehaviorDispenseItem;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -42,25 +41,10 @@ import static net.minecraft.util.EnumActionResult.SUCCESS;
 
 public final class ItemRecalibrator extends ItemMod {
 
-    public static final IBehaviorDispenseItem DISPENSER_BEHAVIOR = (source, stack) -> {
-        BlockPos at = source.getBlockPos().offset(source.getBlockState().getValue(BlockDispenser.FACING));
-        List<Entity> list = source.getWorld().getEntitiesWithinAABB(Entity.class, new AxisAlignedBB(at));
-        if (list.isEmpty()) {
-            return stack;
-        }
-        RecalibrationEffect effect = getEffectFromStack(stack);
-        ItemStack worked = stack.copy();
-        for (Entity entity : list) {
-            worked = effect.apply(entity, worked);
-        }
-        return worked;
-    };
-
     private static boolean entityItemBBoxOffset = true;
 
     public ItemRecalibrator() {
         super("recalibrator");
-        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(this, DISPENSER_BEHAVIOR);
         setMaxStackSize(1);
 
         entityItemBBoxOffset = !Loader.isModLoaded("itemphysic");
@@ -87,6 +71,19 @@ public final class ItemRecalibrator extends ItemMod {
                     int meta = stack.getMetadata();
                     return meta == 0 ? 0 : meta <= 12 ? meta : meta - 12;
                 });
+        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(this, (source, stack) -> {
+            BlockPos at = source.getBlockPos().offset(source.getBlockState().getValue(BlockDispenser.FACING));
+            List<Entity> list = source.getWorld().getEntitiesWithinAABB(Entity.class, new AxisAlignedBB(at));
+            if (list.isEmpty()) {
+                return stack;
+            }
+            RecalibrationEffect effect = ItemRecalibrator.getEffectFromStack(stack);
+            ItemStack worked = stack.copy();
+            for (Entity entity : list) {
+                worked = effect.apply(entity, worked);
+            }
+            return worked;
+        });
     }
 
     public static RecalibrationEffect getEffectFromStack(ItemStack stack) {

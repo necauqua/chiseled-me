@@ -8,6 +8,7 @@ package dev.necauqua.mods.cm.mixin;
 import dev.necauqua.mods.cm.size.IPreciseEffectPacket;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.SPacketEffect;
+import net.minecraft.network.play.server.SPacketSoundEffect;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -16,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import javax.annotation.Nullable;
 
-@Mixin(SPacketEffect.class)
+@Mixin({SPacketEffect.class, SPacketSoundEffect.class})
 public final class SPacketEffectMixin implements IPreciseEffectPacket {
 
     @Nullable

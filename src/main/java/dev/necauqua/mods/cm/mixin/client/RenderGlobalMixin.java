@@ -5,12 +5,15 @@
 
 package dev.necauqua.mods.cm.mixin.client;
 
-import dev.necauqua.mods.cm.api.IWorldPlayPreciseEvent;
+import dev.necauqua.mods.cm.api.IWorldPreciseEvents;
+import dev.necauqua.mods.cm.api.IWorldPreciseSounds;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;
@@ -25,19 +28,33 @@ import javax.annotation.Nullable;
 import static dev.necauqua.mods.cm.size.EntitySizeInteractions.*;
 
 @Mixin(RenderGlobal.class)
-public abstract class RenderGlobalMixin implements IWorldPlayPreciseEvent {
+public abstract class RenderGlobalMixin implements IWorldPreciseEvents {
 
     private double $cm$size = 1.0;
     private BlockPos $cm$blockPos;
     private Vec3d $cm$pos;
 
     @Override
-    public void playEvent(int type, BlockPos blockPos, int data, double size, Vec3d pos) {
+    public void playEvent(EntityPlayer player, int type, BlockPos blockPos, int data, double size, Vec3d pos) {
         $cm$size = size;
         $cm$blockPos = blockPos;
         $cm$pos = pos;
         playEvent(null, type, blockPos, data);
         $cm$blockPos = null;
+    }
+
+    @Redirect(method = "playEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/WorldClient;playSound(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FFZ)V"))
+    void playSound(WorldClient self, BlockPos blockPos, SoundEvent soundIn, SoundCategory category, float volume, float pitch, boolean distanceDelay) {
+        Vec3d pos = $cm$pos;
+        if (pos == null) {
+            self.playSound(blockPos, soundIn, category, volume, pitch, distanceDelay);
+            return;
+        }
+        if ($cm$size != 1.0) {
+            ((IWorldPreciseSounds) self).playSound(pos, soundIn, category, volume, pitch, distanceDelay, $cm$size);
+        } else {
+            self.playSound(pos.x, pos.y, pos.z, soundIn, category, volume, pitch, distanceDelay);
+        }
     }
 
     @ModifyConstant(method = "spawnParticle0(IZZDDDDDD[I)Lnet/minecraft/client/particle/Particle;", constant = @Constant(doubleValue = 1024.0))

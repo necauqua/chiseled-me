@@ -12,7 +12,10 @@ import dev.necauqua.mods.cm.Log;
 import dev.necauqua.mods.cm.SidedHandler;
 import dev.necauqua.mods.cm.api.IRenderSized;
 import dev.necauqua.mods.cm.api.ISized;
+import dev.necauqua.mods.cm.item.ItemRecalibrator;
+import dev.necauqua.mods.cm.item.ItemRecalibrator.RecalibrationEffect;
 import net.minecraft.block.BlockBed;
+import net.minecraft.block.BlockDispenser;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
@@ -26,6 +29,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -42,6 +46,7 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.common.registry.IThrowableEntity;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -50,6 +55,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import static dev.necauqua.mods.cm.ChiseledMe.*;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteract;
 
 @EventBusSubscriber(modid = MODID)
@@ -60,10 +67,21 @@ public final class EntitySizeInteractions {
     private EntitySizeInteractions() {}
 
     @Init
-    private static void fixBedAABB() {
-        if (!Config.changeBedAABB) {
-            return;
+    private static void init() {
+        if (Config.changeBedAABB) {
+            fixBedAABB();
         }
+        GameRegistry.registerEntitySelector((arguments, mainSelector, sender, position) -> {
+            double min = MathHelper.getDouble(arguments.getOrDefault("minsize", ""), 0.0);
+            double max = MathHelper.getDouble(arguments.getOrDefault("size", ""), Double.MAX_VALUE);
+            return singletonList(entity -> {
+                double size = ((ISized) entity).getSizeCM();
+                return min <= size && size <= max;
+            });
+        }, "size", "minsize");
+    }
+
+    private static void fixBedAABB() {
         try {
             EnumHelper.setFailsafeFieldValue(
                     ObfuscationReflectionHelper.findField(BlockBed.class, "field_185513_c"),

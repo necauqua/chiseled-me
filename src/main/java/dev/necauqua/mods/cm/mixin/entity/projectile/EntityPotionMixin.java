@@ -6,7 +6,7 @@
 package dev.necauqua.mods.cm.mixin.entity.projectile;
 
 import dev.necauqua.mods.cm.api.ISized;
-import dev.necauqua.mods.cm.api.IWorldPlayPreciseEvent;
+import dev.necauqua.mods.cm.api.IWorldPreciseEvents;
 import dev.necauqua.mods.cm.mixin.entity.EntityMixin;
 import net.minecraft.entity.EntityAreaEffectCloud;
 import net.minecraft.entity.projectile.EntityPotion;
@@ -21,7 +21,7 @@ public abstract class EntityPotionMixin extends EntityMixin {
 
     @Redirect(method = "onImpact", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;playEvent(ILnet/minecraft/util/math/BlockPos;I)V"))
     void onImpact(World self, int type, BlockPos pos, int data, RayTraceResult result) {
-        ((IWorldPlayPreciseEvent) self).playEvent(type, pos, data, $cm$size, result.hitVec);
+        ((IWorldPreciseEvents) self).playEvent(null, type, pos, data, $cm$size, result.hitVec);
     }
 
     @ModifyVariable(method = "makeAreaOfEffectCloud", at = @At("STORE"))
