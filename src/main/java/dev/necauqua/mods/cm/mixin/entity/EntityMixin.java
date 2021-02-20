@@ -9,6 +9,7 @@ import dev.necauqua.mods.cm.Config;
 import dev.necauqua.mods.cm.Network;
 import dev.necauqua.mods.cm.api.IRenderSized;
 import dev.necauqua.mods.cm.api.ISized;
+import dev.necauqua.mods.cm.api.IWorldPreciseSounds;
 import dev.necauqua.mods.cm.size.ChangingSizeProcess;
 import dev.necauqua.mods.cm.size.DataSerializerDouble;
 import dev.necauqua.mods.cm.size.EntitySizeInteractions;
@@ -16,10 +17,14 @@ import dev.necauqua.mods.cm.size.IEntityExtras;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -353,6 +358,11 @@ public abstract class EntityMixin implements IRenderSized, IEntityExtras {
         }
     }
 
+    @Redirect(method = "playSound", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V"))
+    void playSound(World self, EntityPlayer player, double x, double y, double z, SoundEvent soundIn, SoundCategory category, float volume, float pitch) {
+        ((IWorldPreciseSounds) self).playSound(null, new Vec3d(x, y, z), soundIn, category, volume, pitch, $cm$size);
+    }
+
     // getPosition fix for commands or something
     @ModifyConstant(method = "getPosition", constant = @Constant(doubleValue = 0.5))
     double getPosition(double constant) {
@@ -406,4 +416,7 @@ public abstract class EntityMixin implements IRenderSized, IEntityExtras {
 
     @Shadow
     public abstract String getName();
+
+    @Shadow
+    public abstract Vec3d getPositionEyes(float partialTicks);
 }

@@ -29,7 +29,7 @@ public abstract class EntityArrowMixin extends EntityMixin {
         return constant * $cm$size;
     }
 
-    @Inject(method = "onHit", at = @At(value = "FIELD", opcode = PUTFIELD, shift = AFTER, target = "Lnet/minecraft/entity/projectile/EntityArrow;motionZ:D"))
+    @Inject(method = "onHit", at = @At(value = "FIELD", ordinal = 1, opcode = PUTFIELD, shift = AFTER, target = "Lnet/minecraft/entity/projectile/EntityArrow;motionZ:D"))
     void onHit(RayTraceResult raytraceResultIn, CallbackInfo ci) {
         motionX /= $cm$size;
         motionY /= $cm$size;
@@ -56,12 +56,12 @@ public abstract class EntityArrowMixin extends EntityMixin {
         return aabb.expand(x * $cm$size, y * $cm$size, z * $cm$size);
     }
 
-    @ModifyConstant(method = "findEntityOnPath", constant = @Constant(doubleValue = 1.0))
-    double findEntityOnPath(double constant) {
-        return constant * $cm$size;
-    }
+//    @ModifyConstant(method = "findEntityOnPath", constant = @Constant(doubleValue = 1.0))
+//    double findEntityOnPath(double constant) {
+//        return constant * $cm$size;
+//    }
 
-    // same as in EntityThrowableAndArrowMixin#onUpdate
+    // same as in EntityThrowable#onUpdate
     @Redirect(method = "findEntityOnPath", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;getEntityBoundingBox()Lnet/minecraft/util/math/AxisAlignedBB;"))
     AxisAlignedBB findEntityOnPath(Entity entity) {
         $cm$hack = ((ISized) entity).getSizeCM();

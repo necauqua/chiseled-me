@@ -6,8 +6,12 @@
 package dev.necauqua.mods.cm.mixin.entity.ai;
 
 import dev.necauqua.mods.cm.api.ISized;
+import dev.necauqua.mods.cm.api.IWorldPreciseEvents;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.monster.EntityBlaze;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -30,6 +34,13 @@ public final class EntityBlazeAIFireballAttackMixin {
     double updateTaskSq(double constant) {
         assert blaze.getAttackTarget() != null;
         return constant * ((ISized) blaze).getSizeCM() * ((ISized) blaze.getAttackTarget()).getSizeCM();
+    }
+
+    // sounds
+    @Redirect(method = "updateTask()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;playEvent(Lnet/minecraft/entity/player/EntityPlayer;ILnet/minecraft/util/math/BlockPos;I)V"))
+    void playEvent(World self, EntityPlayer player, int type, BlockPos pos, int data) {
+        double size = ((ISized) blaze).getSizeCM();
+        ((IWorldPreciseEvents) self).playEvent(null, type, pos, data, size, blaze.getPositionEyes(1.0f));
     }
 
     @ModifyConstant(method = "getFollowDistance()D", constant = @Constant(doubleValue = 16.0))
