@@ -120,6 +120,7 @@ public final class UltimateEgg {
         }
     }
 
+    // wtf is this method lul
     private static ITextComponent generateName() {
         ThreadLocalRandom rng = ThreadLocalRandom.current();
 
@@ -160,7 +161,7 @@ public final class UltimateEgg {
                 .setInsertion(USERNAME)
                 .setClickEvent(new ClickEvent(SUGGEST_COMMAND, "/msg " + USERNAME + " "));
 
-        // except an easter egg inside of an easter egg, custom dump hover text
+        // except an easter egg inside of an easter egg, custom dumb hover text
         EntityPlayer observer = Minecraft.getMinecraft().player;
         if (observer == null) {
             return text;

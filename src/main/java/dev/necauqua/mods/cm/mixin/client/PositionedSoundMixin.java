@@ -56,7 +56,7 @@ public final class PositionedSoundMixin implements ISized {
         cir.setReturnValue((float) (listenerY + (cir.getReturnValueF() - listenerY) / $cm$size));
     }
 
-    @Inject(method = "getXPosF", at = @At("RETURN"), cancellable = true)
+    @Inject(method = "getZPosF", at = @At("RETURN"), cancellable = true)
     void getZPosF(CallbackInfoReturnable<Float> cir) {
         if (attenuationType == NONE || $cm$size == 1.0) {
             return;
