@@ -37,6 +37,8 @@ public final class Config {
     public static boolean scaleFallSmall;
     public static boolean scaleFallBig;
 
+    public static boolean scaleSounds;
+
     // limits
     public static boolean allowSleepingWhenSmall;
     public static boolean allowSleepingWhenBig;
@@ -107,6 +109,9 @@ public final class Config {
 
         scaleFallBig = c.getBoolean("fallDistanceWhenSmall", "scale", true,
                 "Scale down the fall distance for big entities, adds to convenience");
+
+        scaleSounds = c.getBoolean("scaleSounds", "scale", true,
+                "Scale the sounds of entities depending on their relative size - helps a lot with realism and immersion");
 
         // limits
         c.addCustomCategoryComment("limits", "Options in this category allow to overcome artificial limits on broken/unsupported outcomes of adding this mod to the game");

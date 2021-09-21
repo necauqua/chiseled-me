@@ -5,6 +5,7 @@
 
 package dev.necauqua.mods.cm.mixin.client;
 
+import dev.necauqua.mods.cm.Config;
 import dev.necauqua.mods.cm.api.IWorldPreciseEvents;
 import dev.necauqua.mods.cm.api.IWorldPreciseSounds;
 import dev.necauqua.mods.cm.size.IPreciseEffectPacket;
@@ -38,7 +39,7 @@ public final class NetHandlerPlayClientMixin {
     void handleSoundEffect(WorldClient self, EntityPlayer player, double x, double y, double z, SoundEvent sound, SoundCategory category, float volume, float pitch, SPacketSoundEffect packet) {
         IPreciseEffectPacket p = (IPreciseEffectPacket) packet;
         Vec3d coords = p.getCoordsCM();
-        if (coords != null) {
+        if (coords != null && Config.scaleSounds) {
             ((IWorldPreciseSounds) self).playSound(player, coords, sound, category, volume, pitch, p.getSizeCM());
         } else {
             self.playSound(player, x, y, z, sound, category, volume, pitch);

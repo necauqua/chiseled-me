@@ -5,6 +5,7 @@
 
 package dev.necauqua.mods.cm.mixin;
 
+import dev.necauqua.mods.cm.Config;
 import dev.necauqua.mods.cm.api.IWorldPreciseEvents;
 import dev.necauqua.mods.cm.api.IWorldPreciseSounds;
 import dev.necauqua.mods.cm.size.IPreciseEffectPacket;
@@ -42,8 +43,12 @@ public final class ServerWorldEventHandlerMixin implements IWorldPreciseEvents, 
     @SuppressWarnings("ConstantConditions") // mixed in interface
     @Override
     public void playSound(@Nullable EntityPlayer player, Vec3d pos, SoundEvent soundIn, SoundCategory category, float volume, float pitch, double size) {
+        // equivalent to playSoundToAllNearExcept, but the sound packet is populated with size/precise-pos data
+
         SPacketSoundEffect packet = new SPacketSoundEffect(soundIn, category, pos.x, pos.y, pos.z, volume, pitch);
-        ((IPreciseEffectPacket) packet).populateCM(size, pos);
+        if (Config.scaleSounds) {
+            ((IPreciseEffectPacket) packet).populateCM(size, pos);
+        }
         mcServer.getPlayerList()
                 .sendToAllNearExcept(player, pos.x, pos.y, pos.z, (volume > 1.0f ? (16.0 * volume) : 16.0) * size, world.provider.getDimension(), packet);
     }
