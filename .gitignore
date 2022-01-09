@@ -1,16 +1,8 @@
-
-#gradle
+# gradle stuff
 /.gradle
-/build
 
-# intellij
+# IDE stuff
 /.idea
 
-# JVM error logs
-hs_err_pid*.log
-
-# my little test script that builds the mod, moves it to testing multimc instance and runs it
-/test.sh
-
-# a folder with mods to be loaded for local testing
-/test-mods
+# build folder (surprisingly)
+/build

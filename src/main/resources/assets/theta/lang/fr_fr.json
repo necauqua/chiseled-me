@@ -1,0 +1,6 @@
+{
+  "theta.bed.too_small": "Vous êtes trop petit pour dormir dans un lit !",
+  "theta.bed.too_big": "Vous êtes trop petit pour dormir dans un lit !",
+  "command.theta.size.get": "La taille relative de %s est %s!",
+  "command.theta.size.set": "Réglage de la taille de %s à %s!"
+}

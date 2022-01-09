@@ -3,7 +3,7 @@ buildscript {
         maven { url = 'https://maven.necauqua.dev' }
     }
     dependencies {
-        classpath 'dev.necauqua:necauqua-mod:0.5.5'
+        classpath 'dev.necauqua:necauqua-mod:0.7.1'
     }
 }
 
@@ -12,49 +12,34 @@ apply plugin: 'dev.necauqua.nmod'
 sourceSets { api }
 
 nmod {
-    curseID = '250075'
-    version = '1.12-1.0.0.0'
-    forge = '1.12.2-14.23.5.2854'
-    mappings = '20171003-1.12'
-    mixin = '0.8'
-    extraMixinConfigs += 'size.hack.mixins.json'
-
-    githubRepo = null // temp until I either fix the plugin or actually make a repo
+    curseID = '448650'
+    version = '1.16-1.0.0.0'
+    forge = '1.16.5-36.2.20'
+    mixin = '0.8.4'
+    mappings = '1.16.5'
 }
 
-repositories {
-    flatDir {
-        name 'test-mods'
-        dir file('test-mods')
-    }
+// region deobf artifacts in maven local lul
+
+task deobfJar(type: Jar) {
+    from sourceSets.api.output
+    from sourceSets.main.output
+    archiveClassifier.set('deobf')
 }
 
-dependencies {
-    for (extraModJar in fileTree(dir: 'test-mods', include: '*.jar')) {
-        def basename = extraModJar.name.substring(0, extraModJar.name.length() - ".jar".length())
-        def versionSep = basename.lastIndexOf('-')
-        assert versionSep != -1
-        def artifactId = basename.substring(0, versionSep)
-        def version = basename.substring(versionSep + 1)
-        runtimeOnly fg.deobf("test-mods:$artifactId:$version")
-    }
+task deobfApiJar(type: Jar) {
+    from sourceSets.api.output
+    archiveClassifier.set('api-deobf')
 }
 
-// fix dev env runner to immediately run compat mixins, this is part of the gross hack to mix into other mods in 1.12
-Collections.replaceAll(minecraft.runs.client.args, 'size.hack.mixins.json', 'size.compat.mixins.json')
-
-afterEvaluate {
-    tasks.findByName('prepareRuns')?.doLast {
-        copy {
-            from 'build/resources/main'
-            into 'build/classes/java/main'
-        }
-    }
+artifacts {
+    archives deobfJar
+    archives deobfApiJar
 }
 
-// another couple of things that are not needed in new Forge (>=1.15) as it comes with Mixin and knows about it
-dependencies.packaged "org.spongepowered:mixin:${nmod.mixin}"
-jar.manifest.attributes 'ForceLoadAsMod': 'true', 'TweakClass': 'org.spongepowered.asm.launch.MixinTweaker'
+publishing.publications[0].with {
+    artifact deobfJar
+    artifact deobfApiJar
+}
 
-// "fix" that duplicate mod issue (1.12 only I think)
-jar.manifest.attributes 'FMLCorePluginContainsFMLMod': 'true'
+// endregion
