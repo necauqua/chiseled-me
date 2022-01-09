@@ -1,0 +1,27 @@
+{
+  "parent": "chiseled_me:blue_nether_star",
+  "display": {
+    "icon": {
+      "item": "minecraft:beacon"
+    },
+    "title": {
+      "translate": "advancement.chiseled_me.weird_beacon"
+    },
+    "description": {
+      "translate": "advancement.chiseled_me.weird_beacon.desc"
+    },
+    "announce_to_chat": false,
+    "hidden": true
+  },
+  "criteria": {
+    "stuff": {
+      "trigger": "chiseled_me:item_crafted",
+      "conditions": {
+        "predicate": {
+          "item": "minecraft:beacon",
+          "nbt": "{BlockEntityTag:{\"chiseled_me:color\":light_blue}}"
+        }
+      }
+    }
+  }
+}

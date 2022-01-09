@@ -1,0 +1,24 @@
+{
+  "parent": "chiseled_me:essence",
+  "display": {
+    "icon": {
+      "item": "chiseled_me:recalibrator",
+      "nbt": "{type:-1,tier:8}"
+    },
+    "title": {
+      "translate": "advancement.chiseled_me.c&b_squared"
+    },
+    "description": {
+      "translate": "advancement.chiseled_me.c&b_squared.desc"
+    },
+    "frame": "goal"
+  },
+  "criteria": {
+    "stuff": {
+      "trigger": "theta:size",
+      "conditions": {
+        "size": 0.00390625
+      }
+    }
+  }
+}

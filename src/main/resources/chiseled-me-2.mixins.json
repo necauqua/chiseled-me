@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "dev.necauqua.mods.cm2.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "chiseled-me-2.refmap.json",
+  "mixins": [
+    "BeaconTileEntityMixin"
+  ],
+  "client": [],
+  "minVersion": "0.8"
+}

@@ -3,7 +3,7 @@ buildscript {
         maven { url = 'https://maven.necauqua.dev' }
     }
     dependencies {
-        classpath 'dev.necauqua:necauqua-mod:0.6.0'
+        classpath 'dev.necauqua:necauqua-mod:0.7.1'
     }
 }
 
@@ -11,35 +11,30 @@ apply plugin: 'dev.necauqua.nmod'
 
 nmod {
     curseID = '250075'
-    version = '1.12-3.0.0.0'
-    forge = '1.12.2-14.23.5.2854'
-    mappings = '20171003-1.12'
-    mixin = '0.8'
-    extraMixinConfigs += 'chiseled-me.hack.mixins.json'
+    version = '1.16-1.0.0.0'
+    forge = '1.16.5-36.2.20'
+    mixin = '0.8.4'
+    mappings = '1.16.5'
+    githubRepo = 'chiseled-me'
 }
 
-dependencies {
-    // shade in the mixin
-    packaged "org.spongepowered:mixin:${nmod.mixin}"
-}
-
-// fix dev env runner to immediately run compat mixins, this is part of the gross hack to mix into other mods in 1.12
-Collections.replaceAll(minecraft.runs.client.args, 'chiseled-me.hack.mixins.json', 'chiseled-me.compat.mixins.json')
-
-
-// this is not in my plugin because since 1.13 they FINALLY fixed that
-// so this is not universally needed there
-afterEvaluate {
-    tasks.findByName('prepareRuns')?.doLast {
-        copy {
-            from 'build/resources/main'
-            into 'build/classes/java/main'
+repositories {
+    mavenLocal()
+    maven {
+        url 'https://dvs1.progwml6.com/files/maven'
+    }
+    maven {
+        url "https://cursemaven.com"
+        content {
+            includeGroup "curse.maven"
         }
     }
 }
 
-// another couple of things that are not needed in new Forge (>=1.15) as it comes with Mixin and knows about it
-jar.manifest.attributes 'ForceLoadAsMod': 'true', 'TweakClass': 'org.spongepowered.asm.launch.MixinTweaker'
+dependencies {
+    compileOnly 'dev.necauqua.mods:theta:1.16-1.0.0.0:api-deobf'
+    runtimeOnly 'dev.necauqua.mods:theta:1.16-1.0.0.0:deobf'
 
-// "fix" that duplicate mod issue (1.12 only I think)
-jar.manifest.attributes 'FMLCorePluginContainsFMLMod': 'true'
+    implementation fg.deobf("curse.maven:jei-238222:3590083")
+    implementation fg.deobf("curse.maven:chiselandbits-231095:3593643")
+}

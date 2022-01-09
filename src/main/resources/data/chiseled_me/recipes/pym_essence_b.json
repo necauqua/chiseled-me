@@ -1,0 +1,28 @@
+{
+  "type": "chiseled_me:enhanced_shapeless",
+  "condition": {
+    "type": "forge:or",
+    "values": [
+      {
+        "type": "theta:supersmall_enabled"
+      },
+      {
+        "type": "theta:big_enabled"
+      }
+    ]
+  },
+  "ingredients": [
+    {
+      "item": "chiseled_me:blue_star"
+    },
+    {
+      "item": "chiseled_me:pym_container_x"
+    }
+  ],
+  "remaining_items": [
+    "minecraft:nether_star"
+  ],
+  "result": {
+    "item": "chiseled_me:pym_essence_b"
+  }
+}
