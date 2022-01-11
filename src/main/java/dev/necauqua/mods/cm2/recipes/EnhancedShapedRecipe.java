@@ -19,11 +19,13 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 
+import javax.annotation.Nullable;
+
 import static dev.necauqua.mods.cm2.ChiseledMe.MODID;
 import static dev.necauqua.mods.cm2.ChiseledMe.ns;
 
 @EventBusSubscriber(modid = MODID, bus = Bus.MOD)
-public final class EnhancedShapedRecipe extends ShapedRecipe {
+public final class EnhancedShapedRecipe extends ShapedRecipe implements ITriggeringRecipe {
 
     @SubscribeEvent
     public static void on(Register<IRecipeSerializer<?>> e) {
@@ -32,11 +34,19 @@ public final class EnhancedShapedRecipe extends ShapedRecipe {
 
     private final ICondition condition;
     private final boolean special;
+    @Nullable
+    private final ResourceLocation trigger;
 
-    public EnhancedShapedRecipe(ResourceLocation id, String group, int width, int height, NonNullList<Ingredient> recipeItems, ItemStack result, ICondition condition, boolean special) {
+    public EnhancedShapedRecipe(ResourceLocation id, String group, int width, int height, NonNullList<Ingredient> recipeItems, ItemStack result, ICondition condition, boolean special, @Nullable ResourceLocation trigger) {
         super(id, group, width, height, recipeItems, result);
         this.condition = condition;
         this.special = special;
+        this.trigger = trigger;
+    }
+
+    @Nullable
+    public ResourceLocation getTrigger() {
+        return trigger;
     }
 
     @Override
@@ -65,7 +75,8 @@ public final class EnhancedShapedRecipe extends ShapedRecipe {
                 CraftingHelper.getCondition(JSONUtils.getAsJsonObject(json, "condition")) :
                 null;
             boolean special = json.has("special") && json.get("special").getAsBoolean();
-            return new EnhancedShapedRecipe(id, recipe.getGroup(), recipe.getWidth(), recipe.getHeight(), recipe.getIngredients(), recipe.getResultItem(), condition, special);
+            ResourceLocation trigger = json.has("trigger") ? new ResourceLocation(JSONUtils.getAsString(json, "trigger")) : null;
+            return new EnhancedShapedRecipe(id, recipe.getGroup(), recipe.getWidth(), recipe.getHeight(), recipe.getIngredients(), recipe.getResultItem(), condition, special, trigger);
         }
 
         @SuppressWarnings("ConstantConditions") // recipe is never null
@@ -77,7 +88,9 @@ public final class EnhancedShapedRecipe extends ShapedRecipe {
                 null :
                 CraftingHelper.getCondition(new JsonParser().parse(conditionJson).getAsJsonObject());
             boolean special = payload.readBoolean();
-            return new EnhancedShapedRecipe(id, recipe.getGroup(), recipe.getWidth(), recipe.getHeight(), recipe.getIngredients(), recipe.getResultItem(), condition, special);
+            String triggerStr = payload.readUtf();
+            ResourceLocation trigger = triggerStr.isEmpty() ? new ResourceLocation(triggerStr) : null;
+            return new EnhancedShapedRecipe(id, recipe.getGroup(), recipe.getWidth(), recipe.getHeight(), recipe.getIngredients(), recipe.getResultItem(), condition, special, trigger);
         }
 
         @Override
@@ -86,6 +99,7 @@ public final class EnhancedShapedRecipe extends ShapedRecipe {
             EnhancedShapedRecipe enhanced = (EnhancedShapedRecipe) recipe;
             buffer.writeUtf(enhanced.condition != null ? CraftingHelper.serialize(enhanced.condition).toString() : "");
             buffer.writeBoolean(enhanced.special);
+            buffer.writeUtf(enhanced.trigger != null ? enhanced.trigger.toString() : "");
         }
     }
 }

@@ -23,6 +23,8 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteract;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteractSpecific;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -49,6 +51,30 @@ public final class ItemRecalibrator extends Item {
     @SubscribeEvent
     public static void on(RegistryEvent.Register<Item> e) {
         e.getRegistry().register(INSTANCE);
+    }
+
+    @EventBusSubscriber(modid = MODID)
+    private static final class ForgeHandler {
+
+        @SubscribeEvent
+        public static void on(EntityInteractSpecific e) {
+            for (Hand hand : Hand.values()) {
+                if (e.getPlayer().getItemInHand(hand).getItem() == INSTANCE) {
+                    e.setCanceled(true);
+                    return;
+                }
+            }
+        }
+
+        @SubscribeEvent
+        public static void on(EntityInteract e) {
+            for (Hand hand : Hand.values()) {
+                if (e.getPlayer().getItemInHand(hand).getItem() == INSTANCE) {
+                    e.setCanceled(true);
+                    return;
+                }
+            }
+        }
     }
 
     public ItemRecalibrator() {

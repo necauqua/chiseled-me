@@ -6,14 +6,20 @@
 package dev.necauqua.mods.cm2.recipes;
 
 import com.google.gson.JsonObject;
+import dev.necauqua.mods.cm2.StatelessTrigger;
 import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.ICriterionInstance;
+import net.minecraft.advancements.ICriterionTrigger;
 import net.minecraft.advancements.criterion.AbstractCriterionTrigger;
 import net.minecraft.advancements.criterion.CriterionInstance;
 import net.minecraft.advancements.criterion.EntityPredicate.AndPredicate;
 import net.minecraft.advancements.criterion.ItemPredicate;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.IRecipeHolder;
+import net.minecraft.inventory.container.Container;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.loot.ConditionArrayParser;
 import net.minecraft.loot.ConditionArraySerializer;
 import net.minecraft.util.ResourceLocation;
@@ -43,8 +49,20 @@ public final class ItemCraftedTrigger extends AbstractCriterionTrigger<ItemCraft
         @SubscribeEvent
         public static void on(ItemCraftedEvent e) {
             PlayerEntity player = e.getPlayer();
-            if (player instanceof ServerPlayerEntity) {
-                trigger((ServerPlayerEntity) player, e.getCrafting());
+            if (!(player instanceof ServerPlayerEntity) || !(player.containerMenu instanceof IRecipeHolder)) {
+                return;
+            }
+            IRecipe<?> recipe = ((IRecipeHolder) player.containerMenu).getRecipeUsed();
+            if (!(recipe instanceof ITriggeringRecipe)) {
+                return;
+            }
+            ResourceLocation trigger = ((ITriggeringRecipe) recipe).getTrigger();
+            if (trigger == null) {
+                return;
+            }
+            ICriterionTrigger<?> criterion = CriteriaTriggers.getCriterion(trigger);
+            if (criterion instanceof StatelessTrigger) {
+                ((StatelessTrigger) criterion).trigger((ServerPlayerEntity) player);
             }
         }
     }

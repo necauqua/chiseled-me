@@ -7,6 +7,8 @@ package dev.necauqua.mods.cm2;
 
 import com.google.gson.JsonObject;
 import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.ICriterionInstance;
+import net.minecraft.advancements.ICriterionTrigger;
 import net.minecraft.advancements.criterion.AbstractCriterionTrigger;
 import net.minecraft.advancements.criterion.CriterionInstance;
 import net.minecraft.advancements.criterion.EntityPredicate;
@@ -26,11 +28,17 @@ public final class StatelessTrigger extends AbstractCriterionTrigger<CriterionIn
 
     public static final StatelessTrigger RECALIBRATOR_RESET = new StatelessTrigger(ns("recalibrator_reset"));
     public static final StatelessTrigger BLUE_STAR_DECRAFT = new StatelessTrigger(ns("blue_star_decraft"));
+    public static final StatelessTrigger WEIRD_BEACON_CRAFTED = new StatelessTrigger(ns("weird_beacon_crafted"));
 
     @SubscribeEvent
     public static void on(FMLCommonSetupEvent e) {
         CriteriaTriggers.register(RECALIBRATOR_RESET);
         CriteriaTriggers.register(BLUE_STAR_DECRAFT);
+        CriteriaTriggers.register(WEIRD_BEACON_CRAFTED);
+
+        ICriterionTrigger<?> kek = CriteriaTriggers.getCriterion(ns("weird_beacon_crafted"));
+        
+        ((StatelessTrigger) kek).trigger(null);
     }
 
     private final ResourceLocation id;

@@ -6,3 +6,6 @@
 
 # build folder (surprisingly)
 /build
+
+# a symlink to the build/run/.mixin.out folder to slightly reduce nesting in intellij project view
+/mixin-out
