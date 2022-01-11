@@ -33,14 +33,15 @@ public final class MixinHelpers {
         }
     }
 
-    public static double getAverageSize(Object a, Object b) {
-        double sa = ((ISized) a).getSizeCM();
-        double sb = ((ISized) b).getSizeCM();
-        return sa == sb ? sa : Math.sqrt(sa * sb);
-    }
-
-    public static double getAverageSize(double a, double b) {
-        return a == b ? a : Math.sqrt(a * b);
+    @OnlyIn(Dist.CLIENT)
+    public static void setCameraHeight(Entity entity, float prevCameraHeight, float cameraHeight) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.cameraEntity != entity) {
+            return;
+        }
+        ActiveRenderInfo camera = mc.gameRenderer.getMainCamera();
+        camera.eyeHeightOld = prevCameraHeight;
+        camera.eyeHeight = cameraHeight;
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -57,16 +58,5 @@ public final class MixinHelpers {
         return viewer != null ?
             ((IRenderSized) viewer).getSizeCM(partialTicks) :
             1.0;
-    }
-
-    @OnlyIn(Dist.CLIENT)
-    public static void setCameraHeight(Entity entity, float prevCameraHeight, float cameraHeight) {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.cameraEntity != entity) {
-            return;
-        }
-        ActiveRenderInfo camera = mc.gameRenderer.getMainCamera();
-        camera.eyeHeightOld = prevCameraHeight;
-        camera.eyeHeight = cameraHeight;
     }
 }

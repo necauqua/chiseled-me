@@ -31,6 +31,8 @@ import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.living.BabyEntitySpawnEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteractSpecific;
 import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -47,28 +49,12 @@ public final class ForgeHandlers {
 
     private ForgeHandlers() {}
 
-//    @SubscribeEvent
-//    public static void on(EntityInteractSpecific e) {
-//        if (((ISized) e.getEntity()).getSizeCM() != ((ISized) e.getTarget()).getSizeCM()) {
-//            e.setCanceled(true);
-//        }
-//        for (Hand hand : Hand.values()) {
-//            if (e.getPlayer().getHeldItem(hand).getItem() == ChiseledMe.RECALIBRATOR) {
-//                e.setCanceled(true);
-//                break;
-//            }
-//        }
-//    }
-
-//    @SubscribeEvent
-//    public static void on(EntityInteract e) {
-//        for (Hand hand : Hand.values()) {
-//            if (e.getPlayer().getHeldItem(hand).getItem() == ChiseledMe.RECALIBRATOR) {
-//                e.setCanceled(true);
-//                break;
-//            }
-//        }
-//    }
+    @SubscribeEvent
+    public static void on(EntityInteractSpecific e) {
+        if (!Config.allowEntityInteraction.get() && ((ISized) e.getEntity()).getSizeCM() != ((ISized) e.getTarget()).getSizeCM()) {
+            e.setCanceled(true);
+        }
+    }
 
     @SubscribeEvent
     public static void on(EntityMountEvent e) {

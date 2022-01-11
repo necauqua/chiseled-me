@@ -42,7 +42,7 @@ public final class DoubleValue extends GameRules.RuleValue<DoubleValue> {
 
     @Override
     protected void updateFromArgument(CommandContext<CommandSource> context, String paramName) {
-        value = IntegerArgumentType.getInteger(context, paramName);
+        value = DoubleArgumentType.getDouble(context, paramName);
     }
 
     public double get() {

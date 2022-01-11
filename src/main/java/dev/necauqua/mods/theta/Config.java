@@ -41,6 +41,7 @@ public final class Config {
     public static ConfigValue<Boolean> allowRidingSameSize;
     public static ConfigValue<Boolean> allowAnyRiding;
     public static ConfigValue<Boolean> allowAnySizes;
+    public static ConfigValue<Boolean> allowEntityInteraction;
 
     // misc
     public static ConfigValue<Double> maxShadowSize;
@@ -130,6 +131,9 @@ public final class Config {
         allowAnySizes = define(b, "allow_any_sizes", false,
             "Disables number checking for the /size command, meaning you can set your size to any double precision number, including zero, negatives, NaN or infinities.\n" +
                 "Note that this is obviously unsupported and bugged in a lot of ways, but can be used to achieve extra-small or bigger-than-16 sizes");
+
+        allowEntityInteraction = define(b, "allow_entity_interaction", false,
+                "Set to true to allow entity interaction between entities of different sizes (e.g. milking a tiny cow while not being the same size)");
 
         maxShadowSize = defineInRange(b, "max_shadow_size", 16.0, 0.0, Double.MAX_VALUE,
             "If allow_any_sizes is set to true, the shadow size is limited by this value, " +

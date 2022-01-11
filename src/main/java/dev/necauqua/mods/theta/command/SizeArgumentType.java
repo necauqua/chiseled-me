@@ -51,14 +51,10 @@ public final class SizeArgumentType implements ArgumentType<Double> {
     @Override
     public Double parse(final StringReader reader) throws CommandSyntaxException {
         int start = reader.getCursor();
-        boolean invert = reader.canRead(2) && reader.peek() == '1' && reader.peek(1) == '/';
-        if (invert) {
-            reader.skip();
-            reader.skip();
-        }
         double result = reader.readDouble();
-        if (invert) {
-            result = 1.0 / result;
+        if (reader.canRead() && reader.peek() == '/') {
+            reader.skip();
+            result /= reader.readDouble();
         }
         if (Config.allowAnySizes.get()) {
             return result;

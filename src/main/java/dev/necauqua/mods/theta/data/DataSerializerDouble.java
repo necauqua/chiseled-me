@@ -17,6 +17,11 @@ import net.minecraftforge.registries.DataSerializerEntry;
 @EventBusSubscriber(modid = Theta.MODID, bus = Bus.MOD)
 public final class DataSerializerDouble implements IDataSerializer<Double> {
 
+    @SubscribeEvent
+    public static void on(RegistryEvent.Register<DataSerializerEntry> e) {
+        e.getRegistry().register(new DataSerializerEntry(INSTANCE).setRegistryName(Theta.ns("double")));
+    }
+
     public static final DataSerializerDouble INSTANCE = new DataSerializerDouble();
 
     @Override
@@ -32,10 +37,5 @@ public final class DataSerializerDouble implements IDataSerializer<Double> {
     @Override
     public Double copy(Double value) {
         return value;
-    }
-
-    @SubscribeEvent
-    public static void on(RegistryEvent.Register<DataSerializerEntry> e) {
-        e.getRegistry().register(new DataSerializerEntry(INSTANCE).setRegistryName(Theta.ns("double")));
     }
 }

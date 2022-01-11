@@ -6,3 +6,6 @@
 
 # build folder (surprisingly)
 /build
+
+# a symlink to mixins folder from 1.12 version
+/old-mixins
