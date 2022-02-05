@@ -1,9 +1,10 @@
 buildscript {
     repositories {
         maven { url = 'https://maven.necauqua.dev' }
+        mavenLocal()
     }
     dependencies {
-        classpath 'dev.necauqua:necauqua-mod:0.7.1'
+        classpath 'dev.necauqua:necauqua-mod:0.8.0'
     }
 }
 
