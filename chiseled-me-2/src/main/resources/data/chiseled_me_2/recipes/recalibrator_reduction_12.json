@@ -1,0 +1,30 @@
+{
+  "type": "chiseled_me_2:enhanced_shapeless",
+  "condition": {
+    "type": "mira:supersmall_enabled"
+  },
+  "ingredients": [
+    {
+      "item": "minecraft:dragon_breath"
+    },
+    {
+      "item": "chiseled_me_2:pym_essence_x"
+    },
+    {
+      "item": "chiseled_me_2:pym_essence_x"
+    },
+    {
+      "item": "chiseled_me_2:pym_essence_x"
+    },
+    {
+      "item": "chiseled_me_2:pym_essence_x"
+    }
+  ],
+  "result": {
+    "item": "chiseled_me_2:recalibrator",
+    "nbt": {
+      "type": -1,
+      "tier": 12
+    }
+  }
+}

@@ -1,8 +1,8 @@
-# gradle stuff
-/.gradle
+.direnv
+.gradle
+.idea
+.vscode
+build
 
-# IDE stuff
-/.idea
-
-# build folder (surprisingly)
-/build
+# a symlink to build/run/.mixin-out in my ws
+mixin-out

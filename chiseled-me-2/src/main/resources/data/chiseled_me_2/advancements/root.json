@@ -1,0 +1,38 @@
+{
+  "display": {
+    "icon": {
+      "item": "chiseled_me_2:recalibrator",
+      "nbt": "{type:-1,tier:4}"
+    },
+    "title": {
+      "translate": "itemGroup.chiseled_me_2"
+    },
+    "description": "",
+    "background": "minecraft:textures/gui/advancements/backgrounds/stone.png",
+    "show_toast": false,
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "stuff": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "minecraft:iron_ingot"
+          },
+          {
+            "potion": "minecraft:awkward"
+          },
+          {
+            "item": "minecraft:diamond"
+          }
+        ]
+      }
+    }
+  },
+  "rewards": {
+    "recipes": [
+      "chiseled_me_2:pym_container"
+    ]
+  }
+}

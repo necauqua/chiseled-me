@@ -1,0 +1,24 @@
+{
+  "parent": "chiseled_me_2:antipolarization",
+  "display": {
+    "icon": {
+      "item": "chiseled_me_2:recalibrator",
+      "nbt": "{type:1,tier:4}"
+    },
+    "title": {
+      "translate": "advancement.chiseled_me_2.sexdecuple"
+    },
+    "description": {
+      "translate": "advancement.chiseled_me_2.sexdecuple.desc"
+    },
+    "frame": "challenge"
+  },
+  "criteria": {
+    "stuff": {
+      "trigger": "mira:size",
+      "conditions": {
+        "size": 16
+      }
+    }
+  }
+}

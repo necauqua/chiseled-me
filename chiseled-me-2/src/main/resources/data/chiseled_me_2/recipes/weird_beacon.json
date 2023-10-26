@@ -1,0 +1,28 @@
+{
+  "type": "chiseled_me_2:enhanced_shaped",
+  "special": true,
+  "pattern": [
+    "ggg",
+    "gsg",
+    "ooo"
+  ],
+  "key": {
+    "s": {
+      "item": "chiseled_me_2:blue_star"
+    },
+    "g": {
+      "item": "minecraft:glass"
+    },
+    "o": {
+      "item": "minecraft:obsidian"
+    }
+  },
+  "result": {
+    "item": "minecraft:beacon",
+    "nbt": {
+      "BlockEntityTag": {
+        "chiseled_me_2:color": "light_blue"
+      }
+    }
+  }
+}

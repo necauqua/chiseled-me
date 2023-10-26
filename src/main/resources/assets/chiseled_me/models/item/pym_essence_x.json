@@ -1,6 +1,0 @@
-{
-  "parent": "item/generated",
-  "textures": {
-    "layer0": "chiseled_me:items/pym_essence_x"
-  }
-}

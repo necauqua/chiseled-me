@@ -1,0 +1,40 @@
+modLoader = 'javafml'
+
+loaderVersion = '[36,)'
+
+license = 'MIT'
+
+issueTrackerURL = 'https://github.com/necauqua/mira/issues'
+
+[[mods]]
+modId = 'mira'
+version = '${file.jarVersion}'
+displayName = 'міра'
+
+updateJSONURL = 'https://raw.githubusercontent.com/wiki/necauqua/mira/updates.json'
+displayURL = 'https://modrinth.com/mod/mira'
+
+logoFile = 'logo.png' # TODO logo lol
+
+credits = 'Thanks for cool people from my Discord'
+
+authors = 'necauqua'
+
+description = '''
+This is a mod that allows *any* entities to be resized in a wide range, from microscopically gamebreakingly small to equally gamebreakingly large.
+It tries it's best to do things consistently. It can be used by both map makers, and by mod makers through it's API.
+'''
+
+[[dependencies.mira]]
+modId = 'forge'
+mandatory = true
+versionRange = '[36,)'
+ordering = 'NONE'
+side = 'BOTH'
+
+[[dependencies.mira]]
+modId = 'minecraft'
+mandatory = true
+versionRange = '[1.16.5,1.17)'
+ordering = 'NONE'
+side = 'BOTH'

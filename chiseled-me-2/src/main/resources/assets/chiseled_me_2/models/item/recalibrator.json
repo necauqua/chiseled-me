@@ -1,0 +1,23 @@
+{
+  "parent": "item/generated",
+  "overrides": [
+    {
+      "predicate": {
+        "chiseled_me_2:recalibrator_type": -1
+      },
+      "model": "chiseled_me_2:item/recalibrator_reduction"
+    },
+    {
+      "predicate": {
+        "chiseled_me_2:recalibrator_type": 0
+      },
+      "model": "chiseled_me_2:item/recalibrator_reset"
+    },
+    {
+      "predicate": {
+        "chiseled_me_2:recalibrator_type": 1
+      },
+      "model": "chiseled_me_2:item/recalibrator_amplification"
+    }
+  ]
+}

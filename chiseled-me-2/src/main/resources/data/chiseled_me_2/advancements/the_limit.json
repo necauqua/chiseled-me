@@ -1,0 +1,24 @@
+{
+  "parent": "chiseled_me_2:concentrated",
+  "display": {
+    "icon": {
+      "item": "chiseled_me_2:recalibrator",
+      "nbt": "{type:-1,tier:12}"
+    },
+    "title": {
+      "translate": "advancement.chiseled_me_2.the_limit"
+    },
+    "description": {
+      "translate": "advancement.chiseled_me_2.the_limit.desc"
+    },
+    "frame": "challenge"
+  },
+  "criteria": {
+    "stuff": {
+      "trigger": "mira:size",
+      "conditions": {
+        "size": 0.000244140625
+      }
+    }
+  }
+}

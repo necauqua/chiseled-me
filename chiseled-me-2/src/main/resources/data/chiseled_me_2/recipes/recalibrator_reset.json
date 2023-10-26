@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "chiseled_me_2:recalibrator"
+    }
+  ],
+  "result": {
+    "item": "chiseled_me_2:recalibrator"
+  }
+}

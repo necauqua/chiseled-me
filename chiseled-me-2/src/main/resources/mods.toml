@@ -1,0 +1,49 @@
+modLoader = 'javafml'
+
+loaderVersion = '[36,)'
+
+license = 'MIT'
+
+issueTrackerURL = 'https://github.com/necauqua/chiseled-me-2/issues'
+
+[[mods]]
+modId = 'chiseled_me_2'
+version = '${file.jarVersion}'
+displayName = 'Chiseled Me 2'
+
+updateJSONURL = 'https://raw.githubusercontent.com/wiki/necauqua/chiseled-me-2/updates.json'
+displayURL = 'https://modrinth.com/mod/chiseled-me-2'
+
+logoFile = 'logo.png' # TODO logo lol
+
+credits = 'People from my Discord who are very helpful with testing and entertainment hehe'
+
+authors = 'necauqua'
+
+description = '''
+The best entity resizing mod that ever existed.
+Also the best particle resizing mod (as the only one so far)
+
+Well, now both of the above goes to mira, this is only a survival mode facade for it.
+'''
+
+[[dependencies.chiseled_me_2]]
+modId = 'forge'
+mandatory = true
+versionRange = '[36,)'
+ordering = 'NONE'
+side = 'BOTH'
+
+[[dependencies.chiseled_me_2]]
+modId = 'minecraft'
+mandatory = true
+versionRange = '[1.16.5,1.17)'
+ordering = 'NONE'
+side = 'BOTH'
+
+[[dependencies.chiseled_me_2]]
+modId = 'mira'
+mandatory = true
+versionRange = '[1.16-1.0.0.0,)'
+ordering = 'NONE'
+side = 'BOTH'

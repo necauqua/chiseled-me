@@ -1,0 +1,36 @@
+{
+  "parent": "chiseled_me_2:advancements",
+  "display": {
+    "icon": {
+      "item": "chiseled_me_2:pym_essence_x"
+    },
+    "title": {
+      "translate": "advancement.chiseled_me_2.concentrated"
+    },
+    "description": {
+      "translate": "advancement.chiseled_me_2.concentrated.desc"
+    },
+    "anonunce_to_chat": false
+  },
+  "criteria": {
+    "stuff": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "chiseled_me_2:pym_essence_x"
+          }
+        ]
+      }
+    }
+  },
+  "rewards": {
+    "recipes": [
+      "chiseled_me_2:blue_star",
+      "chiseled_me_2:recalibrator_reduction_9",
+      "chiseled_me_2:recalibrator_reduction_10",
+      "chiseled_me_2:recalibrator_reduction_11",
+      "chiseled_me_2:recalibrator_reduction_12"
+    ]
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "type": "chiseled_me_2:enhanced_shapeless",
+  "condition": {
+    "type": "forge:or",
+    "values": [
+      {
+        "type": "mira:supersmall_enabled"
+      },
+      {
+        "type": "mira:big_enabled"
+      }
+    ]
+  },
+  "ingredients": [
+    {
+      "item": "minecraft:nether_star"
+    },
+    {
+      "item": "chiseled_me_2:pym_container_x"
+    },
+    {
+      "item": "minecraft:redstone_block"
+    }
+  ],
+  "remaining_items": [
+    "minecraft:nether_star"
+  ],
+  "result": {
+    "item": "chiseled_me_2:pym_essence_x"
+  }
+}

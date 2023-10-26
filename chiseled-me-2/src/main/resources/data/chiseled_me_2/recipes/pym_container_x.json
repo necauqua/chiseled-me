@@ -1,0 +1,33 @@
+{
+  "type": "chiseled_me_2:enhanced_shaped",
+  "condition": {
+    "type": "forge:or",
+    "values": [
+      {
+        "type": "mira:supersmall_enabled"
+      },
+      {
+        "type": "mira:big_enabled"
+      }
+    ]
+  },
+  "pattern": [
+    "idi",
+    "dpd",
+    "idi"
+  ],
+  "key": {
+    "i": {
+      "item": "minecraft:iron_block"
+    },
+    "d": {
+      "item": "minecraft:diamond_block"
+    },
+    "p": {
+      "item": "chiseled_me_2:pym_container"
+    }
+  },
+  "result": {
+    "item": "chiseled_me_2:pym_container_x"
+  }
+}

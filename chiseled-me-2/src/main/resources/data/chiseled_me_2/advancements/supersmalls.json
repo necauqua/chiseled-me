@@ -1,0 +1,25 @@
+{
+  "parent": "chiseled_me_2:concentrated",
+  "display": {
+    "icon": {
+      "item": "chiseled_me_2:recalibrator",
+      "nbt": "{type:-1,tier:9}"
+    },
+    "title": {
+      "translate": "advancement.chiseled_me_2.supersmalls"
+    },
+    "description": {
+      "translate": "advancement.chiseled_me_2.supersmalls.desc"
+    },
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "stuff": {
+      "trigger": "mira:size",
+      "conditions": {
+        "size": 0.00390625,
+        "match": "lt"
+      }
+    }
+  }
+}

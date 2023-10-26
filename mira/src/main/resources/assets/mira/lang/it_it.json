@@ -1,0 +1,6 @@
+{
+  "mira.bed.too_small": "Sei troppo piccolo per dormire nel letto!",
+  "mira.bed.too_big": "Sei troppo grande per dormire nel letto!",
+  "command.mira.size.get": "Relative size of %s is %s!",
+  "command.mira.size.set": "Set size of %s to %s!"
+}

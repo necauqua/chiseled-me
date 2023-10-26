@@ -1,0 +1,61 @@
+buildscript {
+    repositories {
+        maven { url = 'https://maven.necauqua.dev' }
+        mavenLocal()
+    }
+    dependencies {
+        classpath 'dev.necauqua:necauqua-mod:0.11.0'
+    }
+}
+
+apply plugin: 'dev.necauqua.nmod'
+
+nmod {
+    curseID = '250075'
+    mcversion = '1.16.*'
+    forge = '1.16.5-36.2.34'
+    mappings = '1.16.5'
+    mixin = '0.8.5'
+
+    githubRepo = null
+}
+
+// repositories {
+//     maven {
+//         url 'https://dvs1.progwml6.com/files/maven'
+//     }
+//     maven {
+//         url "https://cursemaven.com"
+//         content {
+//             includeGroup "curse.maven"
+//         }
+//     }
+// }
+
+dependencies {
+    implementation project(path: ':mira', configuration: 'api')
+
+    // todo remove non-api dep
+    implementation project(':mira')
+
+    // implementation fg.deobf("curse.maven:jei-238222:3590083")
+    // implementation fg.deobf("curse.maven:chiselandbits-231095:3593643")
+}
+
+// needed to load mira minecraft block
+evaluationDependsOn(':mira')
+
+minecraft.runs {
+    client {
+        args '--mixin', 'mira.mixins.json'
+        mods.addAll(project(':mira').minecraft.runs.client.mods)
+    }
+    server {
+        args '--mixin', 'mira.mixins.json'
+        mods.addAll(project(':mira').minecraft.runs.server.mods)
+    }
+}
+
+// it looks like because mira has apiClasses FG thinks that
+// cm2 also should have apiClasses, so we work around that
+tasks.register('apiClasses')

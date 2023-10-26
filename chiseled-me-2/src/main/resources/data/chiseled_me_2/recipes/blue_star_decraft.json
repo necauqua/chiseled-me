@@ -1,0 +1,15 @@
+{
+  "type": "chiseled_me_2:enhanced_shapeless",
+  "special": true,
+  "ingredients": [
+    {
+      "item": "chiseled_me_2:blue_star"
+    }
+  ],
+  "remaining_items": [
+    "minecraft:nether_star"
+  ],
+  "result": {
+    "item": "minecraft:lapis_block"
+  }
+}
